@@ -5,7 +5,7 @@ on:
   schedule:
     # Berjalan 2 kali sehari (jam 02:00 UTC dan 14:00 UTC)
     # Anda bebas menyesuaikan jadwal Cron ini nanti
-    - cron: '0 2,14 * * *' 
+    - cron: '0 7,12 * * *' 
   workflow_dispatch: # Mengizinkan Anda menekan tombol "Run" secara manual
 
 jobs:

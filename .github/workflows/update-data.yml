@@ -1,0 +1,44 @@
+name: Auto Update Data Market
+
+# Atur jadwal kapan skrip dijalankan
+on:
+  schedule:
+    # Berjalan 2 kali sehari (jam 02:00 UTC dan 14:00 UTC)
+    # Anda bebas menyesuaikan jadwal Cron ini nanti
+    - cron: '0 2,14 * * *' 
+  workflow_dispatch: # Mengizinkan Anda menekan tombol "Run" secara manual
+
+jobs:
+  scrape_and_update:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Mengambil kode dari repositori Anda
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    # 2. Menyiapkan bahasa Python
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    # 3. Menginstal library yang dibutuhkan (requests & beautifulsoup4)
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4
+
+    # 4. Menjalankan skrip Scraper
+    - name: Run Scraper
+      run: python scraper.py
+
+    # 5. Menyimpan (Commit) file JSON yang baru dibuat ke GitHub
+    - name: Commit and Push Changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action Bot"
+        git add data_market/*.json
+        # Hanya commit jika ada perubahan data
+        git commit -m "Auto-update data market harian" || echo "No changes to commit"
+        git push

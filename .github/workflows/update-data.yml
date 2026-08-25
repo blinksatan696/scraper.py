@@ -33,12 +33,12 @@ jobs:
     - name: Run Scraper
       run: python scraper.py
 
-    # 5. Menyimpan (Commit) file JSON yang baru dibuat ke GitHub
+   # 5. Menyimpan (Commit) file JSON yang baru dibuat ke GitHub
     - name: Commit and Push Changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action Bot"
-        git add data_market/*.json
+        git add data_market/ || true
         # Hanya commit jika ada perubahan data
         git commit -m "Auto-update data market harian" || echo "No changes to commit"
-        git push
+        git push || echo "No changes to push"

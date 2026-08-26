@@ -250,17 +250,20 @@ let activeDetailIndex = null;
 let globalBacktestResults = null;
 
 const MARKET_MAPPING = [
-  { slot: 1, file: "california-daily-4.json", name: "California Daily 4" },
-  { slot: 2, file: "oregon-pick-4-1pm.json", name: "Oregon Pick 4 1PM" },
-  { slot: 3, file: "oregon-pick-4-4pm.json", name: "Oregon Pick 4 4PM" },
-  { slot: 4, file: "oregon-pick-4-7pm.json", name: "Oregon Pick 4 7PM" },
-  { slot: 5, file: "oregon-pick-4-10pm.json", name: "Oregon Pick 4 10PM" },
-  { slot: 6, file: "nc-midday-pick-4.json", name: "NC Midday Pick 4" },
-  { slot: 7, file: "nc-pick-4.json", name: "NC Pick 4" },
-  { slot: 8, file: "ny-midday-win-4.json", name: "NY Midday Win 4" },
-  { slot: 9, file: "ny-win-4.json", name: "NY Win 4" },
-  { slot: 10, file: "ky-midday-pick-4.json", name: "KY Midday Pick 4" },
-  { slot: 11, file: "ky-pick-4.json", name: "KY Pick 4" }
+  { slot: 1, file: "kentucky-midday.json", name: "KENTUCKY MIDDAY" },
+  { slot: 2, file: "new-york-midday.json", name: "NEW YORK MIDDAY" },
+  { slot: 3, file: "north-carolina-day.json", name: "NORTH CAROLINA DAY" },
+  { slot: 4, file: "oregon-3.json", name: "OREGON 3" },
+  { slot: 5, file: "oregon-6.json", name: "OREGON 6" },
+  { slot: 6, file: "california.json", name: "CALIFORNIA" },
+  { slot: 7, file: "oregon-9.json", name: "OREGON 9" },
+  { slot: 8, file: "new-york-evening.json", name: "NEW YORK EVENING" },
+  { slot: 9, file: "kentucky-evening.json", name: "KENTUCKY EVENING" },
+  { slot: 10, file: "north-carolina-evening.json", name: "NORTH CAROLINA EVENING" },
+  { slot: 11, file: "oregon-12.json", name: "OREGON 12" },
+  { slot: 12, file: "bullseye.json", name: "BULLSEYE" },
+  { slot: 13, file: "pcso.json", name: "PCSO" },
+  { slot: 14, file: "macau.json", name: "MACAU" }
 ];
 
 function formatDate(d, m, y) { return `${String(d).padStart(2,'0')}-${String(m).padStart(2,'0')}-${y}`; }

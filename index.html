@@ -294,6 +294,27 @@ window.onload = function() {
   buatTabelRekapTunggal(); 
   buatTabel50Upload();
   muatDariLocalStorage();
+
+  // --- TAMBAHAN LOGIKA TANGGAL H-1 ---
+  let today = new Date();
+  today.setDate(today.getDate() - 1); // Mundur 1 hari
+  
+  let yyyy = today.getFullYear();
+  let mm = String(today.getMonth() + 1).padStart(2, '0');
+  let dd = String(today.getDate()).padStart(2, '0');
+  let defaultDateStr = `${yyyy}-${mm}-${dd}`;
+  
+  // Masukkan tanggal H-1 ke dalam kotak input tanggal
+  let inputRekap = document.getElementById('inputTanggalRekap');
+  let inputKal = document.getElementById('inputTanggal');
+  
+  if (inputRekap) inputRekap.value = defaultDateStr;
+  if (inputKal) inputKal.value = defaultDateStr;
+  
+  // Langsung eksekusi pencarian data untuk H-1 tersebut
+  if (globalSelectedDate === "") {
+    sinkronisasiTanggalDariRekap(defaultDateStr);
+  }
 };
 
 function simpanKeLocalStorage() {

@@ -97,13 +97,36 @@ def main():
         os.makedirs('data_market')
 
     for market_name, url in MARKETS.items():
-        data = scrape_market(url)
-        if data:
-            # Simpan ke file JSON
+        new_data = scrape_market(url)
+        if new_data:
             file_path = os.path.join('data_market', f"{market_name}.json")
+            existing_data = []
+            
+            # 1. Buka dan baca file JSON lama jika sudah ada
+            if os.path.exists(file_path):
+                try:
+                    with open(file_path, 'r') as f:
+                        existing_data = json.load(f)
+                except Exception:
+                    pass
+                    
+            # 2. Gabungkan data baru ke data lama (Cek agar tidak ada tanggal ganda)
+            existing_dates = {item['tanggal'] for item in existing_data}
+            for item in new_data:
+                if item['tanggal'] not in existing_dates:
+                    existing_data.append(item)
+                    
+            # 3. Urutkan kembali data berdasarkan tanggal (terlama ke terbaru)
+            try:
+                existing_data.sort(key=lambda x: datetime.strptime(x['tanggal'], "%d-%m-%Y"))
+            except Exception:
+                pass
+                
+            # 4. Simpan kembali seluruh data (lama + baru) ke JSON
             with open(file_path, 'w') as f:
-                json.dump(data, f, indent=4)
-            print(f"SUCCESS: {len(data)} data tersimpan untuk {market_name}")
+                json.dump(existing_data, f, indent=4)
+                
+            print(f"SUCCESS: Total {len(existing_data)} data terkumpul untuk {market_name}")
         else:
             print(f"FAILED: Tidak ada data valid ditemukan untuk {market_name}")
 

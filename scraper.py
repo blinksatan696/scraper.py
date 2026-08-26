@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 import os
 import re
+import cloudscraper
 
 # Daftar Market dan URL-nya
 MARKETS = {
@@ -34,7 +35,10 @@ HEADERS = {
 def scrape_market(url):
     print(f"Mengakses {url} ...")
     try:
-        response = requests.get(url, headers=HEADERS, timeout=15)
+        # Menggunakan cloudscraper untuk menembus anti-bot
+        scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
+        response = scraper.get(url, timeout=20)
+        
         if response.status_code != 200:
             print(f"Gagal! Status Code: {response.status_code}")
             return []

@@ -7,17 +7,20 @@ import re
 
 # Daftar Market dan URL-nya
 MARKETS = {
-    "california-daily-4": "https://www.lotteryusa.com/california/daily-4/",
-    "oregon-pick-4-1pm": "https://www.lotteryusa.com/oregon/pick-4-1pm/",
-    "oregon-pick-4-4pm": "https://www.lotteryusa.com/oregon/pick-4-4pm/",
-    "oregon-pick-4-7pm": "https://www.lotteryusa.com/oregon/pick-4-7pm/",
-    "oregon-pick-4-10pm": "https://www.lotteryusa.com/oregon/pick-4-10pm/",
-    "nc-midday-pick-4": "https://www.lotteryusa.com/north-carolina/midday-pick-4/",
-    "nc-pick-4": "https://www.lotteryusa.com/north-carolina/pick-4/",
-    "ny-midday-win-4": "https://www.lotteryusa.com/new-york/midday-win-4/",
-    "ny-win-4": "https://www.lotteryusa.com/new-york/win-4/",
-    "ky-midday-pick-4": "https://www.lotteryusa.com/kentucky/midday-pick-4/",
-    "ky-pick-4": "https://www.lotteryusa.com/kentucky/pick-4/"
+    "kentucky-midday": "https://presidenttotop6.com/pasaran/q9t5wwhf.html",
+    "new-york-midday": "https://presidenttotop6.com/pasaran/liinkkua.html",
+    "north-carolina-day": "https://presidenttotop6.com/pasaran/vxpgtjuj.html",
+    "oregon-3": "https://presidenttotop6.com/pasaran/fbyqi1ei.html",
+    "oregon-6": "https://presidenttotop6.com/pasaran/nkkwks2m.html",
+    "california": "https://presidenttotop6.com/pasaran/sr6dyibs.html",
+    "oregon-9": "https://presidenttotop6.com/pasaran/vvjpntz9.html",
+    "new-york-evening": "https://presidenttotop6.com/pasaran/wzyn4asu.html",
+    "kentucky-evening": "https://presidenttotop6.com/pasaran/wjollysr.html",
+    "north-carolina-evening": "https://presidenttotop6.com/pasaran/xty6pp5c.html",
+    "oregon-12": "https://presidenttotop6.com/pasaran/leus8kqq.html",
+    "bullseye": "https://presidenttotop6.com/pasaran/7jr1lkpo.html",
+    "pcso": "https://presidenttotop6.com/pasaran/o1uxt3mn.html",
+    "macau": "http://178.128.19.32/"
 }
 
 HEADERS = {
@@ -32,65 +35,65 @@ def scrape_market(url):
     print(f"Mengakses {url} ...")
     try:
         response = requests.get(url, headers=HEADERS, timeout=15)
-        
         if response.status_code != 200:
             print(f"Gagal! Status Code: {response.status_code}")
-            return []
-            
-        # Deteksi jika web memunculkan halaman pelindung Cloudflare
-        if "cloudflare" in response.text.lower() or "just a moment" in response.text.lower():
-            print(f"TERBLOKIR: Cloudflare mendeteksi bot pada {url}")
             return []
 
         soup = BeautifulSoup(response.text, 'html.parser')
         results = []
 
-        # Pendekatan tangguh: Cari semua container yang membungkus elemen tanggal
-        # Biasanya ada di dalam <tr> (tabel), <li> (list), atau <article>/<div>
-        draw_containers = soup.find_all(['tr', 'li', 'div', 'article'])
-
-        for container in draw_containers:
-            try:
-                # 1. Cari elemen waktu (<time>) di dalam container ini
-                date_element = container.find('time')
-                if not date_element:
-                    continue
-                    
-                raw_date_str = date_element.get_text(strip=True)
-                
-                # Format dari web biasanya: "Thursday, Aug 24, 2026"
-                # Kita hapus nama hari agar sisa "Aug 24 2026"
-                clean_str = re.sub(r'^[A-Za-z]+,\s*', '', raw_date_str).replace(',', '').strip()
-                dt_obj = datetime.strptime(clean_str, "%b %d %Y")
-                formatted_date = dt_obj.strftime("%d-%m-%Y")
-
-                # 2. Cari semua elemen angka yang ada di dekat tanggal tersebut
-                # Angka 4D biasanya dibungkus di dalam <li> atau <span>
-                number_elements = container.find_all(['li', 'span'])
-                
-                # Saring hanya elemen yang berisi angka mutlak (tanpa huruf)
-                digits = [el.get_text(strip=True) for el in number_elements if el.get_text(strip=True).isdigit()]
-                result_number = "".join(digits)
-                
-                # 3. Validasi dan simpan angka (Ambil 4 digit pertama)
-                if len(result_number) >= 4:
-                    result_4d = result_number[:4]
-                    
-                    # Pastikan belum ada data di tanggal yang sama (mencegah duplikasi)
-                    if not any(r['tanggal'] == formatted_date for r in results):
-                        results.append({
-                            "tanggal": formatted_date,
-                            "nomor": result_4d
-                        })
-            except Exception as e:
-                # Lewati jika struktur tidak cocok
+        # Mencari semua baris tabel (tr)
+        rows = soup.find_all('tr')
+        for row in rows:
+            cells = row.find_all('td')
+            if not cells or len(cells) < 2:
                 continue
+            
+            row_text = row.get_text(separator=' ', strip=True)
+            
+            # 1. Cari pola tanggal (YYYY-MM-DD)
+            date_match = re.search(r'(\d{4}-\d{2}-\d{2})', row_text)
+            if not date_match:
+                continue
+                
+            raw_date = date_match.group(1)
+            # Konversi format ke DD-MM-YYYY
+            try:
+                dt_obj = datetime.strptime(raw_date, "%Y-%m-%d")
+                formatted_date = dt_obj.strftime("%d-%m-%Y")
+            except ValueError:
+                continue
+
+            # 2. Ambil angka result dari kolom paling kanan (PRIZE)
+            prize_cell = cells[-1]
+            
+            # Ekstrak elemen spesifik yang berisi angka (biasanya di-span)
+            digits = [el.get_text(strip=True) for el in prize_cell.find_all(['span', 'div', 'li', 'b']) if el.get_text(strip=True).isdigit()]
+            
+            # Jika tidak ada elemen span/div (HTML plain text), tarik langsung angka dari teksnya
+            if not digits:
+                clean_prize_text = re.sub(r'\D', '', prize_cell.get_text(strip=True))
+                if len(clean_prize_text) >= 4:
+                    digits = list(clean_prize_text[-4:])
+                    
+            result_number = "".join(digits)
+            
+            # 3. Validasi & Simpan angka 4D
+            if len(result_number) >= 4:
+                result_4d = result_number[-4:] # Ambil tepat 4 digit terakhir
+                
+                # Mencegah duplikasi data per tanggal
+                if not any(r['tanggal'] == formatted_date for r in results):
+                    results.append({
+                        "tanggal": formatted_date,
+                        "nomor": result_4d
+                    })
         
         return results
     except Exception as e:
-        print(f"Error tidak terduga saat memproses {url}: {e}")
+        print(f"Error saat memproses {url}: {e}")
         return []
-
+        
 def main():
     # Buat folder 'data_market' jika belum ada
     if not os.path.exists('data_market'):

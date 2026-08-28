@@ -50,37 +50,37 @@ def parse_oregon(html_text, time_label):
                     results.append({"tanggal": formatted_date, "nomor": "".join(digits_found[:4])})
     return results
 
-# --- 2. FUNGSI PEMBEDAH NEW YORK ---
+# --- 2. FUNGSI PEMBEDAH NEW YORK (DISEMPURNAKAN) ---
 def parse_new_york(html_text, draw_type):
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
-    # Longgarkan pemisah teks untuk menangkap elemen dinamis
-    raw_text = soup.get_text(separator=' ', strip=True)
     
-    # Format NY biasanya menampilkan tanggal lalu tipe undian, misal: "08/25/2026 Midday 4 7 1 1"
-    # Kita cari blok teks yang mengandung tipe undian
-    date_pattern = r'(\d{2}/\d{2}/\d{4})'
+    # New York menggunakan elemen tabel atau baris terstruktur
+    # Kita cari semua teks baris yang memuat tipe undian (Midday/Evening)
+    rows = soup.find_all(['tr', 'div', 'li', 'article'])
     
-    # Pisahkan berdasarkan kata Midday atau Evening agar lebih fokus
-    segments = re.split(draw_type, raw_text, flags=re.IGNORECASE)
-    
-    for i in range(len(segments) - 1):
-        segment_before = segments[i]
-        segment_after = segments[i+1]
+    for row in rows:
+        row_text = row.get_text(separator=' ', strip=True)
         
-        # Cari tanggal di segmen sebelumnya
-        date_match = re.findall(date_pattern, segment_before)
-        if date_match:
-            raw_date = date_match[-1] # Ambil tanggal terdekat sebelum label Midday/Evening
-            m, d, y = raw_date.split('/')
-            formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
-            
-            # Cari 4 angka berurutan di segmen setelahnya (di NY sering ada spasi antar angka)
-            # Menangkap pola seperti "4 7 1 1" atau "4711"
-            clean_after = re.sub(r'[^\d]', '', segment_after[:30]) # Ambil 30 karakter pertama saja setelah label
-            if len(clean_after) >= 4:
-                results.append({"tanggal": formatted_date, "nomor": clean_after[:4]})
+        # Pastikan baris ini mengandung label yang dicari (Midday atau Evening)
+        if draw_type.lower() in row_text.lower():
+            # Cari pola tanggal MM/DD/YYYY
+            date_match = re.search(r'(\d{2}/\d{2}/\d{4})', row_text)
+            if date_match:
+                raw_date = date_match.group(1)
+                m, d, y = raw_date.split('/')
+                formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
                 
+                # Bersihkan teks untuk mengambil deretan angka di baris tersebut
+                # Singkirkan tanggal dan label teks, ambil digit angkanya
+                clean_text = row_text.replace(raw_date, '').replace(draw_type, '')
+                digits = re.findall(r'\b\d\b', clean_text) # Cari angka satuan yang berderet
+                
+                if len(digits) >= 4:
+                    # Ambil 4 angka hasil undian utama
+                    result_num = "".join(digits[:4])
+                    if not any(r['tanggal'] == formatted_date for r in results):
+                        results.append({"tanggal": formatted_date, "nomor": result_num})
     return results
 
 # --- 3. FUNGSI PEMBEDAH NORTH CAROLINA ---
@@ -118,35 +118,40 @@ def parse_north_carolina(html_text, draw_type):
                     pass
     return results
 
-# --- 4. FUNGSI PEMBEDAH MACAU ---
+# --- 4. FUNGSI PEMBEDAH MACAU (DISEMPURNAKAN) ---
 def parse_macau(html_text, _):
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
-    # Macau menggunakan tabel sederhana, kita bisa bedah per baris TR
-    rows = soup.find_all('tr')
     
+    # Macau menggunakan struktur tabel IP lokal sederhana
+    rows = soup.find_all('tr')
     for row in rows:
-        cells = row.find_all('td')
-        if len(cells) >= 2: # Setidaknya ada kolom tanggal dan nomor
-            date_text = cells[0].get_text(strip=True)
-            num_text = cells[-1].get_text(strip=True) # Kolom terakhir biasanya prize/angka
+        cells = row.find_all(['td', 'th'])
+        if len(cells) >= 2:
+            row_combined_text = " ".join([cell.get_text(strip=True) for cell in cells])
             
-            # Cocokkan tanggal format YYYY-MM-DD
-            date_match = re.search(r'(\d{4}-\d{2}-\d{2})', date_text)
+            # Cari format tanggal YYYY-MM-DD
+            date_match = re.search(r'(\d{4}-\d{2}-\d{2})', row_combined_text)
             if date_match:
                 raw_date = date_match.group(1)
                 try:
                     dt_obj = datetime.strptime(raw_date, "%Y-%m-%d")
                     formatted_date = dt_obj.strftime("%d-%m-%Y")
                     
-                    clean_num = re.sub(r'\D', '', num_text)
-                    if len(clean_num) >= 4:
-                        results.append({"tanggal": formatted_date, "nomor": clean_num[-4:]})
+                    # Cari semua angka di dalam baris tersebut
+                    all_numbers = re.findall(r'\d+', row_combined_text.replace(raw_date, ''))
+                    # Gabungkan angka yang potensial menjadi 4D (biasanya deretan angka terakhir di baris)
+                    flat_digits = "".join(all_numbers)
+                    
+                    if len(flat_digits) >= 4:
+                        # Ambil 4 digit terakhir yang biasanya merupakan angka prize
+                        result_num = flat_digits[-4:]
+                        if not any(r['tanggal'] == formatted_date for r in results):
+                            results.append({"tanggal": formatted_date, "nomor": result_num})
                 except Exception:
                     pass
     return results
-
-
+    
 # --- MESIN UTAMA PENARIKAN DATA ---
 def fetch_and_parse(url, parser_function, param):
     print(f"Menarik data dari {url} ({param}) ...")

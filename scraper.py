@@ -52,94 +52,98 @@ def parse_oregon(html_text, time_label):
 
 # --- 2. FUNGSI PEMBEDAH NEW YORK ---
 def parse_new_york(html_text, draw_type):
-    # draw_type akan berisi "Midday" atau "Evening"
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
-    chunks = soup.get_text(separator='|', strip=True).split('|')
+    # Longgarkan pemisah teks untuk menangkap elemen dinamis
+    raw_text = soup.get_text(separator=' ', strip=True)
     
-    current_date = None
+    # Format NY biasanya menampilkan tanggal lalu tipe undian, misal: "08/25/2026 Midday 4 7 1 1"
+    # Kita cari blok teks yang mengandung tipe undian
+    date_pattern = r'(\d{2}/\d{2}/\d{4})'
     
-    for i in range(len(chunks)):
-        text = chunks[i]
-        # Cek apakah teks ini adalah tanggal (Format NY: 08/25/2026)
-        date_match = re.search(r'^(\d{2})/(\d{2})/(\d{4})$', text)
+    # Pisahkan berdasarkan kata Midday atau Evening agar lebih fokus
+    segments = re.split(draw_type, raw_text, flags=re.IGNORECASE)
+    
+    for i in range(len(segments) - 1):
+        segment_before = segments[i]
+        segment_after = segments[i+1]
+        
+        # Cari tanggal di segmen sebelumnya
+        date_match = re.findall(date_pattern, segment_before)
         if date_match:
-            m, d, y = date_match.groups()
-            current_date = f"{int(d):02d}-{int(m):02d}-{y}"
+            raw_date = date_match[-1] # Ambil tanggal terdekat sebelum label Midday/Evening
+            m, d, y = raw_date.split('/')
+            formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
             
-        # Jika menemukan label Midday/Evening dan kita punya current_date
-        if text.lower() == draw_type.lower() and current_date:
-            # Di NY, angka biasanya berada tepat *sebelum* tulisan Midday/Evening
-            digits_found = []
-            for j in range(1, 10):
-                if i - j >= 0:
-                    if chunks[i-j].isdigit() and len(chunks[i-j]) == 1:
-                        digits_found.insert(0, chunks[i-j])
-                    elif len(digits_found) > 0: 
-                        break # Berhenti jika sudah melewati blok angka
-            
-            if len(digits_found) >= 4:
-                # Ambil 4 angka terakhir (mengabaikan extra ball jika ada)
-                results.append({"tanggal": current_date, "nomor": "".join(digits_found[-4:])})
-                current_date = None # Reset agar tidak terduplikasi
+            # Cari 4 angka berurutan di segmen setelahnya (di NY sering ada spasi antar angka)
+            # Menangkap pola seperti "4 7 1 1" atau "4711"
+            clean_after = re.sub(r'[^\d]', '', segment_after[:30]) # Ambil 30 karakter pertama saja setelah label
+            if len(clean_after) >= 4:
+                results.append({"tanggal": formatted_date, "nomor": clean_after[:4]})
+                
     return results
 
 # --- 3. FUNGSI PEMBEDAH NORTH CAROLINA ---
 def parse_north_carolina(html_text, draw_type):
-    # draw_type akan berisi "DAYTIME" atau "EVENING"
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
-    chunks = soup.get_text(separator='|', strip=True).split('|')
-    
+    raw_text = soup.get_text(separator=' ', strip=True)
     current_year = datetime.now().year
     
-    for i in range(len(chunks)):
-        text = chunks[i]
-        # Format NC: "Tue, Aug 25" -> Kita cari nama bulan
-        month_match = re.search(r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})', text, re.IGNORECASE)
+    # NC Format: "Tue, Aug 25 6 1 5 3" (Biasanya angka dipisah spasi)
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    
+    segments = re.split(draw_type, raw_text, flags=re.IGNORECASE)
+    
+    for i in range(1, len(segments)):
+        text_chunk = segments[i][:50] # Periksa 50 karakter setelah label
         
-        # Cek apakah blok teks ini mengandung tipe undian yang dicari DAN bulan
-        if draw_type.lower() in chunks[max(0, i-2):i+1] and month_match:
-            try:
-                dt_obj = datetime.strptime(f"{month_match.group(1)} {month_match.group(2)} {current_year}", "%b %d %Y")
-                formatted_date = dt_obj.strftime("%d-%m-%Y")
-                
-                # Angka biasanya ada tepat setelah tanggal
-                digits_found = []
-                for j in range(1, 10):
-                    if i + j < len(chunks):
-                        if chunks[i+j].isdigit() and len(chunks[i+j]) == 1:
-                            digits_found.append(chunks[i+j])
-                        if len(digits_found) == 4:
-                            break
-                
-                if len(digits_found) >= 4:
-                    results.append({"tanggal": formatted_date, "nomor": "".join(digits_found[:4])})
-            except Exception:
-                pass
+        # Cari bulan dan tanggal
+        for month in months:
+            match = re.search(rf'{month}\s+(\d{{1,2}})', text_chunk, re.IGNORECASE)
+            if match:
+                day = match.group(1)
+                try:
+                    dt_obj = datetime.strptime(f"{month} {day} {current_year}", "%b %d %Y")
+                    formatted_date = dt_obj.strftime("%d-%m-%Y")
+                    
+                    # Potong string setelah tanggal, lalu ambil 4 digit pertamanya
+                    after_date = text_chunk[match.end():]
+                    clean_nums = re.sub(r'[^\d]', '', after_date)
+                    
+                    if len(clean_nums) >= 4:
+                        results.append({"tanggal": formatted_date, "nomor": clean_nums[:4]})
+                        break # Berhenti mencari bulan lain jika sudah ketemu
+                except Exception:
+                    pass
     return results
 
 # --- 4. FUNGSI PEMBEDAH MACAU ---
 def parse_macau(html_text, _):
-    # Menggunakan metode universal pencarian tanggal YYYY-MM-DD
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
+    # Macau menggunakan tabel sederhana, kita bisa bedah per baris TR
     rows = soup.find_all('tr')
     
     for row in rows:
-        text = row.get_text(separator=' ', strip=True)
-        date_match = re.search(r'(\d{4}-\d{2}-\d{2})', text)
-        if date_match:
-            raw_date = date_match.group(1)
-            try:
-                dt_obj = datetime.strptime(raw_date, "%Y-%m-%d")
-                formatted_date = dt_obj.strftime("%d-%m-%Y")
-                
-                clean_text = re.sub(r'\D', '', text.replace(raw_date, ''))
-                if len(clean_text) >= 4:
-                    results.append({"tanggal": formatted_date, "nomor": clean_text[-4:]})
-            except ValueError:
-                continue
+        cells = row.find_all('td')
+        if len(cells) >= 2: # Setidaknya ada kolom tanggal dan nomor
+            date_text = cells[0].get_text(strip=True)
+            num_text = cells[-1].get_text(strip=True) # Kolom terakhir biasanya prize/angka
+            
+            # Cocokkan tanggal format YYYY-MM-DD
+            date_match = re.search(r'(\d{4}-\d{2}-\d{2})', date_text)
+            if date_match:
+                raw_date = date_match.group(1)
+                try:
+                    dt_obj = datetime.strptime(raw_date, "%Y-%m-%d")
+                    formatted_date = dt_obj.strftime("%d-%m-%Y")
+                    
+                    clean_num = re.sub(r'\D', '', num_text)
+                    if len(clean_num) >= 4:
+                        results.append({"tanggal": formatted_date, "nomor": clean_num[-4:]})
+                except Exception:
+                    pass
     return results
 
 

@@ -5,45 +5,153 @@ from datetime import datetime
 import os
 import re
 
-# Header untuk menyamar sebagai browser manusia asli
+# Menyamar sebagai browser manusia (Windows + Chrome)
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.5",
 }
 
-# --- FUNGSI PEMBEDAH KHUSUS SETIAP NEGARA BAGIAN ---
-
-def parse_oregon(html_text):
-    # Logika untuk membaca web resmi Oregon Lottery akan kita letakkan di sini
+# --- 1. FUNGSI PEMBEDAH OREGON ---
+def parse_oregon(html_text, time_label):
+    # time_label akan berisi "1:00 PM", "4:00 PM", "7:00 PM", atau "10:00 PM"
     results = []
-    # (Menunggu analisis HTML lengkap)
+    soup = BeautifulSoup(html_text, 'html.parser')
+    
+    # Hancurkan HTML menjadi teks biasa dengan pemisah "|"
+    raw_text = soup.get_text(separator='|', strip=True)
+    
+    # Format Oregon: "8/25/2026 - 4:00 PM"
+    # Kita pecah berdasarkan tanggal
+    chunks = raw_text.split('|')
+    
+    for i in range(len(chunks)):
+        text = chunks[i]
+        # Cari teks yang mengandung waktu yang dituju (misal: "1:00 PM") dan format tanggal AS
+        if time_label in text and re.search(r'\d{1,2}/\d{1,2}/\d{4}', text):
+            # Ekstrak tanggalnya
+            date_match = re.search(r'(\d{1,2})/(\d{1,2})/(\d{4})', text)
+            if date_match:
+                m, d, y = date_match.groups()
+                formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
+                
+                # Cari 4 angka terdekat di elemen-elemen berikutnya
+                digits_found = []
+                for j in range(1, 15): # Telusuri hingga 15 elemen teks ke depan
+                    if i + j < len(chunks):
+                        # Ambil angka tunggal yang berdiri sendiri (seperti di gambar Oregon)
+                        if chunks[i+j].isdigit() and len(chunks[i+j]) == 1:
+                            digits_found.append(chunks[i+j])
+                        # Jika sudah dapat 4 angka, hentikan pencarian
+                        if len(digits_found) == 4:
+                            break
+                            
+                if len(digits_found) >= 4:
+                    results.append({"tanggal": formatted_date, "nomor": "".join(digits_found[:4])})
     return results
 
-def parse_new_york(html_text):
-    # Logika untuk membaca web resmi New York Lottery
+# --- 2. FUNGSI PEMBEDAH NEW YORK ---
+def parse_new_york(html_text, draw_type):
+    # draw_type akan berisi "Midday" atau "Evening"
     results = []
-    # (Menunggu analisis HTML lengkap)
+    soup = BeautifulSoup(html_text, 'html.parser')
+    chunks = soup.get_text(separator='|', strip=True).split('|')
+    
+    current_date = None
+    
+    for i in range(len(chunks)):
+        text = chunks[i]
+        # Cek apakah teks ini adalah tanggal (Format NY: 08/25/2026)
+        date_match = re.search(r'^(\d{2})/(\d{2})/(\d{4})$', text)
+        if date_match:
+            m, d, y = date_match.groups()
+            current_date = f"{int(d):02d}-{int(m):02d}-{y}"
+            
+        # Jika menemukan label Midday/Evening dan kita punya current_date
+        if text.lower() == draw_type.lower() and current_date:
+            # Di NY, angka biasanya berada tepat *sebelum* tulisan Midday/Evening
+            digits_found = []
+            for j in range(1, 10):
+                if i - j >= 0:
+                    if chunks[i-j].isdigit() and len(chunks[i-j]) == 1:
+                        digits_found.insert(0, chunks[i-j])
+                    elif len(digits_found) > 0: 
+                        break # Berhenti jika sudah melewati blok angka
+            
+            if len(digits_found) >= 4:
+                # Ambil 4 angka terakhir (mengabaikan extra ball jika ada)
+                results.append({"tanggal": current_date, "nomor": "".join(digits_found[-4:])})
+                current_date = None # Reset agar tidak terduplikasi
     return results
 
-def parse_north_carolina(html_text):
-    # Logika untuk membaca web resmi North Carolina Lottery
+# --- 3. FUNGSI PEMBEDAH NORTH CAROLINA ---
+def parse_north_carolina(html_text, draw_type):
+    # draw_type akan berisi "DAYTIME" atau "EVENING"
     results = []
-    # (Menunggu analisis HTML lengkap)
+    soup = BeautifulSoup(html_text, 'html.parser')
+    chunks = soup.get_text(separator='|', strip=True).split('|')
+    
+    current_year = datetime.now().year
+    
+    for i in range(len(chunks)):
+        text = chunks[i]
+        # Format NC: "Tue, Aug 25" -> Kita cari nama bulan
+        month_match = re.search(r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})', text, re.IGNORECASE)
+        
+        # Cek apakah blok teks ini mengandung tipe undian yang dicari DAN bulan
+        if draw_type.lower() in chunks[max(0, i-2):i+1] and month_match:
+            try:
+                dt_obj = datetime.strptime(f"{month_match.group(1)} {month_match.group(2)} {current_year}", "%b %d %Y")
+                formatted_date = dt_obj.strftime("%d-%m-%Y")
+                
+                # Angka biasanya ada tepat setelah tanggal
+                digits_found = []
+                for j in range(1, 10):
+                    if i + j < len(chunks):
+                        if chunks[i+j].isdigit() and len(chunks[i+j]) == 1:
+                            digits_found.append(chunks[i+j])
+                        if len(digits_found) == 4:
+                            break
+                
+                if len(digits_found) >= 4:
+                    results.append({"tanggal": formatted_date, "nomor": "".join(digits_found[:4])})
+            except Exception:
+                pass
     return results
+
+# --- 4. FUNGSI PEMBEDAH MACAU ---
+def parse_macau(html_text, _):
+    # Menggunakan metode universal pencarian tanggal YYYY-MM-DD
+    results = []
+    soup = BeautifulSoup(html_text, 'html.parser')
+    rows = soup.find_all('tr')
+    
+    for row in rows:
+        text = row.get_text(separator=' ', strip=True)
+        date_match = re.search(r'(\d{4}-\d{2}-\d{2})', text)
+        if date_match:
+            raw_date = date_match.group(1)
+            try:
+                dt_obj = datetime.strptime(raw_date, "%Y-%m-%d")
+                formatted_date = dt_obj.strftime("%d-%m-%Y")
+                
+                clean_text = re.sub(r'\D', '', text.replace(raw_date, ''))
+                if len(clean_text) >= 4:
+                    results.append({"tanggal": formatted_date, "nomor": clean_text[-4:]})
+            except ValueError:
+                continue
+    return results
+
 
 # --- MESIN UTAMA PENARIKAN DATA ---
-
-def fetch_and_parse(market_name, url, parser_function):
-    print(f"Menarik data dari {url} ...")
+def fetch_and_parse(url, parser_function, param):
+    print(f"Menarik data dari {url} ({param}) ...")
     try:
         response = requests.get(url, headers=HEADERS, timeout=20)
         if response.status_code != 200:
             print(f"Gagal! Status Code: {response.status_code}")
             return []
-            
-        # Kirim teks HTML ke fungsi pembedah khusus masing-masing web
-        return parser_function(response.text)
+        return parser_function(response.text, param)
     except Exception as e:
         print(f"Error koneksi: {e}")
         return []
@@ -59,7 +167,6 @@ def save_with_smart_append(market_name, new_data):
     file_path = os.path.join('data_market', f"{market_name}.json")
     existing_data = []
     
-    # Baca data lama
     if os.path.exists(file_path):
         try:
             with open(file_path, 'r') as f:
@@ -67,13 +174,11 @@ def save_with_smart_append(market_name, new_data):
         except Exception:
             pass
             
-    # Gabungkan tanpa duplikasi tanggal
     existing_dates = {item['tanggal'] for item in existing_data}
     for item in new_data:
         if item['tanggal'] not in existing_dates:
             existing_data.append(item)
             
-    # Urutkan tanggal dan simpan
     try:
         existing_data.sort(key=lambda x: datetime.strptime(x['tanggal'], "%d-%m-%Y"))
     except Exception:
@@ -84,16 +189,25 @@ def save_with_smart_append(market_name, new_data):
     print(f"SUCCESS: Total {len(existing_data)} data terkumpul untuk {market_name}")
 
 def main():
-    # Daftar Market Resmi yang akan dieksekusi
-    # Struktur: [Nama File, URL Resmi, Fungsi Pembedah]
+    # Target Fase 1
+    # Format: (Nama_File_JSON, URL, Fungsi_Pembedah, Parameter_Khusus)
     TARGETS = [
-        # ("oregon-3", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon),
-        # ("new-york-midday", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york),
-        # Akan diaktifkan setelah Anda memberikan sisa tautannya
+        ("oregon-3", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "1:00 PM"),
+        ("oregon-6", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "4:00 PM"),
+        ("oregon-9", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "7:00 PM"),
+        ("oregon-12", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "10:00 PM"),
+        
+        ("new-york-midday", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Midday"),
+        ("new-york-evening", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Evening"),
+        
+        ("north-carolina-day", "https://nclottery.com/pick4", parse_north_carolina, "DAYTIME"),
+        ("north-carolina-evening", "https://nclottery.com/pick4", parse_north_carolina, "EVENING"),
+        
+        ("macau", "http://178.128.19.32/", parse_macau, "")
     ]
 
-    for market_name, url, parser_func in TARGETS:
-        data = fetch_and_parse(market_name, url, parser_func)
+    for market_name, url, parser_func, param in TARGETS:
+        data = fetch_and_parse(url, parser_func, param)
         save_with_smart_append(market_name, data)
 
 if __name__ == "__main__":

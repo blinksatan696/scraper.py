@@ -1,9 +1,9 @@
-import requests
-from bs4 import BeautifulSoup
 import json
 from datetime import datetime
 import os
 import re
+from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 
 # Menyamar sebagai browser manusia (Windows + Chrome)
 HEADERS = {
@@ -147,13 +147,23 @@ def parse_macau(html_text, _):
 def fetch_and_parse(url, parser_function, param):
     print(f"Menarik data dari {url} ({param}) ...")
     try:
-        response = requests.get(url, headers=HEADERS, timeout=20)
-        if response.status_code != 200:
-            print(f"Gagal! Status Code: {response.status_code}")
-            return []
-        return parser_function(response.text, param)
+        with sync_playwright() as p:
+            # Buka Chrome secara tersembunyi
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+            )
+            page = context.new_page()
+            
+            # Kunjungi web dan tunggu hingga aktivitas jaringan (loading JS) benar-benar berhenti
+            page.goto(url, wait_until="networkidle", timeout=45000)
+            
+            html_text = page.content()
+            browser.close()
+            
+            return parser_function(html_text, param)
     except Exception as e:
-        print(f"Error koneksi: {e}")
+        print(f"Error koneksi/loading: {e}")
         return []
 
 def save_with_smart_append(market_name, new_data):
@@ -189,8 +199,6 @@ def save_with_smart_append(market_name, new_data):
     print(f"SUCCESS: Total {len(existing_data)} data terkumpul untuk {market_name}")
 
 def main():
-    # Target Fase 1
-    # Format: (Nama_File_JSON, URL, Fungsi_Pembedah, Parameter_Khusus)
     TARGETS = [
         ("oregon-3", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "1:00 PM"),
         ("oregon-6", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "4:00 PM"),

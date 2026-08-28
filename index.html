@@ -1,1091 +1,195 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistem Rekapitulasi & Kalkulator Final</title>
-<style>
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; }
-.container { background-color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 1350px; box-sizing: border-box; }
-.tab-nav { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #ddd; padding-bottom: 8px; flex-wrap: wrap; }
-.tab-btn { background-color: #e0e0e0; border: none; padding: 8px 18px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; color: #555; width: auto !important; flex: 1; min-width: 140px; }
-.tab-btn.active { background-color: #1a73e8; color: white; }
-.tab-content { display: none; } .tab-content.active { display: block; }
-h2 { text-align: center; margin: 0 0 12px 0; color: #1a73e8; font-size: 18px; }
-.slot-tabs-wrapper { display: flex; overflow-x: auto; gap: 8px; padding: 10px; margin-bottom: 15px; background-color: #e8f0fe; border-radius: 8px; border: 1px solid #cce0ff; }
-.slot-sub-tab { background-color: white; border: 1px solid #a4c2f4; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; color: #1a73e8; }
-.slot-sub-tab.active { background-color: #1a73e8; color: white; }
-.method-tab-nav { display: flex; gap: 6px; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-.method-tab-btn { background-color: #f1f3f4; border: 1px solid #dcdcdc; padding: 6px 14px; font-size: 12px; font-weight: bold; border-radius: 4px; cursor: pointer; color: #555; }
-.method-tab-btn.active { background-color: #28a745; color: white; border-color: #28a745; }
-.method-content { display: none; } .method-content.active { display: block; }
-.date-picker-container { display: flex; align-items: center; justify-content: center; gap: 10px; background-color: #fff3cd; padding: 12px; border-radius: 8px; border: 1px solid #ffe69c; margin-bottom: 15px; }
-.input-group { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 15px; transition: 0.3s; }
-.input-box label { display: block; font-size: 10px; color: #555; margin-bottom: 3px; text-align: center; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-input[type="text"] { width: 100%; padding: 8px 6px; font-size: 13px; text-align: center; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-button { background-color: #1a73e8; color: white; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; }
-table { width: 100%; border-collapse: collapse; }
-th, td { border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 12px; }
-th { background-color: #f8f9fa; color: #555; }
-.row-label { background-color: #f8f9fa; color: #555; font-size: 13px; width: 80px; font-weight: bold; }
-.table-scroll-container { width: 100%; max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 6px; background: white; }
-.table-rekap input { font-size: 12px; padding: 3px; border: none !important; background: transparent !important; text-align: center; width: 100%; outline: none !important; }
-.col-slot { white-space: nowrap; text-align: left; padding-left: 8px; }
-.custom-file-btn { display: inline-block; background-color: #1a73e8; color: white; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-.custom-file-btn:hover { background-color: #1557b0; }
-.custom-file-btn.uploaded { background-color: #28a745 !important; }
-.multi-upload-btn { background-color: #fbbc05; color: #333; padding: 10px 16px; font-size: 13px; margin-bottom: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; display: inline-block; border: 1px solid #e0a800; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s; }
-.multi-upload-btn:hover { background-color: #e0a800; }
-#mainUploadTable { table-layout: fixed; width: 100%; }
-.file-name-cell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; font-weight: bold; color: #333; }
-.clickable-row { cursor: pointer; }
-.clickable-row:hover { background-color: #f1f5f9; }
-.active-row { background-color: #e8f0fe !important; }
-.top-rank-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
-.top-rank-card { background: #fdfdfd; border: 2px solid #28a745; border-radius: 8px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-.top-rank-title { font-weight: bold; color: #28a745; font-size: 13px; text-align: center; margin-bottom: 6px; background: #e6f4ea; padding: 4px; border-radius: 4px; }
-.backtest-banner { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: white; padding: 12px 18px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 3px 10px rgba(26,115,232,0.2); }
-.backtest-banner div { font-size: 14px; font-weight: bold; }
-.backtest-banner span { background: #ffeb3b; color: #333; padding: 3px 8px; border-radius: 4px; font-size: 13px; }
-/* Tabel Rekomendasi & BBFS */
-#rekomendasi-card .top-rank-title { background: #4285f4; color: white; }
-#rekomendasi-card .top-rank-title::after { content: " (Berdasarkan analisis 7 hari terakhir)"; display: block; font-size: 10px; opacity: 0.8; margin-top: 4px; }
-#bbfs-card .top-rank-title { background: #fbbc05; color: #333; border-color: #fbbc05; }
-</style>
-</head>
-<body>
-<div class="container">
-<div class="tab-nav">
-<button class="tab-btn active" onclick="bukaTab(event, 'tabRekap')">Tabel Rekapitulasi</button>
-<button class="tab-btn" onclick="bukaTab(event, 'tabKalkulator')">Kalkulator Slot</button>
-<button class="tab-btn" onclick="bukaTab(event, 'tabLastNumber')">LAST NUMBER</button>
-<button class="tab-btn" onclick="bukaTab(event, 'tabTools')">Tools</button>
-</div>
+import json
+from datetime import datetime
+import os
+import re
+from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 
-<!-- TAB REKAPITULASI -->
-<div id="tabRekap" class="tab-content active">
-<h2>Tabel Pembanding Rekapitulasi</h2>
+# --- 1. FUNGSI PEMBEDAH OREGON ---
+def parse_oregon(html_text, time_label):
+    results = []
+    soup = BeautifulSoup(html_text, 'html.parser')
+    raw_text = soup.get_text(separator='|', strip=True)
+    chunks = raw_text.split('|')
+    
+    for i in range(len(chunks)):
+        text = chunks[i]
+        if time_label in text and re.search(r'\d{1,2}/\d{1,2}/\d{4}', text):
+            date_match = re.search(r'(\d{1,2})/(\d{1,2})/(\d{4})', text)
+            if date_match:
+                m, d, y = date_match.groups()
+                formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
+                
+                digits_found = []
+                for j in range(1, 15):
+                    if i + j < len(chunks):
+                        if chunks[i+j].isdigit() and len(chunks[i+j]) == 1:
+                            digits_found.append(chunks[i+j])
+                        if len(digits_found) == 4:
+                            break
+                            
+                if len(digits_found) >= 4:
+                    results.append({"tanggal": formatted_date, "nomor": "".join(digits_found[:4])})
+    return results
 
-<!-- KOTAK TARIK DATA TANGGAL -->
-<div class="date-picker-container" style="margin-bottom: 15px;">
-<label style="font-size:13px; font-weight:bold; color: #856404;">Pilih Tanggal:</label>
-<input type="date" id="inputTanggalRekap" style="padding: 6px; border-radius: 4px; border: 1px solid #ffe69c; font-weight:bold; outline:none; cursor:pointer;" onchange="sinkronisasiTanggalDariRekap(this.value)">
-</div>
+# --- 2. FUNGSI PEMBEDAH NEW YORK ---
+def parse_new_york(html_text, draw_type):
+    results = []
+    soup = BeautifulSoup(html_text, 'html.parser')
+    elements = soup.find_all(['tr', 'div', 'li', 'p', 'span'])
+    
+    current_date = None
+    for el in elements:
+        text = el.get_text(strip=True)
+        date_match = re.search(r'^(\d{2})/(\d{2})/(\d{4})$', text)
+        if date_match:
+            m, d, y = date_match.groups()
+            current_date = f"{int(d):02d}-{int(m):02d}-{y}"
+            
+        if draw_type.lower() in text.lower() and current_date:
+            clean_digits = re.sub(r'[^\d]', '', text)
+            if len(clean_digits) >= 4:
+                results.append({"tanggal": current_date, "nomor": clean_digits[-4:]})
+                current_date = None
+    return results
 
-<!-- 3 TABEL: TOP1, TOP2, TOP3 -->
-<div class="top-rank-wrapper" id="topRankContainer">
-  <div class="top-rank-card">
-    <div class="top-rank-title" id="title_top_1">TOP 1: -</div>
-    <div class="table-scroll-container" style="max-height: 180px;">
-      <table class="table-rekap" style="font-size:11px;">
-        <thead><tr><th>NO</th><th>MARKET</th><th>LAST</th><th>AI</th><th>RES</th><th>W/L</th></tr></thead>
-        <tbody id="tbody_top_1"></tbody>
-      </table>
-    </div>
-  </div>
-  <div class="top-rank-card">
-    <div class="top-rank-title" id="title_top_2">TOP 2: -</div>
-    <div class="table-scroll-container" style="max-height: 180px;">
-      <table class="table-rekap" style="font-size:11px;">
-        <thead><tr><th>NO</th><th>MARKET</th><th>LAST</th><th>AI</th><th>RES</th><th>W/L</th></tr></thead>
-        <tbody id="tbody_top_2"></tbody>
-      </table>
-    </div>
-  </div>
-  <div class="top-rank-card">
-    <div class="top-rank-title" id="title_top_3">TOP 3: -</div>
-    <div class="table-scroll-container" style="max-height: 180px;">
-      <table class="table-rekap" style="font-size:11px;">
-        <thead><tr><th>NO</th><th>MARKET</th><th>LAST</th><th>AI</th><th>RES</th><th>W/L</th></tr></thead>
-        <tbody id="tbody_top_3"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- REKOMENDASI METODE & BBFS -->
-<div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: stretch; width: 100%;">
-  
-  <div class="top-rank-card" id="rekomendasi-card" style="flex: 1.5; margin-bottom: 0; display: flex; flex-direction: column;">
-    <div class="top-rank-title">
-      <span id="rekomendasiMetodeText">Pilih tanggal untuk melihat Hasil Analisis 7 Hari</span>
-    </div>
-    <div class="table-scroll-container" style="flex: 1;">
-      <table class="table-rekap">
-        <thead>
-          <tr>
-            <th rowspan="2">NO</th>
-            <th rowspan="2">MARKET</th>
-            <th rowspan="2"><div>LAST RESULT</div></th>
-            <th rowspan="2">AI</th>
-            <th rowspan="2">RESULT</th>
-            <th id="rekomendasi_w">W: 0</th>
-            <th id="rekomendasi_l">L: 0</th>
-          </tr>
-          <tr><th colspan="2" id="rekomendasi_diff">+/- 0</th></tr>
-        </thead>
-        <tbody id="rekapTunggalBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="top-rank-card" id="bbfs-card" style="flex: 1; margin-bottom: 0; display: flex; flex-direction: column;">
-    <div class="top-rank-title">
-      <span>Tabel BBFS</span>
-    </div>
-    <div class="table-scroll-container" style="flex: 1; max-height: none;">
-      <table class="table-rekap">
-        <thead>
-          <tr>
-            <th>NO</th>
-            <th>MARKET</th>
-            <th>AI</th>
-            <th>BBFS</th>
-          </tr>
-        </thead>
-        <tbody id="bbfsBody">
-          <tr><td colspan="4">Belum ada data market</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</div>
-</div>
-
-<!-- TAB KALKULATOR -->
-<div id="tabKalkulator" class="tab-content" style="display:none;">
-<h2>Sistem Kalkulasi Slot</h2>
-<div class="slot-tabs-wrapper" id="slotTabsContainer"></div>
-<div class="date-picker-container">
-<label style="font-size:13px; font-weight:bold; color: #856404;">Pilih Tanggal:</label>
-<input type="date" id="inputTanggal" style="padding: 6px; border-radius: 4px; border: 1px solid #ffe69c; font-weight:bold; outline:none; cursor:pointer;" onchange="tarikDataDariTanggal(this.value)">
-</div>
-<div class="input-group" id="inputGroupContainer">
-<div class="input-box"><label id="lbl_C3">C3</label><input type="text" id="C3" maxlength="4" inputmode="numeric" oninput="simpanOtomatis()"></div>
-<div class="input-box"><label id="lbl_C4">C4</label><input type="text" id="C4" maxlength="4" inputmode="numeric" oninput="simpanOtomatis()"></div>
-<div class="input-box"><label id="lbl_C5">C5</label><input type="text" id="C5" maxlength="4" inputmode="numeric" oninput="simpanOtomatis()"></div>
-<div class="input-box"><label id="lbl_C6">C6</label><input type="text" id="C6" maxlength="4" inputmode="numeric" oninput="simpanOtomatis()"></div>
-<div class="input-box"><label id="lbl_C7">C7</label><input type="text" id="C7" maxlength="4" inputmode="numeric" oninput="simpanOtomatis()"></div>
-<div class="input-box"><label id="lbl_C8">C8</label><input type="text" id="C8" maxlength="4" inputmode="numeric" oninput="simpanOtomatis()"></div>
-<div class="input-box"><label id="lbl_C9">C9</label><input type="text" id="C9" maxlength="4" inputmode="numeric" oninput="simpanOtomatis()"></div>
-<div class="input-box" id="box_C10" style="display: none;"><label id="lbl_C10">C10</label><input type="text" id="C10" maxlength="4" inputmode="numeric" oninput="simpanOtomatis()"></div>
-</div>
-<button onclick="prosesData()">PROSES & ACAK</button>
-<div class="method-tab-nav">
-<button class="method-tab-btn active" onclick="bukaMetodeTab(event, 'metode1')">Metode 1</button>
-<button class="method-tab-btn" onclick="bukaMetodeTab(event, 'metode2sd9')">Metode 2 - 9 (Tabel Excel)</button>
-</div>
-<div id="metode1" class="method-content active">
-<table>
-<tr><th class="row-label">Sel</th><th>C</th><th>D</th><th>E</th></tr>
-<tr><td class="row-label">18</td><td id="out_C18">-</td><td id="out_D18">-</td><td id="out_E18">-</td></tr>
-<tr><td class="row-label">19</td><td id="out_C19">-</td><td id="out_D19">-</td><td id="out_E19">-</td></tr>
-<tr><td class="row-label">20</td><td id="out_C20">-</td><td id="out_D20">-</td><td id="out_E20">-</td></tr>
-<tr><td class="row-label">21</td><td id="out_C21" colspan="3">-</td></tr>
-<tr><td class="row-label">23</td><td id="out_C23" colspan="3">-</td></tr>
-</table>
-</div>
-<div id="metode2sd9" class="method-content">
-<div style="font-weight: bold; color: #137333; font-size: 14px; margin-bottom: 10px;">Output AI Gabungan (Metode 2 - 9):</div>
-<div class="ai-grid">
-<div class="ai-box">METODE 2 <span id="out_M2_AI">-</span></div>
-<div class="ai-box">METODE 3 <span id="out_M3_AI">-</span></div>
-<div class="ai-box">METODE 4 <span id="out_M4_AI">-</span></div>
-<div class="ai-box">METODE 5 <span id="out_M5_AI">-</span></div>
-<div class="ai-box">METODE 6 <span id="out_M6_AI">-</span></div>
-<div class="ai-box">METODE 7 <span id="out_M7_AI">-</span></div>
-<div class="ai-box">METODE 8 <span id="out_M8_AI">-</span></div>
-<div class="ai-box">METODE 9 <span id="out_M9_AI">-</span></div>
-</div>
-</div>
-</div>
-
-<!-- TAB LAST NUMBER -->
-<div id="tabLastNumber" class="tab-content" style="display:none;">
-<h2>LAST NUMBER</h2>
-<div style="text-align: left; margin-bottom: 15px; display: flex; align-items: center; gap: 15px;">
-  <button onclick="sinkronisasiOnline()" class="multi-upload-btn" id="btnSyncOnline" style="background-color: #28a745; color: white; border-color: #28a745; margin-bottom: 0;">
-    🔄 Sinkronisasi Data Online
-  </button>
-  <span id="syncStatus" style="font-size: 13px; font-weight: bold; color: #1a73e8;"></span>
-</div>
-<div style="text-align: right; margin-bottom: 10px;">
-<button onclick="resetDataStorage()" style="background-color: #dc3545; width: auto; padding: 6px 12px; font-size: 11px;">Reset Data Tersimpan</button>
-</div>
-<div class="table-scroll-container">
-<table id="mainUploadTable">
-<thead><tr><th style="width: 50px;">No</th><th>MARKET</th></tr></thead>
-<tbody id="upload50Body"></tbody>
-</table>
-</div>
-<div id="detailFileWrapper" style="margin-top: 25px; border-top: 2px solid #ddd; padding-top: 15px; display: none;">
-<h3 id="detailFileTitle" style="color: #1a73e8; font-size: 15px; margin-bottom: 8px;">Detail Seluruh Data File</h3>
-<div class="table-scroll-container" style="max-height: 250px;">
-<table id="detailFileTable">
-<thead><tr><th>No</th><th>Tanggal</th><th>Nomor</th></tr></thead>
-<tbody id="detailFileBody"></tbody>
-</table>
-</div>
-</div>
-</div>
-
-<!-- HALAMAN 2: TAB TOOLS -->
-<div id="tabTools" class="tab-content" style="display:none;">
-<h2>Tools</h2>
-<div style="text-align: center; padding: 40px; color: #666;">
-  Area Halaman 2 (Tools) - Menunggu kode dari Anda.
-</div>
-</div>
-
-</div>
-
-<script>
-let dataSemuaSlot = {};
-let slotAktif = 1;
-let globalSelectedDate = "";
-let isResultAutomatic = true;
-let storedHtmlData = {};
-let activeDetailIndex = null;
-let globalBacktestResults = null;
-
-const MARKET_MAPPING = [
-  { slot: 1, file: "kentucky-midday.json", name: "KENTUCKY MIDDAY" },
-  { slot: 2, file: "new-york-midday.json", name: "NEW YORK MIDDAY" },
-  { slot: 3, file: "north-carolina-day.json", name: "NORTH CAROLINA DAY" },
-  { slot: 4, file: "oregon-3.json", name: "OREGON 3" },
-  { slot: 5, file: "oregon-6.json", name: "OREGON 6" },
-  { slot: 6, file: "california.json", name: "CALIFORNIA" },
-  { slot: 7, file: "oregon-9.json", name: "OREGON 9" },
-  { slot: 8, file: "new-york-evening.json", name: "NEW YORK EVENING" },
-  { slot: 9, file: "kentucky-evening.json", name: "KENTUCKY EVENING" },
-  { slot: 10, file: "north-carolina-evening.json", name: "NORTH CAROLINA EVENING" },
-  { slot: 11, file: "oregon-12.json", name: "OREGON 12" },
-  { slot: 12, file: "bullseye.json", name: "BULLSEYE" },
-  { slot: 13, file: "pcso.json", name: "PCSO" },
-  { slot: 14, file: "macau.json", name: "MACAU" }
-];
-
-function formatDate(d, m, y) { return `${String(d).padStart(2,'0')}-${String(m).padStart(2,'0')}-${y}`; }
-function getNamaHari(date) {
-  const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-  return hari[date.getDay()];
-}
-
-window.onload = function() {
-  let tabsContainer = document.getElementById("slotTabsContainer");
-  for (let i = 1; i <= 75; i++) {
-    dataSemuaSlot[i] = {
-      nama: "Slot " + i,
-      parsedData: [],
-      inputs: ["", "", "", "", "", "", "", ""],
-      hasil: {
-        C18: "-", D18: "-", E18: "-", C19: "-", D19: "-", E19: "-", C20: "-", D20: "-", E20: "-", C21: "-", C23: "-",
-        M_AI: { 2:"-", 3:"-", 4:"-", 5:"-", 6:"-", 7:"-", 8:"-", 9:"-" },
-        matrixRows: []
-      },
-      rekapManual: { 1:"", 2:"", 3:"", 4:"", 5:"", 6:"", 7:"", 8:"", 9:"" }
-    };
-    let btn = document.createElement("button");
-    btn.className = "slot-sub-tab";
-    if (i === 1) btn.classList.add("active");
-    btn.id = "btn_slot_" + i;
-    btn.innerText = "Slot " + i;
-    btn.onclick = function() { gantiSlot(i); };
-    tabsContainer.appendChild(btn);
-  }
-  buatTabelRekapTunggal(); 
-  buatTabel50Upload();
-  muatDariLocalStorage();
-
-  // --- TAMBAHAN LOGIKA TANGGAL H-1 ---
-  let today = new Date();
-  today.setDate(today.getDate() - 1); // Mundur 1 hari
-  
-  let yyyy = today.getFullYear();
-  let mm = String(today.getMonth() + 1).padStart(2, '0');
-  let dd = String(today.getDate()).padStart(2, '0');
-  let defaultDateStr = `${yyyy}-${mm}-${dd}`;
-  
-  // Masukkan tanggal H-1 ke dalam kotak input tanggal
-  let inputRekap = document.getElementById('inputTanggalRekap');
-  let inputKal = document.getElementById('inputTanggal');
-  
-  if (inputRekap) inputRekap.value = defaultDateStr;
-  if (inputKal) inputKal.value = defaultDateStr;
-  
-  // Langsung eksekusi pencarian data untuk H-1 tersebut
-  if (globalSelectedDate === "") {
-    sinkronisasiTanggalDariRekap(defaultDateStr);
-  }
-};
-
-function simpanKeLocalStorage() {
-  let saveData = {};
-  for (let i = 1; i <= 75; i++) {
-    saveData[i] = {
-      nama: dataSemuaSlot[i].nama,
-      parsedData: dataSemuaSlot[i].parsedData,
-      inputs: dataSemuaSlot[i].inputs,
-      rekapManual: dataSemuaSlot[i].rekapManual,
-      hasil: dataSemuaSlot[i].hasil
-    };
-  }
-  localStorage.setItem('sistem_rekap_slot_data', JSON.stringify(saveData));
-}
-
-function muatDariLocalStorage() {
-  let saved = localStorage.getItem('sistem_rekap_slot_data');
-  if (!saved) return;
-  try {
-    let saveData = JSON.parse(saved);
-    for (let i = 1; i <= 75; i++) {
-      if (saveData[i]) {
-        dataSemuaSlot[i].nama = saveData[i].nama || ("Slot " + i);
-        dataSemuaSlot[i].parsedData = saveData[i].parsedData || [];
-        dataSemuaSlot[i].inputs = saveData[i].inputs || ["","","","","","","",""];
-        dataSemuaSlot[i].hasil = saveData[i].hasil || dataSemuaSlot[i].hasil;
-        if (!dataSemuaSlot[i].hasil.M_AI) dataSemuaSlot[i].hasil.M_AI = { 2:"-", 3:"-", 4:"-", 5:"-", 6:"-", 7:"-", 8:"-", 9:"-" };
+# --- 3. FUNGSI PEMBEDAH NORTH CAROLINA (BERDASARKAN URL BARU) ---
+def parse_north_carolina(html_text, session_type):
+    # session_type diisi "day" (matahari) atau "evening" (bulan)
+    results = []
+    soup = BeautifulSoup(html_text, 'html.parser')
+    
+    # Berdasarkan screenshot, data tersusun dalam baris-baris teks/tabel
+    rows = soup.find_all(['tr', 'div', 'li'])
+    
+    for row in rows:
+        row_text = row.get_text(separator=' ', strip=True)
         
-        if (saveData[i].rekapManual) dataSemuaSlot[i].rekapManual = saveData[i].rekapManual;
+        # Cek apakah baris memuat format tanggal NC: "2026, Aug 27"
+        date_match = re.search(r'(\d{4}),\s+([A-Za-z]{3})\s+(\d{1,2})', row_text)
+        if date_match:
+            year, month_str, day = date_match.groups()
+            
+            # Tentukan apakah ini sesi Day (Matahari/Kuning) atau Evening (Bulan/Biru)
+            is_evening = "🌙" in row_text or "evening" in row.decode_contents().lower() or "night" in row_text.lower()
+            
+            # Filter berdasarkan sesi yang diminta
+            if session_type == "evening" and not is_evening:
+                continue
+            if session_type == "day" and is_evening:
+                continue
+                
+            try:
+                dt_obj = datetime.strptime(f"{month_str} {day} {year}", "%b %d %Y")
+                formatted_date = dt_obj.strftime("%d-%m-%Y")
+                
+                # Ambil semua angka di baris setelah tanggal
+                all_digits = re.findall(r'\d+', row_text.replace(date_match.group(0), ''))
+                # Filter angka 1 digit yang berderet (hasil undian 4 digit pertama)
+                valid_digits = [d for d in all_digits if len(d) == 1]
+                
+                if len(valid_digits) >= 4:
+                    result_num = "".join(valid_digits[:4])
+                    if not any(r['tanggal'] == formatted_date for r in results):
+                        results.append({"tanggal": formatted_date, "nomor": result_num})
+            except Exception:
+                pass
+    return results
+
+# --- 4. FUNGSI PEMBEDAH MACAU ---
+def parse_macau(html_text, _):
+    results = []
+    soup = BeautifulSoup(html_text, 'html.parser')
+    rows = soup.find_all('tr')
+    
+    for row in rows:
+        row_text = row.get_text(separator=' ', strip=True)
+        date_match = re.search(r'(\d{4}-\d{2}-\d{2})', row_text)
+        if date_match:
+            raw_date = date_match.group(1)
+            try:
+                dt_obj = datetime.strptime(raw_date, "%Y-%m-%d")
+                formatted_date = dt_obj.strftime("%d-%m-%Y")
+                
+                all_digits = re.findall(r'\d+', row_text.replace(raw_date, ''))
+                combined_digits = "".join(all_digits)
+                
+                if len(combined_digits) >= 4:
+                    results.append({"tanggal": formatted_date, "nomor": combined_digits[-4:]})
+            except Exception:
+                pass
+    return results
+
+# --- MESIN UTAMA PENARIKAN DATA ---
+def fetch_and_parse(url, parser_function, param):
+    print(f"Menarik data dari {url} ({param}) ...")
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+            )
+            page = context.new_page()
+            page.goto(url, wait_until="networkidle", timeout=45000)
+            html_text = page.content()
+            browser.close()
+            return parser_function(html_text, param)
+    except Exception as e:
+        print(f"Error koneksi/loading: {e}")
+        return []
+
+def save_with_smart_append(market_name, new_data):
+    if not new_data:
+        print(f"FAILED: Tidak ada data ditarik untuk {market_name}")
+        return
+
+    if not os.path.exists('data_market'):
+        os.makedirs('data_market')
         
-        if (dataSemuaSlot[i].nama !== ("Slot " + i)) {
-          let nameSpan = document.getElementById(`name_${i}`);
-          if (nameSpan) nameSpan.innerText = dataSemuaSlot[i].nama;
-          let lblUpload = document.getElementById(`lbl_upload_${i}`);
-          if (lblUpload) lblUpload.classList.add('uploaded');
-          let rekapSlotName = document.getElementById(`nama_slot_tunggal_${i}`);
-          if (rekapSlotName) rekapSlotName.innerText = dataSemuaSlot[i].nama;
-          let btnSlot = document.getElementById(`btn_slot_${i}`);
-          if (btnSlot) btnSlot.innerText = dataSemuaSlot[i].nama;
-        }
-      }
-    }
-    updateRekapSinkron();
-  } catch(e) {
-    console.error("Gagal memuat data tersimpan:", e);
-  }
-}
-
-function resetDataStorage() {
-  if(confirm("Apakah Anda yakin ingin mereset seluruh data file yang tersimpan?")) {
-    localStorage.removeItem('sistem_rekap_slot_data');
-    location.reload();
-  }
-}
-
-function bukaTab(evt, namaTab) {
-  document.querySelectorAll('.tab-content').forEach(c => { c.classList.remove('active'); c.style.display = 'none'; });
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(namaTab).classList.add('active');
-  document.getElementById(namaTab).style.display = 'block';
-  evt.currentTarget.classList.add('active');
-  if (namaTab === 'tabRekap') { updateRekapSinkron(); }
-}
-
-function bukaMetodeTab(evt, id) {
-  document.querySelectorAll('.method-content').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.method-tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  evt.currentTarget.classList.add('active');
-  let inputGroup = document.getElementById('inputGroupContainer');
-  let boxC10 = document.getElementById('box_C10');
-  if (id === 'metode1') {
-    inputGroup.style.gridTemplateColumns = 'repeat(7, 1fr)';
-    boxC10.style.display = 'none';
-  } else {
-    inputGroup.style.gridTemplateColumns = 'repeat(8, 1fr)';
-    boxC10.style.display = 'block';
-  }
-  gantiSlot(slotAktif);
-}
-
-function buatTabelRekapTunggal() {
-  let tbody = document.getElementById("rekapTunggalBody");
-  tbody.innerHTML = `<tr id="rekapTunggalEmpty"><td colspan="7">Belum ada data market</td></tr>`;
-  for (let i = 1; i <= 75; i++) {
-    tbody.innerHTML += `<tr id="row_rek_tunggal_${i}" style="display:none;">
-      <td id="no_rek_tunggal_${i}">${i}</td>
-      <td class="col-slot" id="nama_slot_tunggal_${i}">Slot ${i}</td>
-      <td><div id="rek_tunggal_C_${i}" style="font-weight:bold; color:#1a73e8;">-</div></td>
-      <td id="rek_tunggal_D_${i}" style="font-weight:bold; color:#1a73e8;">-</td>
-      <td><input type="text" class="input-result-tunggal" id="rek_tunggal_E_${i}" oninput="simpanRekapManual(${i})" readonly></td>
-      <td colspan="2" id="rek_tunggal_icon_${i}" class="result-icon-cell"></td>
-    </tr>`;
-  }
-}
-
-function simpanRekapManual(idx) {
-  const el = document.getElementById(`rek_tunggal_E_${idx}`);
-  const val = el ? el.value.trim() : '';
-  const methodSelected = globalBacktestResults ? Object.keys(globalBacktestResults).sort((a,b) => globalBacktestResults[b].diff - globalBacktestResults[a].diff)[0] || 1 : 1;
-  dataSemuaSlot[idx].rekapManual[methodSelected] = val;
-  simpanKeLocalStorage();
-  updateRekapSinkron();
-}
-
-function evaluasiSatuSelExcelIcon(AI, RESULT) {
-  const x5 = String(AI || '').replace(/\s/g, '');
-  const y5 = String(RESULT || '').replace(/\s/g, '');
-  if (x5 === "" || y5 === "" || x5 === "-" || y5 === "-") return "";
-  const d3 = y5.charAt(2);
-  const d4 = y5.charAt(3);
-  if ((d3 && x5.includes(d3)) || (d4 && x5.includes(d4))) return "✔️";
-  else return "✖";
-}
-
-function ambilResultRekapByMethod(i, method) {
-  const slot = dataSemuaSlot[i];
-  if (isResultAutomatic) {
-    if (!globalSelectedDate || !slot.parsedData || slot.parsedData.length === 0) return '';
-    let [y, m, d] = globalSelectedDate.split('-').map(Number);
-    let date = new Date(y, m - 1, d);
-    date.setDate(date.getDate() + 1);
-    let nextDay = formatDate(date.getDate(), date.getMonth() + 1, date.getFullYear());
-    let entry = slot.parsedData.find(item => item.tanggal === nextDay);
-    return entry ? String(entry.nomor || '').replace(/\s/g, '') : '';
-  }
-  return String(slot.rekapManual[method] || '').replace(/\s/g, '');
-}
-
-function formatPlusMinus(val) { return String(val); }
-
-function hitungStatistikMetode(methodNum) {
-  let w = 0, l = 0;
-  let details = [];
-  let currentStreak = 0;
-  let maxLosingStreak = 0;
-  let displayNo = 1;
-  
-  for (let i = 1; i <= 75; i++) {
-    let slot = dataSemuaSlot[i];
-    if (slot.nama === "Slot " + i || !slot.parsedData || slot.parsedData.length === 0) {
-      continue; 
-    }
-
-    let ai = (methodNum === 1) ? String(slot.hasil.C21 || '').trim() : String(slot.hasil.M_AI[methodNum] || '').trim();
-    if (ai === '') ai = '-';
-    let res = ambilResultRekapByMethod(i, methodNum);
-    slot.rekapManual[methodNum] = res;
-    let icon = evaluasiSatuSelExcelIcon(ai, res);
-    let valC = String(slot.inputs[0] || '').trim();
-    if (valC === '') valC = '-';
-    if (icon === '✔️') { w++; currentStreak = 0; }
-    else if (icon === '✖') { l++; currentStreak++; if (currentStreak > maxLosingStreak) maxLosingStreak = currentStreak; }
+    file_path = os.path.join('data_market', f"{market_name}.json")
+    existing_data = []
     
-    details.push({ no: displayNo++, market: slot.nama.substring(0,6), last: valC, ai: ai, res: res, icon: icon });
-  }
-  let diff = w - l;
-  let winRate = (w + l) > 0 ? (w / (w + l)) : 0;
-  return { methodNum, w, l, diff, winRate, maxLosingStreak, details };
-}
-
-function jalankanBacktesting7Hari() {
-  if (!globalSelectedDate) {
-    globalBacktestResults = null;
-    return;
-  }
-  let [y, m, d] = globalSelectedDate.split('-').map(Number);
-  let baseDateObj = new Date(y, m - 1, d);
-  let activeMethodsList = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-  let metodeScores = {};
-  activeMethodsList.forEach(mNum => { metodeScores[mNum] = { w: 0, l: 0, diff: 0 }; });
-
-  let activeDaysCount = 0;
-  for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
-    let checkDate = new Date(baseDateObj);
-    checkDate.setDate(baseDateObj.getDate() - dayOffset);
-    let checkDateStr = formatDate(checkDate.getDate(), checkDate.getMonth() + 1, checkDate.getFullYear());
-    let hasData = false;
-    for (let s = 1; s <= 75; s++) {
-      if (dataSemuaSlot[s].parsedData && dataSemuaSlot[s].parsedData.some(item => item.tanggal === checkDateStr)) {
-        hasData = true;
-        break;
-      }
-    }
-    if (!hasData) continue;
-    activeDaysCount++;
-
-    activeMethodsList.forEach(mNum => {
-      let tempW = 0, tempL = 0;
-      for (let s = 1; s <= 75; s++) {
-        let slot = dataSemuaSlot[s];
-        if (!slot.parsedData || slot.parsedData.length === 0) continue; 
+    if os.path.exists(file_path):
+        try:
+            with open(file_path, 'r') as f:
+                existing_data = json.load(f)
+        except Exception:
+            pass
+            
+    existing_dates = {item['tanggal'] for item in existing_data}
+    for item in new_data:
+        if item['tanggal'] not in existing_dates:
+            existing_data.append(item)
+            
+    try:
+        existing_data.sort(key=lambda x: datetime.strptime(x['tanggal'], "%d-%m-%Y"))
+    except Exception:
+        pass
         
-        let entry = slot.parsedData.find(item => item.tanggal === checkDateStr);
-        if (entry) {
-          let targetInputs = [];
-          let [ty, tm, td] = checkDateStr.split('-').map(Number);
-          let tDate = new Date(ty, tm - 1, td);
-          let limitInputs = (mNum === 1) ? 7 : 8;
-          for(let idxInput=0; idxInput<limitInputs; idxInput++) {
-            let subDate = new Date(tDate);
-            subDate.setDate(tDate.getDate() - idxInput);
-            let subDateStr = formatDate(subDate.getDate(), subDate.getMonth() + 1, subDate.getFullYear());
-            let foundSub = slot.parsedData.find(it => it.tanggal === subDateStr);
-            targetInputs.push(foundSub ? foundSub.nomor : "");
-          }
-          let aiVal = "-";
-          if (mNum === 1) {
-            let resM1 = hitungAlgoritmaM1(targetInputs.slice(0,7));
-            aiVal = resM1.C21;
-          } else {
-            let resM2sd9 = hitungAlgoritmaM2sd9Excel(targetInputs);
-            aiVal = resM2sd9.ai[mNum];
-          }
-          let iconRes = evaluasiSatuSelExcelIcon(aiVal, entry.nomor);
-          if (iconRes === '✔️') tempW++;
-          if (iconRes === '✖') tempL++;
-        }
-      }
-      metodeScores[mNum].w += tempW;
-      metodeScores[mNum].l += tempL;
-      metodeScores[mNum].diff += (tempW - tempL);
-    });
-  }
-  globalBacktestResults = metodeScores;
-  let sortedMethods = Object.keys(metodeScores).map(Number).sort((a, b) => {
-    if (metodeScores[b].diff !== metodeScores[a].diff) return metodeScores[b].diff - metodeScores[a].diff;
-    return metodeScores[b].w - metodeScores[a].w;
-  });
-  let bestMethod = sortedMethods[0];
-  let bestScore = metodeScores[bestMethod];
-  if (activeDaysCount > 0) {
-    document.getElementById("rekomendasiMetodeText").innerHTML = 
-      `<b>METODE ${bestMethod}</b> (Akumulasi Profit 7 Hari: <b>${bestScore.diff >= 0 ? '+'+bestScore.diff : bestScore.diff}</b> poin dari ${activeDaysCount} hari aktif data)`;
-  }
-}
+    with open(file_path, 'w') as f:
+        json.dump(existing_data, f, indent=4)
+    print(f"SUCCESS: Total {len(existing_data)} data terkumpul untuk {market_name}")
 
-function sinkronisasiTanggalDariRekap(tglInput) {
-  globalSelectedDate = tglInput;
-  document.getElementById('inputTanggal').value = tglInput;
-  for (let s = 1; s <= 75; s++) { terapkanTanggalKeSlot(s, globalSelectedDate); }
-  updateRekapSinkron();
-  simpanKeLocalStorage();
-}
-
-function tarikDataDariTanggal(tglInput) {
-  globalSelectedDate = tglInput;
-  document.getElementById('inputTanggalRekap').value = tglInput;
-  for (let s = 1; s <= 75; s++) { terapkanTanggalKeSlot(s, globalSelectedDate); }
-  updateRekapSinkron();
-  simpanKeLocalStorage();
-}
-
-function updateRekapSinkron() {
-  try {
-    jalankanBacktesting7Hari();
-    
-    let activeMethodsList = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    let stats1Day = [];
-    
-    activeMethodsList.forEach(m => { 
-      stats1Day.push(hitungStatistikMetode(m)); 
-    });
-    
-    stats1Day.sort((a, b) => {
-      if (b.diff !== a.diff) return b.diff - a.diff;
-      if (b.winRate !== a.winRate) return b.winRate - a.winRate;
-      return a.maxLosingStreak - b.maxLosingStreak;
-    });
-
-    let top1 = stats1Day[0] ? stats1Day[0].methodNum : 1;
-    let top2 = stats1Day[1] ? stats1Day[1].methodNum : 2;
-    let top3 = stats1Day[2] ? stats1Day[2].methodNum : 3;
-
-    for (let rank = 1; rank <= 3; rank++) {
-      let stat = stats1Day[rank - 1];
-      let titleEl = document.getElementById(`title_top_${rank}`);
-      let tbodyEl = document.getElementById(`tbody_top_${rank}`);
-      if (stat && titleEl && tbodyEl) {
-        let diffStr = formatPlusMinus(stat.diff);
-        titleEl.innerHTML = `TOP ${rank}: METODE ${stat.methodNum} <span style="float:right;">W:${stat.w} | L:${stat.l} | +/-:${diffStr}</span>`;
+def main():
+    TARGETS = [
+        ("oregon-3", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "1:00 PM"),
+        ("oregon-6", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "4:00 PM"),
+        ("oregon-9", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "7:00 PM"),
+        ("oregon-12", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "10:00 PM"),
         
-        let htmlRows = "";
-        if (stat.details.length === 0) {
-           htmlRows = `<tr><td colspan="6">Belum ada data market</td></tr>`;
-        } else {
-           stat.details.forEach(item => {
-             htmlRows += `<tr>
-               <td>${item.no}</td>
-               <td style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:50px; text-align: left; padding-left: 6px;">${item.market}</td>
-               <td style="font-weight:bold; color:#1a73e8;">${item.last}</td>
-               <td>${item.ai}</td>
-               <td>${item.res}</td>
-               <td style="font-weight:bold; color:${item.icon==='✔️'?'#28a745':item.icon==='✖'?'#dc3545':'#333'}">${item.icon}</td>
-             </tr>`;
-           });
-        }
-        tbodyEl.innerHTML = htmlRows;
-      }
-    }
+        ("new-york-midday", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Midday"),
+        ("new-york-evening", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Evening"),
+        
+        # Menggunakan tautan baru khusus halaman riwayat North Carolina
+        ("north-carolina-day", "https://nclottery.com/pick4-past", parse_north_carolina, "day"),
+        ("north-carolina-evening", "https://nclottery.com/pick4-past", parse_north_carolina, "evening"),
+        
+        ("macau", "http://178.128.19.32/", parse_macau, "")
+    ]
 
-    let methodTunggal = top1; 
-    if (globalBacktestResults) {
-        let sorted7Day = Object.keys(globalBacktestResults).map(Number).sort((a, b) => {
-            if (globalBacktestResults[b].diff !== globalBacktestResults[a].diff) return globalBacktestResults[b].diff - globalBacktestResults[a].diff;
-            return globalBacktestResults[b].w - globalBacktestResults[a].w;
-        });
-        methodTunggal = sorted7Day[0] || top1;
-    }
+    for market_name, url, parser_func, param in TARGETS:
+        data = fetch_and_parse(url, parser_func, param)
+        save_with_smart_append(market_name, data)
 
-    let displayNoTunggal = 1;
-    let hasAnyData = false;
-
-    for (let i = 1; i <= 75; i++) {
-      let slot = dataSemuaSlot[i];
-      let rowEl = document.getElementById(`row_rek_tunggal_${i}`);
-      
-      if (slot.nama === "Slot " + i || !slot.parsedData || slot.parsedData.length === 0) {
-        if (rowEl) rowEl.style.display = 'none';
-        continue;
-      }
-
-      hasAnyData = true;
-      if (rowEl) {
-        rowEl.style.display = ''; 
-        document.getElementById(`no_rek_tunggal_${i}`).innerText = displayNoTunggal++;
-      }
-
-      let valC = String(slot.inputs[0] || '').trim();
-      if (valC === '') valC = '-';
-      let aiTunggal = (methodTunggal === 1) ? String(slot.hasil.C21 || '').trim() : String(slot.hasil.M_AI[methodTunggal] || '').trim();
-      if (aiTunggal === '') aiTunggal = '-';
-      let resTunggal = ambilResultRekapByMethod(i, methodTunggal);
-
-      let elC = document.getElementById(`rek_tunggal_C_${i}`);
-      if (elC) elC.textContent = valC;
-      
-      let elD = document.getElementById(`rek_tunggal_D_${i}`);
-      if (elD) elD.textContent = aiTunggal;
-      
-      let inputETunggal = document.getElementById(`rek_tunggal_E_${i}`);
-      if (inputETunggal) {
-        inputETunggal.value = resTunggal;
-        inputETunggal.readOnly = isResultAutomatic;
-      }
-      
-      let iconResTunggal = evaluasiSatuSelExcelIcon(aiTunggal, resTunggal);
-      let iconElTunggal = document.getElementById(`rek_tunggal_icon_${i}`);
-      if (iconElTunggal) {
-        iconElTunggal.textContent = iconResTunggal;
-        iconElTunggal.style.color = (iconResTunggal === "✔️") ? "#28a745" : (iconResTunggal === "✖") ? "#dc3545" : "#333";
-      }
-    }
-
-    let emptyRow = document.getElementById("rekapTunggalEmpty");
-    if (emptyRow) {
-      emptyRow.style.display = hasAnyData ? 'none' : '';
-    }
-
-    let statTunggal = (globalBacktestResults && globalBacktestResults[methodTunggal]) ? globalBacktestResults[methodTunggal] : { w: 0, l: 0, diff: 0 };
-    
-    let rekW = document.getElementById("rekomendasi_w");
-    if (rekW) rekW.innerText = "W: " + statTunggal.w;
-    
-    let rekL = document.getElementById("rekomendasi_l");
-    if (rekL) rekL.innerText = "L: " + statTunggal.l;
-    
-    let rekDiff = document.getElementById("rekomendasi_diff");
-    if (rekDiff) rekDiff.innerText = formatPlusMinus(statTunggal.diff);
-
-    updateTabelBBFS(top1, top2, top3);
-    
-  } catch (error) {
-    console.error("Crash terjadi di sinkronisasi:", error);
-  }
-}
-
-function updateTabelBBFS(top1Method = 1, top2Method = 2, top3Method = 3) {
-  let bbfsBody = document.getElementById("bbfsBody");
-  if (!bbfsBody) return;
-
-  let activeSlots = [];
-  for (let i = 1; i <= 75; i++) {
-    let slot = dataSemuaSlot[i];
-    if (slot.nama && slot.nama !== `Slot ${i}` && slot.parsedData && slot.parsedData.length > 0) {
-      activeSlots.push({ no: i, name: slot.nama });
-    }
-  }
-
-  if (activeSlots.length === 0) {
-    bbfsBody.innerHTML = `<tr><td colspan="4">Belum ada data market</td></tr>`;
-    return;
-  }
-
-  let bestBacktestMethod = top1Method;
-  if (globalBacktestResults) {
-    let sorted7Day = Object.keys(globalBacktestResults).map(Number).sort((a, b) => {
-      if (globalBacktestResults[b].diff !== globalBacktestResults[a].diff) return globalBacktestResults[b].diff - globalBacktestResults[a].diff;
-      return globalBacktestResults[b].w - globalBacktestResults[a].w;
-    });
-    bestBacktestMethod = sorted7Day[0] || top1Method;
-  }
-
-  let htmlRows = "";
-  activeSlots.forEach((market, idx) => {
-    let slotIndex = market.no;
-    let slotData = dataSemuaSlot[slotIndex];
-
-    let getAiByMethod = (mNum, sData) => {
-      let ai = (mNum === 1) ? String(sData.hasil.C21 || '').trim() : String(sData.hasil.M_AI[mNum] || '').trim();
-      return (ai === '-' || !ai) ? '' : ai;
-    };
-
-    let ai1 = getAiByMethod(top1Method, slotData);
-    let ai2 = getAiByMethod(top2Method, slotData);
-    let ai3 = getAiByMethod(top3Method, slotData);
-    let aiBacktest = getAiByMethod(bestBacktestMethod, slotData);
-
-    let set1 = new Set(ai1.split(''));
-    let set2 = new Set(ai2.split(''));
-    let set3 = new Set(ai3.split(''));
-
-    let duplicateDigits = [];
-    for (let d = 0; d <= 9; d++) {
-      let charD = String(d);
-      let count = 0;
-      if (set1.has(charD)) count++;
-      if (set2.has(charD)) count++;
-      if (set3.has(charD)) count++;
-      if (count >= 2) duplicateDigits.push(charD);
-    }
-    let aiResultText = duplicateDigits.join('');
-
-    let combinedSet = new Set([...ai1, ...ai2, ...ai3]);
-    
-    if (aiBacktest) {
-      for (let charDigit of aiBacktest) {
-        if (!set1.has(charDigit) && !set2.has(charDigit) && !set3.has(charDigit)) {
-          combinedSet.add(charDigit);
-        }
-      }
-    }
-
-    let bbfsResultText = Array.from(combinedSet).sort().join('');
-
-    htmlRows += `<tr>
-      <td>${idx + 1}</td>
-      <td style="text-align: left; padding-left: 6px;">${market.name}</td>
-      <td style="font-weight: bold; color: #1a73e8;">${aiResultText}</td>
-      <td style="font-weight: bold; color: #28a745;">${bbfsResultText}</td>
-    </tr>`;
-  });
-
-  bbfsBody.innerHTML = htmlRows;
-}
-
-function hitungSlotOtomatis(idx) {
-  let slot = dataSemuaSlot[idx];
-  if (slot.inputs.some(v => v !== "")) {
-    let inputsM1 = slot.inputs.slice(0, 7);
-    let resM1 = hitungAlgoritmaM1(inputsM1);
-    slot.hasil.C18 = resM1.C18; slot.hasil.D18 = resM1.D18; slot.hasil.E18 = resM1.E18;
-    slot.hasil.C19 = resM1.C19; slot.hasil.D19 = resM1.D19; slot.hasil.E19 = resM1.E19;
-    slot.hasil.C20 = resM1.C20; slot.hasil.D20 = resM1.D20; slot.hasil.E20 = resM1.E20;
-    slot.hasil.C21 = resM1.C21; slot.hasil.C23 = resM1.C23;
-    let inputsM2 = slot.inputs.slice(0, 8);
-    let resM2sd9 = hitungAlgoritmaM2sd9Excel(inputsM2);
-    slot.hasil.M_AI = resM2sd9.ai;
-    slot.hasil.matrixRows = resM2sd9.matrixRows;
-  } else {
-    slot.hasil.C21 = "-";
-    slot.hasil.M_AI = {2:"-", 3:"-", 4:"-", 5:"-", 6:"-", 7:"-", 8:"-", 9:"-"};
-    slot.hasil.matrixRows = [];
-  }
-}
-
-function simpanOtomatis() {
-  let isM1Active = document.getElementById('metode1').classList.contains('active');
-  let limit = isM1Active ? 7 : 8;
-  for (let i = 3; i < 3 + limit; i++) {
-    dataSemuaSlot[slotAktif].inputs[i-3] = document.getElementById('C'+i).value;
-  }
-  hitungSlotOtomatis(slotAktif);
-  updateRekapSinkron();
-  simpanKeLocalStorage();
-}
-
-function gantiSlot(idx) {
-  slotAktif = idx;
-  document.querySelectorAll(".slot-sub-tab").forEach(b => b.classList.remove("active"));
-  document.getElementById("btn_slot_"+slotAktif).classList.add("active");
-  let slot = dataSemuaSlot[slotAktif];
-  for (let i = 3; i <= 10; i++) {
-    let val = slot.inputs[i-3] || "";
-    let inputEl = document.getElementById('C'+i);
-    if (inputEl) inputEl.value = val;
-    let lbl = document.getElementById(`lbl_C${i}`);
-    if (globalSelectedDate && lbl) {
-      let [y, m, d] = globalSelectedDate.split('-').map(Number);
-      let baseDate = new Date(y, m - 1, d);
-      let targetDate = new Date(baseDate);
-      targetDate.setDate(baseDate.getDate() - (i - 3));
-      let targetDateStr = formatDate(targetDate.getDate(), targetDate.getMonth() + 1, targetDate.getFullYear());
-      let namaHari = getNamaHari(targetDate);
-      lbl.innerText = `${namaHari}, ${targetDateStr}`;
-    } else if (lbl) {
-      lbl.innerText = `C${i}`;
-    }
-  }
-  document.getElementById('out_C18').innerText = slot.hasil.C18;
-  document.getElementById('out_D18').innerText = slot.hasil.D18;
-  document.getElementById('out_E18').innerText = slot.hasil.E18;
-  document.getElementById('out_C19').innerText = slot.hasil.C19;
-  document.getElementById('out_D19').innerText = slot.hasil.D19;
-  document.getElementById('out_E19').innerText = slot.hasil.E19;
-  document.getElementById('out_C20').innerText = slot.hasil.C20;
-  document.getElementById('out_D20').innerText = slot.hasil.D20;
-  document.getElementById('out_E20').innerText = slot.hasil.E20;
-  document.getElementById('out_C21').innerText = slot.hasil.C21;
-  document.getElementById('out_C23').innerText = slot.hasil.C23;
-  let activeAIKeys = [2, 3, 4, 5, 6, 7, 8, 9];
-  activeAIKeys.forEach(m => {
-    let el = document.getElementById(`out_M${m}_AI`);
-    if (el) el.innerText = slot.hasil.M_AI[m] || "-";
-  });
-}
-
-function hitungRankExcel(arr) {
-  return arr.map((v, i) => {
-    let r = 1; let c = 1;
-    for (let j = 0; j < arr.length; j++) {
-      if (arr[j] > v) r++;
-      if (j < i && arr[j] === v) c++;
-    }
-    return (r + c - 1) % 10;
-  });
-}
-
-const ambilPosisiTerbesar = (arr, n) => { let s = [...arr].sort((a,b) => b - a); return arr.indexOf(s[n-1]); };
-const ambilPosisiTerkecil = (arr, n) => { let s = [...arr].sort((a,b) => a - b); return arr.indexOf(s[n-1]); };
-const temukanPosisi = (arr, val) => arr.indexOf(val);
-
-function hitungAlgoritmaM1(arrInputs) {
-  let inputStr = arrInputs.join("");
-  let freq = Array.from({length:10}, (_, d) => (inputStr.match(new RegExp(d, 'g')) || []).length);
-  let rank1 = hitungRankExcel(freq);
-  let skor = freq.map((f, i) => (f*100) - rank1[i] - (rank1[i] === Math.min(...rank1.filter((_, idx)=>freq[idx]===f)) ? 150 : 0));
-  let rank2 = hitungRankExcel(skor);
-  let rank3 = hitungRankExcel(rank1.map((r, i) => r + rank2[i]));
-  let C18 = "" + ambilPosisiTerbesar(skor, 1) + ambilPosisiTerbesar(skor, 2) + ambilPosisiTerbesar(skor, 3);
-  let D18 = "" + ambilPosisiTerbesar(skor, 4) + ambilPosisiTerbesar(skor, 5);
-  let E18 = "" + ambilPosisiTerkecil(skor, 1) + ambilPosisiTerkecil(skor, 2);
-  let C19 = "" + temukanPosisi(rank1, 1) + temukanPosisi(rank1, 2) + temukanPosisi(rank1, 3);
-  let D19 = "" + temukanPosisi(rank2, 4) + temukanPosisi(rank2, 5);
-  let E19 = "" + temukanPosisi(rank2, 9) + temukanPosisi(rank2, 0);
-  let C20 = "" + temukanPosisi(rank3, 1) + temukanPosisi(rank3, 2) + temukanPosisi(rank3, 3);
-  let D20 = "" + temukanPosisi(rank3, 4) + temukanPosisi(rank3, 5);
-  let E20 = "" + temukanPosisi(rank3, 9) + temukanPosisi(rank3, 0);
-  let teks = D18 + E18 + D19 + E19 + D20 + E20;
-  let freqDE = Array.from({length:10}, (_, d) => (teks.match(new RegExp(d, 'g')) || []).length);
-  let rank4 = hitungRankExcel(freqDE);
-  let colC = [1,2,3,4].map(n => rank4.indexOf(n)).join("");
-  let colC23 = [1,2,3,4,5,6,7].map(n => rank4.indexOf(n)).join("");
-  return { C18, D18, E18, C19, D19, E19, C20, D20, E20, C21: colC, C23: colC23 };
-}
-
-function getRankTieBreaker(sumArray) {
-  return sumArray.map((val, i) => {
-    let greaterCount = sumArray.filter(v => v > val).length;
-    let baseRank = greaterCount + 1;
-    let tieCount = sumArray.slice(0, i + 1).filter(v => v === val).length;
-    let finalRankValue = baseRank + tieCount - 1;
-    return finalRankValue === 10 ? 0 : finalRankValue;
-  });
-}
-
-function getAIOrdered(rankArr, targets, digitsStrArr) {
-  let res = "";
-  for (let i = 0; i < targets.length; i++) {
-    let idx = rankArr.indexOf(targets[i]);
-    if (idx !== -1) res += digitsStrArr[idx];
-  }
-  return res;
-}
-
-function hitungAlgoritmaM2sd9Excel(arrInputs) {
-  let Q = [], R = [], S = [], T = [];
-  for (let r = 0; r < arrInputs.length; r++) {
-    let val = String(arrInputs[r] || "").trim();
-    Q.push(val.length >= 1 ? val.charAt(0) : "");
-    R.push(val.length >= 2 ? val.charAt(1) : "");
-    S.push(val.length >= 3 ? val.charAt(2) : "");
-    T.push(val.length >= 4 ? val.charAt(3) : "");
-  }
-  let digits = ["0","1","2","3","4","5","6","7","8","9"];
-  let calcCounts = [];
-  let colsData = [ { label: 'Q (MID 1)', data: Q }, { label: 'R (MID 2)', data: R }, { label: 'S (MID 3)', data: S }, { label: 'T (MID 4)', data: T } ];
-  colsData.forEach(cd => {
-    let counts = digits.map(d => {
-      let count = cd.data.filter(x => x === d).length;
-      return count === 0 ? 0 : count;
-    });
-    calcCounts.push(counts);
-  });
-  let rowSumF8 = digits.map((d, i) => calcCounts[0][i] + calcCounts[1][i]);
-  let rankF9 = getRankTieBreaker(rowSumF8);
-  let rowSumF11 = digits.map((d, i) => calcCounts[1][i] + calcCounts[2][i]);
-  let rankF12 = getRankTieBreaker(rowSumF11);
-  let rowSumF14 = digits.map((d, i) => calcCounts[2][i] + calcCounts[3][i]);
-  let rankF15 = getRankTieBreaker(rowSumF14);
-  let freqF19 = digits.map((d, i) => calcCounts[0][i] + calcCounts[1][i] + calcCounts[2][i] + calcCounts[3][i]);
-  let freqF20 = digits.map((d, i) => calcCounts[2][i] + calcCounts[3][i]);
-  let freqF21 = digits.map((d, i) => calcCounts[0][i] + calcCounts[1][i]);
-  let freqF22 = digits.map((d, i) => (calcCounts[0][i] === 0 ? 1 : 0) + (calcCounts[1][i] === 0 ? 1 : 0) + (calcCounts[2][i] === 0 ? 1 : 0) + (calcCounts[3][i] === 0 ? 1 : 0));
-  let freqF23 = digits.map((d, i) => (calcCounts[0][i] > 0 ? 1 : 0) + (calcCounts[1][i] > 0 ? 1 : 0) + (calcCounts[2][i] > 0 ? 1 : 0) + (calcCounts[3][i] > 0 ? 1 : 0));
-  let sumF24 = digits.map((d, i) => freqF19[i] + freqF20[i] + freqF21[i] + freqF22[i] + freqF23[i]);
-  let rankF25 = getRankTieBreaker(sumF24);
-  let aiResults = {
-    2: getAIOrdered(rankF9, [1,2,3,4], digits),
-    3: getAIOrdered(rankF9, [7,8,9,0], digits),
-    4: getAIOrdered(rankF12, [1,2,3,4], digits),
-    5: getAIOrdered(rankF12, [7,8,9,0], digits),
-    6: getAIOrdered(rankF15, [1,2,3,4], digits),
-    7: getAIOrdered(rankF15, [7,8,9,0], digits),
-    8: getAIOrdered(rankF25, [1,2,3,4], digits),
-    9: getAIOrdered(rankF25, [7,8,9,0], digits)
-  };
-  return { ai: aiResults };
-}
-
-function prosesData() {
-  simpanOtomatis();
-  for (let s = 1; s <= 75; s++) { hitungSlotOtomatis(s); }
-  gantiSlot(slotAktif);
-  updateRekapSinkron();
-  simpanKeLocalStorage();
-  alert("Proses kalkulasi untuk seluruh slot telah selesai!");
-}
-
-function buatTabel50Upload() {
-  let tbody = document.getElementById("upload50Body");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-  for (let i = 1; i <= 50; i++) {
-    let market = MARKET_MAPPING.find(m => m.slot === i);
-    let marketName = market ? market.name : `Slot ${i} (Kosong)`;
-    let badgeHtml = market ? `<span style="background-color: #1a73e8; color: white; padding: 3px 6px; border-radius: 4px; font-size: 10px; margin-right: 8px;">Auto</span>` : '';
-    
-    tbody.innerHTML += `
-      <tr class="clickable-row" id="uploadRow_${i}" onclick="toggleDetailFile(${i})">
-        <td style="width: 50px;">${i}</td>
-        <td style="text-align:left; padding: 6px 10px; display: flex; align-items: center;">
-          ${badgeHtml}
-          <span id="name_${i}" class="file-name-cell">${marketName}</span>
-        </td>
-      </tr>
-    `;
-  }
-}
-
-async function sinkronisasiOnline() {
-  const btn = document.getElementById('btnSyncOnline');
-  const statusTxt = document.getElementById('syncStatus');
-  
-  btn.disabled = true;
-  btn.innerHTML = "⏳ Menarik Data...";
-  
-  let successCount = 0;
-  let failCount = 0;
-
-  for (let item of MARKET_MAPPING) {
-    try {
-      statusTxt.innerText = `Mengunduh ${item.name}...`;
-      let response = await fetch(`./data_market/${item.file}?t=${new Date().getTime()}`);
-      
-      if (!response.ok) throw new Error("Data belum tersedia");
-      
-      let resData = await response.json(); 
-      
-      dataSemuaSlot[item.slot].nama = item.name;
-      dataSemuaSlot[item.slot].parsedData = resData;
-      storedHtmlData[item.slot] = { parsedData: resData, nama: item.name };
-      
-      let rekapNameEl = document.getElementById(`nama_slot_tunggal_${item.slot}`);
-      if (rekapNameEl) rekapNameEl.innerText = item.name;
-      let btnSlotEl = document.getElementById(`btn_slot_${item.slot}`);
-      if (btnSlotEl) btnSlotEl.innerText = item.name;
-      
-      if (globalSelectedDate) {
-        terapkanTanggalKeSlot(item.slot, globalSelectedDate);
-      } else {
-        hitungSlotOtomatis(item.slot);
-      }
-      
-      successCount++;
-    } catch (error) {
-      console.warn(`Gagal menarik data untuk ${item.name}:`, error);
-      failCount++;
-    }
-  }
-  
-  updateRekapSinkron(); 
-  simpanKeLocalStorage();
-  
-  btn.disabled = false;
-  btn.innerHTML = "🔄 Sinkronisasi Data Online";
-  statusTxt.innerText = `Selesai! Berhasil: ${successCount} | Gagal: ${failCount}`;
-}
-
-function terapkanTanggalKeSlot(idx, tglInput) {
-  let slot = dataSemuaSlot[idx];
-  if (!tglInput || !slot.parsedData || slot.parsedData.length === 0) {
-    for (let i = 0; i < 8; i++) {
-      slot.inputs[i] = "";
-      if (idx === slotAktif) {
-        let lbl = document.getElementById(`lbl_C${i+3}`);
-        if (lbl) lbl.innerText = `C${i+3}`;
-      }
-    }
-    hitungSlotOtomatis(idx);
-    if (idx === slotAktif) gantiSlot(slotAktif);
-    return;
-  }
-  let [y, m, d] = tglInput.split('-').map(Number);
-  let baseDate = new Date(y, m - 1, d);
-  for (let i = 0; i < 8; i++) {
-    let targetDate = new Date(baseDate);
-    targetDate.setDate(baseDate.getDate() - i);
-    let targetDateStr = formatDate(targetDate.getDate(), targetDate.getMonth() + 1, targetDate.getFullYear());
-    let found = slot.parsedData.find(item => item.tanggal === targetDateStr);
-    slot.inputs[i] = found ? found.nomor : "";
-    if (idx === slotAktif) {
-      let lbl = document.getElementById(`lbl_C${i+3}`);
-      if (lbl) {
-        let namaHari = getNamaHari(targetDate);
-        lbl.innerText = `${namaHari}, ${targetDateStr}`;
-      }
-    }
-  }
-  hitungSlotOtomatis(idx);
-  if (idx === slotAktif) gantiSlot(slotAktif);
-}
-
-function toggleDetailFile(index, forceRefresh = false) {
-  let wrapper = document.getElementById("detailFileWrapper");
-  let title = document.getElementById("detailFileTitle");
-  document.querySelectorAll("#upload50Body tr").forEach(row => row.classList.remove("active-row"));
-  if (activeDetailIndex === index && !forceRefresh) {
-    wrapper.style.display = "none";
-    activeDetailIndex = null;
-  } else {
-    let entry = storedHtmlData[index];
-    if (!entry || !entry.parsedData || entry.parsedData.length === 0) {
-      alert(`Silakan unggah file #${index} dulu!`);
-      return;
-    }
-    document.getElementById(`uploadRow_${index}`).classList.add("active-row");
-    activeDetailIndex = index;
-    title.innerText = `Detail Seluruh Data File #${index} (${entry.nama})`;
-    wrapper.style.display = "block";
-    let tbody = document.getElementById("detailFileBody");
-    tbody.innerHTML = "";
-    entry.parsedData.forEach((row, idx) => {
-      tbody.innerHTML += `<tr><td>${idx+1}</td><td>${row.tanggal}</td><td style="font-weight:bold; color:#1a73e8;">${row.nomor}</td></tr>`;
-    });
-  }
-}
-</script>
-</body>
-</html>
+if __name__ == "__main__":
+    main()

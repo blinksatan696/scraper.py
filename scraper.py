@@ -32,76 +32,78 @@ def parse_oregon(html_text, time_label):
                     results.append({"tanggal": formatted_date, "nomor": "".join(digits_found[:4])})
     return results
 
-# --- 2. FUNGSI PEMBEDAH NEW YORK (STABIL) ---
+# --- 2. FUNGSI PEMBEDAH NEW YORK ---
 def parse_new_york(html_text, draw_type):
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
-    
-    # Cari seluruh blok elemen di halaman New York
     elements = soup.find_all(['tr', 'div', 'li', 'p', 'span'])
     
     current_date = None
     for el in elements:
         text = el.get_text(strip=True)
-        
-        # Tangkap tanggal format MM/DD/YYYY
         date_match = re.search(r'^(\d{2})/(\d{2})/(\d{4})$', text)
         if date_match:
             m, d, y = date_match.groups()
             current_date = f"{int(d):02d}-{int(m):02d}-{y}"
             
-        # Jika teks elemen persis sama atau mengandung Midday/Evening dan kita punya tanggal
         if draw_type.lower() in text.lower() and current_date:
-            # Ambil deretan angka di elemen tersebut atau elemen sekitarnya
             clean_digits = re.sub(r'[^\d]', '', text)
             if len(clean_digits) >= 4:
-                # Ambil 4 digit angka hasil undian
                 results.append({"tanggal": current_date, "nomor": clean_digits[-4:]})
                 current_date = None
-                
     return results
 
-# --- 3. FUNGSI PEMBEDAH NORTH CAROLINA ---
-def parse_north_carolina(html_text, draw_type):
-    results = []
-    soup = BeautifulSoup(html_text, 'html.parser')
-    raw_text = soup.get_text(separator=' ', strip=True)
-    current_year = datetime.now().year
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    
-    segments = re.split(draw_type, raw_text, flags=re.IGNORECASE)
-    
-    for i in range(1, len(segments)):
-        text_chunk = segments[i][:50]
-        for month in months:
-            match = re.search(rf'{month}\s+(\d{{1,2}})', text_chunk, re.IGNORECASE)
-            if match:
-                day = match.group(1)
-                try:
-                    dt_obj = datetime.strptime(f"{month} {day} {current_year}", "%b %d %Y")
-                    formatted_date = dt_obj.strftime("%d-%m-%Y")
-                    
-                    after_date = text_chunk[match.end():]
-                    clean_nums = re.sub(r'[^\d]', '', after_date)
-                    
-                    if len(clean_nums) >= 4:
-                        results.append({"tanggal": formatted_date, "nomor": clean_nums[:4]})
-                        break
-                except Exception:
-                    pass
-    return results
-
-# --- 4. FUNGSI PEMBEDAH MACAU (DIKEMBALIKAN & DISEMPURNAKAN) ---
-def parse_macau(html_text, _):
+# --- 3. FUNGSI PEMBEDAH NORTH CAROLINA (BERDASARKAN URL BARU) ---
+def parse_north_carolina(html_text, session_type):
+    # session_type diisi "day" (matahari) atau "evening" (bulan)
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
     
-    # Macau menggunakan tabel HTML standar dengan IP langsung
-    rows = soup.find_all('tr')
+    # Berdasarkan screenshot, data tersusun dalam baris-baris teks/tabel
+    rows = soup.find_all(['tr', 'div', 'li'])
+    
     for row in rows:
         row_text = row.get_text(separator=' ', strip=True)
         
-        # Cari pola tanggal YYYY-MM-DD
+        # Cek apakah baris memuat format tanggal NC: "2026, Aug 27"
+        date_match = re.search(r'(\d{4}),\s+([A-Za-z]{3})\s+(\d{1,2})', row_text)
+        if date_match:
+            year, month_str, day = date_match.groups()
+            
+            # Tentukan apakah ini sesi Day (Matahari/Kuning) atau Evening (Bulan/Biru)
+            is_evening = "🌙" in row_text or "evening" in row.decode_contents().lower() or "night" in row_text.lower()
+            
+            # Filter berdasarkan sesi yang diminta
+            if session_type == "evening" and not is_evening:
+                continue
+            if session_type == "day" and is_evening:
+                continue
+                
+            try:
+                dt_obj = datetime.strptime(f"{month_str} {day} {year}", "%b %d %Y")
+                formatted_date = dt_obj.strftime("%d-%m-%Y")
+                
+                # Ambil semua angka di baris setelah tanggal
+                all_digits = re.findall(r'\d+', row_text.replace(date_match.group(0), ''))
+                # Filter angka 1 digit yang berderet (hasil undian 4 digit pertama)
+                valid_digits = [d for d in all_digits if len(d) == 1]
+                
+                if len(valid_digits) >= 4:
+                    result_num = "".join(valid_digits[:4])
+                    if not any(r['tanggal'] == formatted_date for r in results):
+                        results.append({"tanggal": formatted_date, "nomor": result_num})
+            except Exception:
+                pass
+    return results
+
+# --- 4. FUNGSI PEMBEDAH MACAU ---
+def parse_macau(html_text, _):
+    results = []
+    soup = BeautifulSoup(html_text, 'html.parser')
+    rows = soup.find_all('tr')
+    
+    for row in rows:
+        row_text = row.get_text(separator=' ', strip=True)
         date_match = re.search(r'(\d{4}-\d{2}-\d{2})', row_text)
         if date_match:
             raw_date = date_match.group(1)
@@ -109,7 +111,6 @@ def parse_macau(html_text, _):
                 dt_obj = datetime.strptime(raw_date, "%Y-%m-%d")
                 formatted_date = dt_obj.strftime("%d-%m-%Y")
                 
-                # Ambil semua angka di baris tersebut
                 all_digits = re.findall(r'\d+', row_text.replace(raw_date, ''))
                 combined_digits = "".join(all_digits)
                 
@@ -179,8 +180,9 @@ def main():
         ("new-york-midday", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Midday"),
         ("new-york-evening", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Evening"),
         
-        ("north-carolina-day", "https://nclottery.com/pick4", parse_north_carolina, "DAYTIME"),
-        ("north-carolina-evening", "https://nclottery.com/pick4", parse_north_carolina, "EVENING"),
+        # Menggunakan tautan baru khusus halaman riwayat North Carolina
+        ("north-carolina-day", "https://nclottery.com/pick4-past", parse_north_carolina, "day"),
+        ("north-carolina-evening", "https://nclottery.com/pick4-past", parse_north_carolina, "evening"),
         
         ("macau", "http://178.128.19.32/", parse_macau, "")
     ]

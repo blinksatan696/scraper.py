@@ -32,9 +32,12 @@
         <option value="north-carolina-evening">North Carolina Evening</option>
         <option value="california-daily-4">California Daily 4</option>
         <option value="kentucky-pick-4">Kentucky Pick 4</option>
+        <option value="macau-00">Macau 00:01</option>
         <option value="macau-13">Macau 13:00</option>
         <option value="macau-16">Macau 16:00</option>
         <option value="macau-19">Macau 19:00</option>
+        <option value="macau-22">Macau 22:00</option>
+        <option value="macau-23">Macau 23:00</option>
     </select>
 
     <table id="dataTable">
@@ -45,7 +48,7 @@
                 <th>Nomor</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="tableBody">
             <!-- Data akan dimuat otomatis di sini -->
         </tbody>
     </table>
@@ -54,7 +57,7 @@
 <script>
     async function loadMarketData() {
         const market = document.getElementById('marketSelect').value;
-        const tableBody = document.querySelector('#dataTable tbody');
+        const tableBody = document.getElementById('tableBody');
         tableBody.innerHTML = '<tr><td colspan="3">Memuat data...</td></tr>';
 
         try {
@@ -70,11 +73,8 @@
                 return;
             }
 
-            // Membalik urutan agar tanggal terbaru muncul di baris paling atas
-            data.reverse();
-
+            // Data sudah di-sort dari scraper (terbaru di atas)
             data.forEach((item, index) => {
-                // PERBAIKAN: Menggunakan fallback untuk menangani key lama yang pakai spasi
                 const tanggal = item.tanggal || item["tanggal "] || "Tidak ada tanggal";
                 const nomor = item.nomor || item["nomor "] || "Tidak ada nomor";
 
@@ -86,7 +86,7 @@
                 tableBody.innerHTML += row;
             });
         } catch (error) {
-            tableBody.innerHTML = `<tr><td colspan="3" style="color: red;">Gagal memuat data: ${market}.json belum terbentuk atau nama file tidak cocok.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="3" style="color: red;">Gagal memuat data: ${market}.json belum terbentuk.</td></tr>`;
         }
     }
 

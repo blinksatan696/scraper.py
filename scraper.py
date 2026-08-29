@@ -34,21 +34,33 @@ def parse_oregon(html_text, time_label):
 def parse_new_york(html_text, draw_type):
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
-    elements = soup.find_all(['tr', 'div', 'li', 'p', 'span'])
-    current_date = None
+    
+    # Cari semua elemen yang mungkin berisi data
+    elements = soup.find_all(['div', 'article', 'section'])
     
     for el in elements:
-        text = el.get_text(strip=True)
-        date_match = re.search(r'^(\d{2})/(\d{2})/(\d{4})$', text)
-        if date_match:
-            m, d, y = date_match.groups()
-            current_date = f"{int(d):02d}-{int(m):02d}-{y}"
+        text = el.get_text(separator=' ', strip=True)
         
-        if draw_type.lower() in text.lower() and current_date:
-            clean_digits = re.sub(r'[^\d]', '', text)
-            if len(clean_digits) >= 4:
-                results.append({"tanggal": current_date, "nomor": clean_digits[-4:]})
-                current_date = None # Reset agar tidak double match
+        # Cek apakah ini bagian draw_type yang dicari
+        if draw_type.lower() not in text.lower():
+            continue
+            
+        # Cari tanggal format MM/DD/YYYY
+        date_matches = re.findall(r'(\d{2})/(\d{2})/(\d{4})', text)
+        
+        for m, d, y in date_matches:
+            formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
+            
+            # Cari 4 angka yang terpisah (dalam lingkaran)
+            numbers = re.findall(r'\b(\d)\s+(\d)\s+(\d)\s+(\d)\b', text)
+            for num_tuple in numbers:
+                nomor = "".join(num_tuple)
+                if len(nomor) == 4:
+                    # Cek duplikasi
+                    if not any(r['tanggal'] == formatted_date and r['nomor'] == nomor for r in results):
+                        results.append({"tanggal": formatted_date, "nomor": nomor})
+                    break
+                    
     return results
 
 # --- 3. FUNGSI PEMBEDAH NORTH CAROLINA ---
@@ -59,8 +71,12 @@ def parse_north_carolina(html_text, session_type):
     
     for row in rows:
         row_text = row.get_text(separator=' ', strip=True)
-        # Support format: MM/DD/YYYY atau Month DD, YYYY
-        date_match = re.search(r'(\d{1,2})/(\d{1,2})/(\d{4})', row_text) or re.search(r'([A-Za-z]{3})\s+(\d{1,2}),?\s+(\d{4})', row_text)
+        
+        # Support format: MM/DD/YYYY
+        date_match = re.search(r'(\d{1,2})/(\d{1,2})/(\d{4})', row_text)
+        if not date_match:
+            # Support format: Month DD, YYYY
+            date_match = re.search(r'([A-Za-z]{3})\s+(\d{1,2}),?\s+(\d{4})', row_text)
         
         if date_match:
             if len(date_match.groups()) == 3 and date_match.group(1).isdigit():
@@ -82,8 +98,8 @@ def parse_north_carolina(html_text, session_type):
             if session_type == "midday" and not is_midday:
                 continue
 
+            # Cari 4 digit nomor
             all_digits = re.findall(r'\d+', row_text)
-            # Cari kombinasi 4 digit
             for digit_str in all_digits:
                 if len(digit_str) == 4:
                     if not any(r['tanggal'] == formatted_date and r['nomor'] == digit_str for r in results):
@@ -95,15 +111,18 @@ def parse_north_carolina(html_text, session_type):
 def parse_california(html_text, _):
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
-    rows = soup.find_all(['tr', 'div', 'li'])
+    rows = soup.find_all(['tr', 'div', 'li', 'td'])
     
     for row in rows:
         row_text = row.get_text(separator=' ', strip=True)
+        
+        # Cari tanggal MM/DD/YYYY
         date_match = re.search(r'(\d{1,2})/(\d{1,2})/(\d{4})', row_text)
         if date_match:
             m, d, y = date_match.groups()
             formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
             
+            # Cari 4 digit
             all_digits = re.findall(r'\d+', row_text)
             for digit_str in all_digits:
                 if len(digit_str) == 4:
@@ -116,15 +135,20 @@ def parse_california(html_text, _):
 def parse_kentucky(html_text, session_type):
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
+    
+    # Kentucky biasanya memiliki tabel atau list
     rows = soup.find_all(['tr', 'div', 'li', 'td'])
     
     for row in rows:
         row_text = row.get_text(separator=' ', strip=True)
+        
+        # Cari tanggal MM/DD/YYYY
         date_match = re.search(r'(\d{1,2})/(\d{1,2})/(\d{4})', row_text)
         if date_match:
             m, d, y = date_match.groups()
             formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
             
+            # Cek session type
             is_evening = "evening" in row_text.lower()
             is_midday = "midday" in row_text.lower()
             
@@ -132,44 +156,77 @@ def parse_kentucky(html_text, session_type):
                 continue
             if session_type == "midday" and not is_midday:
                 continue
-                
+            
+            # Cari 4 digit nomor (bisa terpisah atau menyatu)
             all_digits = re.findall(r'\d+', row_text)
             for digit_str in all_digits:
                 if len(digit_str) == 4:
                     if not any(r['tanggal'] == formatted_date and r['nomor'] == digit_str for r in results):
                         results.append({"tanggal": formatted_date, "nomor": digit_str})
                     break
+                    
+            # Jika tidak ada 4 digit menyatu, cari 4 digit terpisah
+            if not any(r['tanggal'] == formatted_date for r in results):
+                single_digits = re.findall(r'\b(\d)\b', row_text)
+                if len(single_digits) >= 4:
+                    nomor = "".join(single_digits[:4])
+                    if not any(r['tanggal'] == formatted_date for r in results):
+                        results.append({"tanggal": formatted_date, "nomor": nomor})
+    
     return results
 
 # --- 6. FUNGSI PEMBEDAH MACAU ---
 def parse_macau(html_text, time_label):
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
-    rows = soup.find_all(['tr', 'div', 'li', 'td'])
+    
+    # Macau menggunakan tabel
+    rows = soup.find_all('tr')
     
     for row in rows:
-        row_text = row.get_text(separator=' ', strip=True)
-        date_match = re.search(r'(\d{4}-\d{2}-\d{2})', row_text) or re.search(r'(\d{2})/(\d{2})/(\d{4})', row_text)
+        cells = row.find_all(['td', 'th'])
+        if len(cells) < 2:
+            continue
+            
+        # Kolom pertama biasanya tanggal
+        date_cell = cells[0].get_text(strip=True)
+        
+        # Format tanggal: "24 Aug" atau "Aug 24"
+        date_match = re.search(r'(\d{1,2})\s+([A-Za-z]{3})', date_cell)
+        if not date_match:
+            date_match = re.search(r'([A-Za-z]{3})\s+(\d{1,2})', date_cell)
         
         if date_match:
-            if len(date_match.groups()) == 3 and '-' in date_match.group(0):
-                raw_date = date_match.group(0)
-                formatted_date = datetime.strptime(raw_date, "%Y-%m-%d").strftime("%d-%m-%Y")
+            if date_match.group(1).isdigit():
+                day, month_str = date_match.groups()
             else:
-                m, d, y = date_match.groups()
-                formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
+                month_str, day = date_match.groups()
             
-            # Cek apakah label waktu (00, 13, 16, dll) ada di sekitar teks ini
-            if time_label and time_label not in row_text:
+            try:
+                dt_obj = datetime.strptime(f"{month_str} {day} 2026", "%b %d %Y")
+                formatted_date = dt_obj.strftime("%d-%m-%Y")
+            except:
                 continue
-                
-            all_digits = re.findall(r'\d+', row_text)
-            combined = "".join(all_digits)
-            # Ambil 4 digit terakhir sebagai nomor undian (sesuai logika lama Anda)
-            if len(combined) >= 4:
-                num_val = combined[-4:]
-                if not any(r['tanggal'] == formatted_date and r['nomor'] == num_val for r in results):
-                    results.append({"tanggal": formatted_date, "nomor": num_val})
+            
+            # Cari kolom yang sesuai dengan time_label
+            # Mapping: 00->00:01, 13->13:00, 16->16:00, 19->19:00, 22->22:00, 23->23:00
+            time_mapping = {
+                "00": 1,  # Kolom ke-2 (index 1)
+                "13": 2,  # Kolom ke-3
+                "16": 3,  # Kolom ke-4
+                "19": 4,  # Kolom ke-5
+                "22": 5,  # Kolom ke-6
+                "23": 6   # Kolom ke-7
+            }
+            
+            col_index = time_mapping.get(time_label)
+            if col_index and col_index < len(cells):
+                nomor = cells[col_index].get_text(strip=True)
+                # Pastikan nomor 4 digit
+                if len(nomor) == 4 and nomor.isdigit():
+                    if not any(r['tanggal'] == formatted_date and r['nomor'] == nomor for r in results):
+                        results.append({"tanggal": formatted_date, "nomor": nomor})
+    
     return results
 
 # --- FUNGSI UTAMA FETCH & SAVE ---
@@ -208,21 +265,30 @@ def save_with_smart_append(market_name, new_data):
         except Exception:
             pass
 
-    # PERBAIKAN KRITIS: Key sekarang PASTI "tanggal" dan "nomor" (tanpa spasi)
-    existing_records = {(item['tanggal'], item['nomor']) for item in existing_data if 'tanggal' in item and 'nomor' in item}
+    # PERBAIKAN: Handle key dengan atau tanpa spasi
+    existing_records = set()
+    for item in existing_data:
+        tanggal = item.get('tanggal', item.get('tanggal ', '')).strip()
+        nomor = item.get('nomor', item.get('nomor ', '')).strip()
+        if tanggal and nomor:
+            existing_records.add((tanggal, nomor))
     
     added_count = 0
     for item in new_data:
-        identifier = (item['tanggal'], item['nomor'])
-        if identifier not in existing_records:
-            existing_data.append(item)
+        tanggal = item.get('tanggal', '').strip()
+        nomor = item.get('nomor', '').strip()
+        identifier = (tanggal, nomor)
+        if identifier and identifier not in existing_records:
+            # Simpan dengan key tanpa spasi
+            existing_data.append({"tanggal": tanggal, "nomor": nomor})
             existing_records.add(identifier)
             added_count += 1
 
+    # Sortir dari yang terbaru
     try:
-        existing_data.sort(key=lambda x: datetime.strptime(x['tanggal'], "%d-%m-%Y"))
-    except Exception:
-        pass
+        existing_data.sort(key=lambda x: datetime.strptime(x.get('tanggal', x.get('tanggal ', '')).strip(), "%d-%m-%Y"), reverse=True)
+    except Exception as e:
+        print(f"Warning: Gagal sorting data: {e}")
 
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(existing_data, f, indent=2, ensure_ascii=False)
@@ -245,9 +311,9 @@ def main():
         ("north-carolina-day", "https://nclottery.com/pick4-past", parse_north_carolina, "midday"),
         ("north-carolina-evening", "https://nclottery.com/pick4-past", parse_north_carolina, "evening"),
         
-        # California & Kentucky (Baru)
+        # California & Kentucky
         ("california-daily-4", "https://www.calottery.com/en/draw-games/daily-4", parse_california, ""),
-        ("kentucky-pick-4", "https://www.kylottery.com/en-us/games/draw-games/pick-4.html", parse_kentucky, "midday"), # Bisa di-split jadi midday/evening jika perlu
+        ("kentucky-pick-4", "https://www.kylottery.com/en-us/games/draw-games/pick-4.html", parse_kentucky, "midday"),
         
         # Macau (Multiple Sessions)
         ("macau-00", "http://178.128.19.32/", parse_macau, "00"),

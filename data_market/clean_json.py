@@ -1,4 +1,3 @@
-# clean_json.py
 import json
 import os
 import glob
@@ -33,4 +32,4 @@ for file_path in json_files:
     except Exception as e:
         print(f"❌ Gagal memproses {os.path.basename(file_path)}: {e}")
 
-print("🎉 Proses pembersihan selesai! Semua key sekarang 'tanggal' dan 'nomor' (tanpa spasi).")
+print("\n🎉 Proses pembersihan selesai!")

@@ -172,13 +172,13 @@ def save_with_smart_append(market_name, new_data):
 
 def main():
     TARGETS = [
-        ("oregon-3", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "1:00 PM"),
-        ("oregon-6", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "4:00 PM"),
-        ("oregon-9", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "7:00 PM"),
-        ("oregon-12", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "10:00 PM"),
+        ("oregon-pick-4-1pm", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "1:00 PM"),
+        ("oregon-pick-4-4pm", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "4:00 PM"),
+        ("oregon-pick-4-7pm", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "7:00 PM"),
+        ("oregon-pick-4-10pm", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "10:00 PM"),
         
-        ("new-york-midday", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Midday"),
-        ("new-york-evening", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Evening"),
+        ("ny-midday-win-4", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Midday"),
+        ("ny-win-4", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Evening"),
         
         # Menggunakan tautan baru khusus halaman riwayat North Carolina
         ("north-carolina-day", "https://nclottery.com/pick4-past", parse_north_carolina, "day"),

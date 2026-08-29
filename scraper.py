@@ -53,27 +53,19 @@ def parse_new_york(html_text, draw_type):
                 current_date = None
     return results
 
-# --- 3. FUNGSI PEMBEDAH NORTH CAROLINA (BERDASARKAN URL BARU) ---
+# --- 3. FUNGSI PEMBEDAH NORTH CAROLINA ---
 def parse_north_carolina(html_text, session_type):
-    # session_type diisi "day" (matahari) atau "evening" (bulan)
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
-    
-    # Berdasarkan screenshot, data tersusun dalam baris-baris teks/tabel
     rows = soup.find_all(['tr', 'div', 'li'])
     
     for row in rows:
         row_text = row.get_text(separator=' ', strip=True)
-        
-        # Cek apakah baris memuat format tanggal NC: "2026, Aug 27"
         date_match = re.search(r'(\d{4}),\s+([A-Za-z]{3})\s+(\d{1,2})', row_text)
         if date_match:
             year, month_str, day = date_match.groups()
-            
-            # Tentukan apakah ini sesi Day (Matahari/Kuning) atau Evening (Bulan/Biru)
             is_evening = "🌙" in row_text or "evening" in row.decode_contents().lower() or "night" in row_text.lower()
             
-            # Filter berdasarkan sesi yang diminta
             if session_type == "evening" and not is_evening:
                 continue
             if session_type == "day" and is_evening:
@@ -83,14 +75,13 @@ def parse_north_carolina(html_text, session_type):
                 dt_obj = datetime.strptime(f"{month_str} {day} {year}", "%b %d %Y")
                 formatted_date = dt_obj.strftime("%d-%m-%Y")
                 
-                # Ambil semua angka di baris setelah tanggal
                 all_digits = re.findall(r'\d+', row_text.replace(date_match.group(0), ''))
-                # Filter angka 1 digit yang berderet (hasil undian 4 digit pertama)
                 valid_digits = [d for d in all_digits if len(d) == 1]
                 
                 if len(valid_digits) >= 4:
                     result_num = "".join(valid_digits[:4])
-                    if not any(r['tanggal'] == formatted_date for r in results):
+                    # Mencegah duplikasi data identik
+                    if not any(r['tanggal'] == formatted_date and r['nomor'] == result_num for r in results):
                         results.append({"tanggal": formatted_date, "nomor": result_num})
             except Exception:
                 pass
@@ -100,7 +91,7 @@ def parse_north_carolina(html_text, session_type):
 def parse_macau(html_text, _):
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
-    rows = soup.find_all('tr')
+    rows = soup.find_all(['tr', 'div', 'li'])
     
     for row in rows:
         row_text = row.get_text(separator=' ', strip=True)
@@ -115,12 +106,13 @@ def parse_macau(html_text, _):
                 combined_digits = "".join(all_digits)
                 
                 if len(combined_digits) >= 4:
-                    results.append({"tanggal": formatted_date, "nomor": combined_digits[-4:]})
+                    num_val = combined_digits[-4:]
+                    if not any(r['tanggal'] == formatted_date and r['nomor'] == num_val for r in results):
+                        results.append({"tanggal": formatted_date, "nomor": num_val})
             except Exception:
                 pass
     return results
 
-# --- MESIN UTAMA PENARIKAN DATA ---
 def fetch_and_parse(url, parser_function, param):
     print(f"Menarik data dari {url} ({param}) ...")
     try:
@@ -156,10 +148,13 @@ def save_with_smart_append(market_name, new_data):
         except Exception:
             pass
             
-    existing_dates = {item['tanggal'] for item in existing_data}
+    # Penyaring duplikasi ketat berbasis kombinasi Tanggal DAN Nomor
+    existing_records = {(item['tanggal'], item['nomor']) for item in existing_data}
     for item in new_data:
-        if item['tanggal'] not in existing_dates:
+        identifier = (item['tanggal'], item['nomor'])
+        if identifier not in existing_records:
             existing_data.append(item)
+            existing_records.add(identifier)
             
     try:
         existing_data.sort(key=lambda x: datetime.strptime(x['tanggal'], "%d-%m-%Y"))
@@ -172,15 +167,15 @@ def save_with_smart_append(market_name, new_data):
 
 def main():
     TARGETS = [
-        ("oregon-pick-4-1pm", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "1:00 PM"),
-        ("oregon-pick-4-4pm", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "4:00 PM"),
-        ("oregon-pick-4-7pm", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "7:00 PM"),
-        ("oregon-pick-4-10pm", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "10:00 PM"),
+        # Nama file diselaraskan dengan pilihan value di index.html
+        ("oregon-3", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "1:00 PM"),
+        ("oregon-6", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "4:00 PM"),
+        ("oregon-9", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "7:00 PM"),
+        ("oregon-12", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "10:00 PM"),
         
-        ("ny-midday-win-4", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Midday"),
-        ("ny-win-4", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Evening"),
+        ("new-york-midday", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Midday"),
+        ("new-york-evening", "https://nylottery.ny.gov/all-winning-numbers", parse_new_york, "Evening"),
         
-        # Menggunakan tautan baru khusus halaman riwayat North Carolina
         ("north-carolina-day", "https://nclottery.com/pick4-past", parse_north_carolina, "day"),
         ("north-carolina-evening", "https://nclottery.com/pick4-past", parse_north_carolina, "evening"),
         

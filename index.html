@@ -5,48 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Rekapitulasi & Kalkulator Data Market</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        select, button {
-            padding: 10px;
-            font-size: 16px;
-            margin-right: 10px;
-            margin-bottom: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: center;
-        }
-        th {
-            background-color: #3498db;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
+        h1 { text-align: center; color: #2c3e50; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        select { padding: 10px; font-size: 16px; margin-bottom: 20px; width: 100%; max-width: 300px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #3498db; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
@@ -54,17 +20,21 @@
 <div class="container">
     <h1>Data Market Harian</h1>
     
-    <label for="marketSelect">Pilih Market:</label>
+    <label for="marketSelect"><strong>Pilih Market:</strong></label><br>
     <select id="marketSelect" onchange="loadMarketData()">
-        <option value="oregon-3">Oregon 1:00 PM</option>
-        <option value="oregon-6">Oregon 4:00 PM</option>
-        <option value="oregon-9">Oregon 7:00 PM</option>
-        <option value="oregon-12">Oregon 10:00 PM</option>
+        <option value="oregon-3">Oregon 3 (1:00 PM)</option>
+        <option value="oregon-6">Oregon 6 (4:00 PM)</option>
+        <option value="oregon-9">Oregon 9 (7:00 PM)</option>
+        <option value="oregon-12">Oregon 12 (10:00 PM)</option>
         <option value="new-york-midday">New York Midday</option>
         <option value="new-york-evening">New York Evening</option>
         <option value="north-carolina-day">North Carolina Day</option>
         <option value="north-carolina-evening">North Carolina Evening</option>
-        <option value="macau">Macau</option>
+        <option value="california-daily-4">California Daily 4</option>
+        <option value="kentucky-pick-4">Kentucky Pick 4</option>
+        <option value="macau-13">Macau 13:00</option>
+        <option value="macau-16">Macau 16:00</option>
+        <option value="macau-19">Macau 19:00</option>
     </select>
 
     <table id="dataTable">
@@ -90,12 +60,12 @@
         try {
             const response = await fetch(`data_market/${market}.json`);
             if (!response.ok) {
-                throw new Error('File data belum tersedia.');
+                throw new Error('File data belum tersedia (404).');
             }
             let data = await response.json();
             
             tableBody.innerHTML = '';
-            if (data.length === 0) {
+            if (!data || data.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="3">Tidak ada data tersedia.</td></tr>';
                 return;
             }
@@ -104,15 +74,19 @@
             data.reverse();
 
             data.forEach((item, index) => {
+                // PERBAIKAN: Menggunakan fallback untuk menangani key lama yang pakai spasi
+                const tanggal = item.tanggal || item["tanggal "] || "Tidak ada tanggal";
+                const nomor = item.nomor || item["nomor "] || "Tidak ada nomor";
+
                 const row = `<tr>
                     <td>${index + 1}</td>
-                    <td>${item.tanggal}</td>
-                    <td><strong>${item.nomor}</strong></td>
+                    <td>${tanggal.trim()}</td>
+                    <td><strong>${nomor.trim()}</strong></td>
                 </tr>`;
                 tableBody.innerHTML += row;
             });
         } catch (error) {
-            tableBody.innerHTML = `<tr><td colspan="3" style="color: red;">Gagal memuat data atau file JSON belum terbentuk.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="3" style="color: red;">Gagal memuat data: ${market}.json belum terbentuk atau nama file tidak cocok.</td></tr>`;
         }
     }
 

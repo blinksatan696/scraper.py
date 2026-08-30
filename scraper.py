@@ -1,7 +1,6 @@
 import json
 import os
 import re
-import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
@@ -10,8 +9,6 @@ from playwright.sync_api import sync_playwright
 # KONFIGURASI TARGET
 # ==========================================
 # Format: (nama_file_json, url, tipe_parser)
-# 'kingdom' = menggunakan parser universal ringan
-# 'macau' = menggunakan playwright
 TARGETS = [
     # New York
     ("new-york-midday", "https://kingdomtotox73.com/pasaran/liinkkua.html", "kingdom"),
@@ -34,7 +31,7 @@ TARGETS = [
     ("kentucky-midday", "https://kingdomtotox73.com/pasaran/q9t5wwhf.html", "kingdom"),
     ("kentucky-evening", "https://kingdomtotox73.com/pasaran/555xyssd.html", "kingdom"),
     
-    # Macau (Tetap menggunakan Playwright)
+    # Macau
     ("macau-00", "http://178.128.19.32/", "macau"),
     ("macau-13", "http://178.128.19.32/", "macau"),
     ("macau-16", "http://178.128.19.32/", "macau"),
@@ -43,9 +40,37 @@ TARGETS = [
     ("macau-23", "http://178.128.19.32/", "macau"),
 ]
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-}
+def fetch_html_robust(url):
+    """Mengambil HTML dengan menyamar total sebagai browser manusia"""
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 800}
+            )
+            page = context.new_page()
+            
+            # Tambahkan header agar terlihat seperti permintaan browser asli
+            page.set_extra_http_headers({
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Referer": "https://www.google.com/",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1"
+            })
+            
+            page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            
+            # TUNGGU 2-3 DETIK: Ini trik penting untuk melewati deteksi bot sederhana
+            page.wait_for_timeout(2500) 
+            
+            html_text = page.content()
+            browser.close()
+            return html_text
+    except Exception as e:
+        print(f"   ⚠️ Error koneksi: {e}")
+        return None
 
 def parse_kingdom_toto(html_text):
     """Parser universal untuk situs kingdomtotox73.com"""
@@ -115,29 +140,27 @@ def parse_macau(html_text, time_label):
 
 def fetch_and_parse(url, parser_type, market_name, param=None):
     print(f"📡 Memproses: {market_name} ...")
-    try:
-        if parser_type == "kingdom":
-            response = requests.get(url, headers=HEADERS, timeout=15)
-            response.raise_for_status()
-            return parse_kingdom_toto(response.text)
-            
-        elif parser_type == "macau":
-            with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
-                context = browser.new_context(user_agent=HEADERS["User-Agent"])
-                page = context.new_page()
-                page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                html_text = page.content()
-                browser.close()
-            return parse_macau(html_text, param)
-            
-    except Exception as e:
-        print(f"   ⚠️ Gagal: {e}")
+    html = fetch_html_robust(url)
+    
+    if not html:
+        print(f"   ⚠️ Gagal total mengambil HTML untuk {market_name}")
         return []
+        
+    # Deteksi pemblokiran tingkat halaman
+    if "403 Forbidden" in html or "access denied" in html.lower() or "cloudflare" in html.lower() or "checking your browser" in html.lower():
+        print(f"   ⛔ Terdeteksi Pemblokiran (403/Cloudflare) untuk {market_name}")
+        return []
+
+    if parser_type == "kingdom":
+        return parse_kingdom_toto(html)
+    elif parser_type == "macau":
+        return parse_macau(html, param)
+    
+    return []
 
 def save_with_smart_append(market_name, new_data):
     if not new_data:
-        print(f"   ⚠️ Tidak ada data baru untuk {market_name}")
+        print(f"   ⚠️ Tidak ada data baru untuk {market_name} (Data website mungkin belum update atau sama dengan database)")
         return
     
     os.makedirs('data_market', exist_ok=True)
@@ -185,9 +208,8 @@ def save_with_smart_append(market_name, new_data):
     print(f"   ✅ {market_name}: {added_count} data baru | Total: {len(cleaned_existing)}")
 
 def main():
-    print("🚀 Memulai Scraper Universal (Kingdom Toto + Macau)...")
+    print("🚀 Memulai Scraper Universal (Full Browser Mimicry)...")
     for market_name, url, parser_type in TARGETS:
-        # Untuk Macau, kita perlu memisahkan param waktu dari nama file (misal: macau-13 -> 13)
         param = market_name.split('-')[-1] if market_name.startswith('macau-') else None
         data = fetch_and_parse(url, parser_type, market_name, param)
         save_with_smart_append(market_name, data)

@@ -12,118 +12,68 @@ import time
 # ==========================================
 RAPIDAPI_KEY = "52ef60fa19msh5a0d6a071ecf14cp173a73jsnd3fa3138b311"
 
-def fetch_rapidapi(host, endpoint, market_name):
+def fetch_rapidapi(host, endpoint):
     """Mengambil data JSON dari RapidAPI"""
-    print(f"\n📡 Menarik data dari RapidAPI untuk {market_name} ...")
+    url = f"https://{host}{endpoint}"
+    req = urllib.request.Request(url, method="GET")
+    req.add_header("X-RapidAPI-Key", RAPIDAPI_KEY)
+    req.add_header("X-RapidAPI-Host", host)
     try:
-        req = urllib.request.Request(f"https://{host}{endpoint}", method="GET")
-        req.add_header("X-RapidAPI-Key", RAPIDAPI_KEY)
-        req.add_header("X-RapidAPI-Host", host)
-        
         with urllib.request.urlopen(req, timeout=15) as response:
-            data = json.loads(response.read().decode('utf-8'))
-            # Simpan raw response untuk debugging
-            os.makedirs('debug_api', exist_ok=True)
-            with open(f'debug_api/{market_name}.json', 'w') as f:
-                json.dump(data, f, indent=2)
-            print(f"   ✅ Berhasil mengambil data mentah dari {market_name}")
-            return data
+            return json.loads(response.read().decode('utf-8'))
     except Exception as e:
-        print(f"   ⚠️ Error RapidAPI untuk {market_name}: {e}")
+        print(f"   ⚠️ Error RapidAPI ({host}): {e}")
         return None
 
-def parse_ny_api(data):
-    """Parser universal untuk New York Lottery API"""
-    results_midday = []
-    results_evening = []
-    if not data:
-        return results_midday, results_evening
-        
-    # Coba berbagai kemungkinan struktur JSON
-    draws = []
-    if isinstance(data, list):
-        draws = data
-    elif isinstance(data, dict):
-        draws = data.get('draws', data.get('results', data.get('data', [])))
-        if isinstance(draws, dict):
-            draws = draws.get('draws', [])
-
-    for draw in draws:
-        # Cari nama game (Win 4, Pick 4, dll)
-        game_name = str(draw.get('game', draw.get('game_name', draw.get('title', draw.get('gameName', ''))))).lower()
-        # Jika API tidak memisahkan game, kita proses semua yang mengandung 4 digit
-        if 'win 4' not in game_name and 'pick 4' not in game_name and game_name != '':
-            continue 
-            
-        date_str = str(draw.get('draw_date', draw.get('date', draw.get('drawDate', draw.get('drawDateStr', '')))))
-        numbers = str(draw.get('winning_numbers', draw.get('numbers', draw.get('winningNumbers', draw.get('drawNumbers', '')))))
-        draw_time = str(draw.get('draw_time', draw.get('time', draw.get('drawTime', draw.get('session', ''))))).lower()
-        
-        if date_str and numbers:
-            try:
-                for fmt in ["%Y-%m-%d", "%m/%d/%Y", "%d-%m-%Y"]:
-                    try:
-                        dt = datetime.strptime(date_str.split('T')[0], fmt)
-                        formatted_date = dt.strftime("%d-%m-%Y")
-                        break
-                    except:
-                        continue
-                else:
-                    formatted_date = date_str
-                    
-                clean_number = re.sub(r'\D', '', numbers)
-                if len(clean_number) >= 4:
-                    nomor = clean_number[-4:] if len(clean_number) > 4 else clean_number
-                    item = {"tanggal": formatted_date, "nomor": nomor}
-                    
-                    if 'midday' in draw_time or 'day' in draw_time:
-                        if not any(r['tanggal'] == formatted_date and r['nomor'] == nomor for r in results_midday):
-                            results_midday.append(item)
-                    else:
-                        if not any(r['tanggal'] == formatted_date and r['nomor'] == nomor for r in results_evening):
-                            results_evening.append(item)
-            except Exception as e:
-                pass
-                
-    return results_midday, results_evening
-
-def parse_ca_api(data):
-    """Parser universal untuk CA Lottery API"""
+def parse_json_smart(data, filter_keyword=None):
+    """Parser cerdas untuk mencari tanggal dan nomor 4 digit di JSON"""
     results = []
     if not data:
         return results
-        
-    draws = []
-    if isinstance(data, list):
-        draws = data
-    elif isinstance(data, dict):
-        draws = data.get('draws', data.get('results', data.get('data', [])))
 
-    for draw in draws:
-        date_str = str(draw.get('draw_date', draw.get('date', draw.get('drawDate', ''))))
-        numbers = str(draw.get('winning_numbers', draw.get('numbers', draw.get('winningNumbers', ''))))
-        
-        if date_str and numbers:
-            try:
-                for fmt in ["%Y-%m-%d", "%m/%d/%Y", "%d-%m-%Y"]:
-                    try:
-                        dt = datetime.strptime(date_str.split('T')[0], fmt)
-                        formatted_date = dt.strftime("%d-%m-%Y")
-                        break
-                    except:
-                        continue
-                else:
-                    formatted_date = date_str
-                    
-                clean_number = re.sub(r'\D', '', numbers)
-                if len(clean_number) >= 4:
-                    nomor = clean_number[-4:] if len(clean_number) > 4 else clean_number
-                    if not any(r['tanggal'] == formatted_date and r['nomor'] == nomor for r in results):
-                        results.append({"tanggal": formatted_date, "nomor": nomor})
-            except Exception as e:
-                pass
+    def extract_from_obj(obj):
+        if isinstance(obj, dict):
+            # Cari kunci yang mungkin berisi tanggal dan nomor
+            date_str = obj.get('drawDate') or obj.get('date') or obj.get('draw_date') or obj.get('DrawDate') or obj.get('drawingDate')
+            num_str = obj.get('winningNumbers') or obj.get('numbers') or obj.get('result') or obj.get('WinningNumbers') or obj.get('drawNumbers')
+            
+            if date_str and num_str:
+                try:
+                    # Coba bersihkan tanggal
+                    clean_date = str(date_str).split('T')[0].split(' ')[0]
+                    dt = datetime.strptime(clean_date, "%Y-%m-%d")
+                    formatted_date = dt.strftime("%d-%m-%Y")
+                except:
+                    formatted_date = str(date_str) # Fallback
                 
-    return results
+                clean_num = re.sub(r'\D', '', str(num_str))
+                if len(clean_num) >= 4:
+                    nomor = clean_num[-4:] if len(clean_num) > 4 else clean_num
+                    results.append({"tanggal": formatted_date, "nomor": nomor})
+            
+            # Rekursif untuk nested objects
+            for v in obj.values():
+                extract_from_obj(v)
+        elif isinstance(obj, list):
+            for item in obj:
+                extract_from_obj(item)
+
+    # Jika ada filter keyword (misal "Win 4" untuk NY), cari di key dictionary
+    if filter_keyword and isinstance(data, dict):
+        for key in data:
+            if filter_keyword.lower() in key.lower():
+                extract_from_obj(data[key])
+    else:
+        extract_from_obj(data)
+        
+    # Deduplicate
+    seen = set()
+    unique_results = []
+    for r in results:
+        if (r['tanggal'], r['nomor']) not in seen:
+            seen.add((r['tanggal'], r['nomor']))
+            unique_results.append(r)
+    return unique_results
 
 def fetch_html(url, market_name):
     """Mengambil HTML dengan strategi anti-timeout"""
@@ -164,12 +114,9 @@ def parse_oregon(html_text, time_label):
     return results
 
 def parse_north_carolina(html_text, session_type):
-    """Parser NC yang diperluas agar lebih toleran"""
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
     text = soup.get_text(separator=' ', strip=True)
-    
-    # Cari pola tanggal MM/DD/YYYY
     for match in re.finditer(r'(\d{1,2})/(\d{1,2})/(\d{4})', text):
         m, d, y = match.groups()
         formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
@@ -248,6 +195,7 @@ def save_with_smart_append(market_name, new_data):
                 existing_data = json.load(f)
         except: pass
     
+    # Bersihkan data lama dari spasi
     existing_data = [{"tanggal": item.get('tanggal', item.get('tanggal ', '')).strip(), 
                       "nomor": item.get('nomor', item.get('nomor ', '')).strip()} 
                      for item in existing_data if item.get('tanggal') or item.get('tanggal ')]
@@ -263,6 +211,7 @@ def save_with_smart_append(market_name, new_data):
             existing_records.add((tanggal, nomor))
             added_count += 1
     
+    # Sortir: Terbaru di atas
     try:
         existing_data.sort(key=lambda x: datetime.strptime(x['tanggal'], "%d-%m-%Y"), reverse=True)
     except: pass
@@ -273,23 +222,35 @@ def save_with_smart_append(market_name, new_data):
     print(f"✅ {market_name}: {added_count} data baru | Total: {len(existing_data)}")
 
 def main():
-    # 1. Ambil data dari RapidAPI (New York & California)
-    ny_data = fetch_rapidapi("new-york-lottery.p.rapidapi.com", "/get_draw_results", "new-york")
+    print("🚀 Memulai Scraper dengan Integrasi RapidAPI...")
+    
+    # 1. NEW YORK LOTTERY (Via API)
+    print("\n--- NEW YORK LOTTERY (API) ---")
+    ny_data = fetch_rapidapi("new-york-lottery.p.rapidapi.com", "/get_draw_results")
     if ny_data:
-        ny_midday, ny_evening = parse_ny_api(ny_data)
-        save_with_smart_append("new-york-midday", ny_midday)
-        save_with_smart_append("new-york-evening", ny_evening)
+        # Filter untuk game "Win 4" atau "Pick 4"
+        parsed_ny = parse_json_smart(ny_data, filter_keyword="Win 4")
+        if not parsed_ny:
+            parsed_ny = parse_json_smart(ny_data, filter_keyword="Pick 4")
+        # Karena API mungkin menggabungkan Midday/Evening, kita simpan ke satu file atau pisahkan jika strukturnya jelas
+        # Untuk saat ini, kita simpan ke new-york-midday dan evening (data mungkin sama jika API tidak memisahkan)
+        save_with_smart_append("new-york-midday", parsed_ny)
+        save_with_smart_append("new-york-evening", parsed_ny)
     else:
-        print("⚠️ Gagal mengambil data New York dari RapidAPI")
+        print("⚠️ Gagal mengambil data NY Lottery dari API.")
 
-    ca_data = fetch_rapidapi("ca-lottery.p.rapidapi.com", "/DrawGamePastDrawResults/14/1/20", "california")
+    # 2. CALIFORNIA LOTTERY (Via API)
+    print("\n--- CALIFORNIA LOTTERY (API) ---")
+    # Game ID 14 adalah Daily 4
+    ca_data = fetch_rapidapi("ca-lottery.p.rapidapi.com", "/DrawGamePastDrawResults/14/1/20")
     if ca_data:
-        ca_results = parse_ca_api(ca_data)
-        save_with_smart_append("california-daily-4", ca_results)
+        parsed_ca = parse_json_smart(ca_data)
+        save_with_smart_append("california-daily-4", parsed_ca)
     else:
-        print("⚠️ Gagal mengambil data California dari RapidAPI")
+        print("⚠️ Gagal mengambil data CA Lottery dari API.")
 
-    # 2. Ambil via Web Scraping untuk market lainnya
+    # 3. WEB SCRAPING UNTUK MARKET LAINNYA
+    print("\n--- WEB SCRAPING ---")
     TARGETS = [
         ("oregon-3", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "1:00 PM"),
         ("oregon-6", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "4:00 PM"),
@@ -312,7 +273,7 @@ def main():
             data = parser_func(html, param)
             save_with_smart_append(market_name, data)
         else:
-            print(f"⚠️ Gagal total mengambil HTML untuk {market_name}")
+            print(f"️ Gagal total mengambil HTML untuk {market_name}")
 
 if __name__ == "__main__":
     main()

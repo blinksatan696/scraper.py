@@ -12,72 +12,31 @@ import time
 # ==========================================
 RAPIDAPI_KEY = "52ef60fa19msh5a0d6a071ecf14cp173a73jsnd3fa3138b311"
 
-def fetch_rapidapi(host, endpoint):
-    """Mengambil data JSON dari RapidAPI"""
-    url = f"https://{host}{endpoint}"
-    req = urllib.request.Request(url, method="GET")
-    req.add_header("X-RapidAPI-Key", RAPIDAPI_KEY)
-    req.add_header("X-RapidAPI-Host", host)
+def fetch_rapidapi(host, endpoint, market_name):
+    print(f"\n📡 [API] Mencoba mengambil data untuk {market_name} ...")
     try:
-        with urllib.request.urlopen(req, timeout=15) as response:
-            return json.loads(response.read().decode('utf-8'))
+        req = urllib.request.Request(f"https://{host}{endpoint}", method="GET")
+        req.add_header("X-RapidAPI-Key", RAPIDAPI_KEY)
+        req.add_header("X-RapidAPI-Host", host)
+        
+        with urllib.request.urlopen(req, timeout=10) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            print(f"   ✅ Berhasil via API untuk {market_name}")
+            return data
+    except urllib.error.HTTPError as e:
+        if e.code == 429:
+            print(f"   ⚠️ Limit API Habis (429 Too Many Requests) untuk {market_name}. Beralih ke Scraping...")
+        elif e.code == 403:
+            print(f"   ⚠️ API Diblokir (403 Forbidden) untuk {market_name}. Beralih ke Scraping...")
+        else:
+            print(f"   ⚠️ Error API {e.code} untuk {market_name}. Beralih ke Scraping...")
+        return None
     except Exception as e:
-        print(f"   ⚠️ Error RapidAPI ({host}): {e}")
+        print(f"   ⚠️ Error koneksi API untuk {market_name}: {e}. Beralih ke Scraping...")
         return None
 
-def parse_json_smart(data, filter_keyword=None):
-    """Parser cerdas untuk mencari tanggal dan nomor 4 digit di JSON"""
-    results = []
-    if not data:
-        return results
-
-    def extract_from_obj(obj):
-        if isinstance(obj, dict):
-            # Cari kunci yang mungkin berisi tanggal dan nomor
-            date_str = obj.get('drawDate') or obj.get('date') or obj.get('draw_date') or obj.get('DrawDate') or obj.get('drawingDate')
-            num_str = obj.get('winningNumbers') or obj.get('numbers') or obj.get('result') or obj.get('WinningNumbers') or obj.get('drawNumbers')
-            
-            if date_str and num_str:
-                try:
-                    # Coba bersihkan tanggal
-                    clean_date = str(date_str).split('T')[0].split(' ')[0]
-                    dt = datetime.strptime(clean_date, "%Y-%m-%d")
-                    formatted_date = dt.strftime("%d-%m-%Y")
-                except:
-                    formatted_date = str(date_str) # Fallback
-                
-                clean_num = re.sub(r'\D', '', str(num_str))
-                if len(clean_num) >= 4:
-                    nomor = clean_num[-4:] if len(clean_num) > 4 else clean_num
-                    results.append({"tanggal": formatted_date, "nomor": nomor})
-            
-            # Rekursif untuk nested objects
-            for v in obj.values():
-                extract_from_obj(v)
-        elif isinstance(obj, list):
-            for item in obj:
-                extract_from_obj(item)
-
-    # Jika ada filter keyword (misal "Win 4" untuk NY), cari di key dictionary
-    if filter_keyword and isinstance(data, dict):
-        for key in data:
-            if filter_keyword.lower() in key.lower():
-                extract_from_obj(data[key])
-    else:
-        extract_from_obj(data)
-        
-    # Deduplicate
-    seen = set()
-    unique_results = []
-    for r in results:
-        if (r['tanggal'], r['nomor']) not in seen:
-            seen.add((r['tanggal'], r['nomor']))
-            unique_results.append(r)
-    return unique_results
-
 def fetch_html(url, market_name):
-    """Mengambil HTML dengan strategi anti-timeout"""
-    print(f"\n📡 Menarik data dari {url} ...")
+    print(f"\n📡 [SCRAPING] Mencoba mengambil HTML untuk {market_name} ...")
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
@@ -86,37 +45,97 @@ def fetch_html(url, market_name):
             )
             page = context.new_page()
             page.goto(url, wait_until="domcontentloaded", timeout=30000)
-            time.sleep(4)
+            time.sleep(3) # Tunggu render JS
             html_text = page.content()
             browser.close()
             
             if "cloudflare" in html_text.lower() or "access denied" in html_text.lower():
-                print(f"   ⛔ TERDETEKSI PEMBLOKIRAN (Cloudflare) untuk {market_name}")
+                print(f"   ⛔ Terdeteksi Cloudflare Block untuk {market_name}")
                 return None
             return html_text
     except Exception as e:
-        print(f"   ⚠️ Error koneksi: {e}")
+        print(f"   ⚠️ Error scraping untuk {market_name}: {e}")
         return None
 
-def parse_oregon(html_text, time_label):
+# --- PARSER API ---
+def parse_api_data(data, market_name):
+    results = []
+    if not data: return results
+    
+    # Coba berbagai struktur JSON umum
+    draws = data if isinstance(data, list) else data.get('draws', data.get('results', data.get('data', [])))
+    if isinstance(draws, dict): draws = draws.get('draws', [])
+    
+    for draw in draws:
+        date_str = str(draw.get('draw_date', draw.get('date', draw.get('drawDate', ''))))
+        numbers = str(draw.get('winning_numbers', draw.get('numbers', draw.get('winningNumbers', ''))))
+        
+        if date_str and numbers:
+            try:
+                # Bersihkan dan format tanggal
+                clean_date = re.sub(r'T.*', '', date_str)
+                for fmt in ["%Y-%m-%d", "%m/%d/%Y", "%d-%m-%Y"]:
+                    try:
+                        dt = datetime.strptime(clean_date, fmt)
+                        formatted_date = dt.strftime("%d-%m-%Y")
+                        break
+                    except: continue
+                else:
+                    formatted_date = clean_date
+                
+                clean_number = re.sub(r'\D', '', numbers)
+                if len(clean_number) >= 4:
+                    nomor = clean_number[-4:] if len(clean_number) > 4 else clean_number
+                    if not any(r['tanggal'] == formatted_date and r['nomor'] == nomor for r in results):
+                        results.append({"tanggal": formatted_date, "nomor": nomor})
+            except: continue
+    return results
+
+# --- PARSER HTML (FALLBACK) ---
+def parse_ny_html(html_text):
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
     text = soup.get_text(separator=' ', strip=True)
-    for match in re.finditer(r'(\d{1,2})/(\d{1,2})/(\d{4})', text):
+    
+    # Cari pola MM/DD/YYYY
+    for match in re.finditer(r'(\d{2})/(\d{2})/(\d{4})', text):
         m, d, y = match.groups()
         formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
         snippet = text[match.end():match.end()+300]
-        if time_label.lower() in snippet.lower():
-            digits = re.findall(r'\b\d\b', snippet)
-            nomor = "".join(digits[:4]) if len(digits) >= 4 else (re.findall(r'\b(\d{4})\b', snippet)[0] if re.findall(r'\b(\d{4})\b', snippet) else "")
-            if len(nomor) == 4 and not any(r['tanggal'] == formatted_date and r['nomor'] == nomor for r in results):
+        
+        # Cari 4 angka terpisah atau menyatu
+        digits = re.findall(r'\b\d\b', snippet)
+        nomor = "".join(digits[:4]) if len(digits) >= 4 else ""
+        if not nomor:
+            four_digits = re.findall(r'\b(\d{4})\b', snippet)
+            if four_digits: nomor = four_digits[0]
+            
+        if len(nomor) == 4 and not any(r['tanggal'] == formatted_date and r['nomor'] == nomor for r in results):
+            results.append({"tanggal": formatted_date, "nomor": nomor})
+    return results
+
+def parse_ca_html(html_text):
+    results = []
+    soup = BeautifulSoup(html_text, 'html.parser')
+    text = soup.get_text(separator=' ', strip=True)
+    
+    for match in re.finditer(r'(\d{1,2})/(\d{1,2})/(\d{4})', text):
+        m, d, y = match.groups()
+        formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
+        snippet = text[match.end():match.end()+400]
+        
+        digits = re.findall(r'\b(\d{4})\b', snippet)
+        for nomor in digits:
+            if not any(r['tanggal'] == formatted_date and r['nomor'] == nomor for r in results):
                 results.append({"tanggal": formatted_date, "nomor": nomor})
+                break
     return results
 
 def parse_north_carolina(html_text, session_type):
     results = []
     soup = BeautifulSoup(html_text, 'html.parser')
     text = soup.get_text(separator=' ', strip=True)
+    
     for match in re.finditer(r'(\d{1,2})/(\d{1,2})/(\d{4})', text):
         m, d, y = match.groups()
         formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
@@ -133,6 +152,21 @@ def parse_north_carolina(html_text, session_type):
             if not any(r['tanggal'] == formatted_date and r['nomor'] == nomor for r in results):
                 results.append({"tanggal": formatted_date, "nomor": nomor})
                 break
+    return results
+
+def parse_oregon(html_text, time_label):
+    results = []
+    soup = BeautifulSoup(html_text, 'html.parser')
+    text = soup.get_text(separator=' ', strip=True)
+    for match in re.finditer(r'(\d{1,2})/(\d{1,2})/(\d{4})', text):
+        m, d, y = match.groups()
+        formatted_date = f"{int(d):02d}-{int(m):02d}-{y}"
+        snippet = text[match.end():match.end()+300]
+        if time_label.lower() in snippet.lower():
+            digits = re.findall(r'\b\d\b', snippet)
+            nomor = "".join(digits[:4]) if len(digits) >= 4 else (re.findall(r'\b(\d{4})\b', snippet)[0] if re.findall(r'\b(\d{4})\b', snippet) else "")
+            if len(nomor) == 4 and not any(r['tanggal'] == formatted_date and r['nomor'] == nomor for r in results):
+                results.append({"tanggal": formatted_date, "nomor": nomor})
     return results
 
 def parse_kentucky(html_text, session_type):
@@ -182,7 +216,7 @@ def parse_macau(html_text, time_label):
 
 def save_with_smart_append(market_name, new_data):
     if not new_data:
-        print(f"⚠️ FAILED: Tidak ada data baru untuk {market_name}")
+        print(f"⚠️ FAILED: Tidak ada data baru untuk {market_name} (Website mungkin belum update atau parser perlu penyesuaian)")
         return
     
     os.makedirs('data_market', exist_ok=True)
@@ -211,7 +245,6 @@ def save_with_smart_append(market_name, new_data):
             existing_records.add((tanggal, nomor))
             added_count += 1
     
-    # Sortir: Terbaru di atas
     try:
         existing_data.sort(key=lambda x: datetime.strptime(x['tanggal'], "%d-%m-%Y"), reverse=True)
     except: pass
@@ -222,35 +255,37 @@ def save_with_smart_append(market_name, new_data):
     print(f"✅ {market_name}: {added_count} data baru | Total: {len(existing_data)}")
 
 def main():
-    print("🚀 Memulai Scraper dengan Integrasi RapidAPI...")
+    print("🚀 Memulai Scraper Hybrid (API + Fallback Scraping)...")
     
-    # 1. NEW YORK LOTTERY (Via API)
-    print("\n--- NEW YORK LOTTERY (API) ---")
-    ny_data = fetch_rapidapi("new-york-lottery.p.rapidapi.com", "/get_draw_results")
-    if ny_data:
-        # Filter untuk game "Win 4" atau "Pick 4"
-        parsed_ny = parse_json_smart(ny_data, filter_keyword="Win 4")
-        if not parsed_ny:
-            parsed_ny = parse_json_smart(ny_data, filter_keyword="Pick 4")
-        # Karena API mungkin menggabungkan Midday/Evening, kita simpan ke satu file atau pisahkan jika strukturnya jelas
-        # Untuk saat ini, kita simpan ke new-york-midday dan evening (data mungkin sama jika API tidak memisahkan)
-        save_with_smart_append("new-york-midday", parsed_ny)
-        save_with_smart_append("new-york-evening", parsed_ny)
+    # 1. NEW YORK (Coba API, jika gagal fallback ke Scraping)
+    ny_api_data = fetch_rapidapi("new-york-lottery.p.rapidapi.com", "/get_draw_results", "new-york")
+    if ny_api_data:
+        ny_results = parse_api_data(ny_api_data, "new-york")
+        # Asumsi API mengembalikan semua, kita simpan ke satu file atau pisah jika strukturnya memungkinkan
+        # Untuk amannya, kita simpan ke midday dan evening (data yang sama jika API tidak memisahkan)
+        save_with_smart_append("new-york-midday", ny_results)
+        save_with_smart_append("new-york-evening", ny_results)
     else:
-        print("⚠️ Gagal mengambil data NY Lottery dari API.")
+        print("   🔄 Menggunakan Fallback Scraping untuk New York...")
+        ny_html = fetch_html("https://nylottery.ny.gov/all-winning-numbers?nid=46", "new-york")
+        if ny_html:
+            ny_results = parse_ny_html(ny_html)
+            save_with_smart_append("new-york-midday", ny_results)
+            save_with_smart_append("new-york-evening", ny_results)
 
-    # 2. CALIFORNIA LOTTERY (Via API)
-    print("\n--- CALIFORNIA LOTTERY (API) ---")
-    # Game ID 14 adalah Daily 4
-    ca_data = fetch_rapidapi("ca-lottery.p.rapidapi.com", "/DrawGamePastDrawResults/14/1/20")
-    if ca_data:
-        parsed_ca = parse_json_smart(ca_data)
-        save_with_smart_append("california-daily-4", parsed_ca)
+    # 2. CALIFORNIA (Coba API, jika gagal fallback ke Scraping)
+    ca_api_data = fetch_rapidapi("ca-lottery.p.rapidapi.com", "/DrawGamePastDrawResults/14/1/20", "california")
+    if ca_api_data:
+        ca_results = parse_api_data(ca_api_data, "california")
+        save_with_smart_append("california-daily-4", ca_results)
     else:
-        print("⚠️ Gagal mengambil data CA Lottery dari API.")
+        print("   🔄 Menggunakan Fallback Scraping untuk California...")
+        ca_html = fetch_html("https://www.calottery.com/en/draw-games/daily-4", "california")
+        if ca_html:
+            ca_results = parse_ca_html(ca_html)
+            save_with_smart_append("california-daily-4", ca_results)
 
-    # 3. WEB SCRAPING UNTUK MARKET LAINNYA
-    print("\n--- WEB SCRAPING ---")
+    # 3. MARKET LAINNYA (Langsung Scraping karena sudah stabil)
     TARGETS = [
         ("oregon-3", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "1:00 PM"),
         ("oregon-6", "https://www.oregonlottery.org/pick-4/winning-numbers/", parse_oregon, "4:00 PM"),
@@ -273,7 +308,7 @@ def main():
             data = parser_func(html, param)
             save_with_smart_append(market_name, data)
         else:
-            print(f"️ Gagal total mengambil HTML untuk {market_name}")
+            print(f"⚠️ Gagal total mengambil HTML untuk {market_name}")
 
 if __name__ == "__main__":
     main()

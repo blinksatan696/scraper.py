@@ -10,11 +10,11 @@ jobs:
   scrape_and_update:
     runs-on: ubuntu-latest
     steps:
-      # 1. Mengambil kode dari repositori Anda
+      # 1. Mengambil kode dari repositori
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Menyiapkan bahasa Python
+      # 2. Menyiapkan Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -24,7 +24,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install playwright beautifulsoup4
+          pip install requests beautifulsoup4 playwright
           playwright install chromium
 
       # 4. Menjalankan skrip Scraper

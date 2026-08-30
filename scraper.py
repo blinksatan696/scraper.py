@@ -30,18 +30,13 @@ TARGETS = [
 ]
 
 def fetch_html_stealth(url):
-    """Mengambil HTML menggunakan curl_cffi yang memalsukan TLS Fingerprint browser asli"""
     try:
-        # impersonate="chrome124" adalah kunci untuk melewati Cloudflare
+        # impersonate="chrome124" memalsukan sidik jari browser untuk melewati Cloudflare
         response = requests.get(url, impersonate="chrome124", timeout=20)
-        
         if response.status_code == 403 or "cloudflare" in response.text.lower() or "access denied" in response.text.lower():
-            print(f"   ⛔ Masih terblokir Cloudflare (403) untuk {url}")
             return None
-            
         return response.text
-    except Exception as e:
-        print(f"   ⚠️ Error koneksi stealth: {e}")
+    except Exception:
         return None
 
 def parse_kingdom_toto(html_text):
@@ -101,13 +96,11 @@ def parse_macau(html_text, time_label):
 
 def fetch_and_parse(url, parser_type, market_name, param=None):
     print(f"📡 Memproses: {market_name} ...")
-    
     if parser_type == "kingdom":
         html = fetch_html_stealth(url)
         if not html:
             return []
         return parse_kingdom_toto(html)
-        
     elif parser_type == "macau":
         try:
             with sync_playwright() as p:
@@ -118,17 +111,11 @@ def fetch_and_parse(url, parser_type, market_name, param=None):
                 html_text = page.content()
                 browser.close()
             return parse_macau(html_text, param)
-        except Exception as e:
-            print(f"   ⚠️ Error Macau: {e}")
+        except Exception:
             return []
-    
     return []
 
 def save_with_smart_append(market_name, new_data):
-    if not new_data:
-        print(f"   ⚠️ Tidak ada data baru untuk {market_name}")
-        return
-    
     os.makedirs('data_market', exist_ok=True)
     file_path = os.path.join('data_market', f"{market_name}.json")
     existing_data = []
@@ -140,6 +127,7 @@ def save_with_smart_append(market_name, new_data):
         except Exception:
             pass
 
+    # AUTO-CLEAN SAFETY NET: Membersihkan spasi di key dan value data lama
     cleaned_existing = []
     for item in existing_data:
         t = str(item.get("tanggal", item.get("tanggal ", ""))).strip()
@@ -150,27 +138,33 @@ def save_with_smart_append(market_name, new_data):
     existing_records = {(item['tanggal'], item['nomor']) for item in cleaned_existing}
     added_count = 0
     
-    for item in new_data:
-        tanggal = str(item.get('tanggal', '')).strip()
-        nomor = str(item.get('nomor', '')).strip()
-        
-        if tanggal and nomor and (tanggal, nomor) not in existing_records:
-            cleaned_existing.append({"tanggal": tanggal, "nomor": nomor})
-            existing_records.add((tanggal, nomor))
-            added_count += 1
+    # Tambah Data Baru
+    if new_data:
+        for item in new_data:
+            tanggal = str(item.get('tanggal', '')).strip()
+            nomor = str(item.get('nomor', '')).strip()
+            if tanggal and nomor and (tanggal, nomor) not in existing_records:
+                cleaned_existing.append({"tanggal": tanggal, "nomor": nomor})
+                existing_records.add((tanggal, nomor))
+                added_count += 1
     
+    # Sortir: Tanggal terbaru di paling atas (Descending)
     try:
         cleaned_existing.sort(key=lambda x: datetime.strptime(x['tanggal'], "%d-%m-%Y"), reverse=True)
     except Exception:
         pass
     
+    # Simpan ke File
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(cleaned_existing, f, indent=2, ensure_ascii=False)
     
-    print(f"   ✅ {market_name}: {added_count} data baru | Total: {len(cleaned_existing)}")
+    if added_count > 0:
+        print(f"   ✅ {market_name}: {added_count} data baru | Total: {len(cleaned_existing)}")
+    else:
+        print(f"   ℹ️ {market_name}: Tidak ada data baru (Total tetap: {len(cleaned_existing)})")
 
 def main():
-    print("🚀 Memulai Scraper dengan curl_cffi (Anti-Cloudflare)...")
+    print("🚀 Memulai Scraper (Auto-Clean + curl_cffi)...")
     for market_name, url, parser_type in TARGETS:
         param = market_name.split('-')[-1] if market_name.startswith('macau-') else None
         data = fetch_and_parse(url, parser_type, market_name, param)

@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Update Data Market</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 { font-size: 28px; margin-bottom: 5px; }
+        .header p { opacity: 0.9; font-size: 14px; }
+        
+        .config-section {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 6px;
+        }
+        .config-section label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #856404;
+        }
+        .config-section input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: monospace;
+        }
+        .config-section small {
+            display: block;
+            margin-top: 5px;
+            color: #856404;
+        }
+        
+        .main-content { padding: 20px; }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .quick-add-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .quick-add-row button {
+            padding: 10px 15px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .quick-add-row button:hover { background: #229954; }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(52,152,219,0.4); }
+        .btn-primary:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(231,76,60,0.4); }
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px;
+            font-weight: 500;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            display: block;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+        
+        .current-data {
+            margin: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .current-data h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .current-data table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .current-data th,
+        .current-data td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .current-data th {
+            background: #3498db;
+            color: white;
+        }
+        .current-data tr:nth-child(even) { background: #e9ecef; }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal h3 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        .modal p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .batch-section {
+            margin: 20px;
+            padding: 20px;
+            background: #e8f4f8;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .batch-section h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        .batch-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .batch-item select,
+        .batch-item input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .batch-item select { flex: 2; }
+        .batch-item input { flex: 1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Admin Panel - Update Data Market</h1>
+            <p>Update langsung ke GitHub | Rolling 30 Hari | Multi-User Safe</p>
+        </div>
+        
+        <!-- Konfigurasi GitHub Token -->
+        <div class="config-section">
+            <label for="githubToken"> GitHub Personal Access Token (PAT)</label>
+            <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+            <small>Token disimpan di browser Anda (localStorage). Buat token di: GitHub → Settings → Developer Settings → Personal Access Tokens → Tokens (classic) → Generate new token → Centang "repo"</small>
+        </div>
+        
+        <!-- Form Input Data -->
+        <div class="main-content">
+            <div class="form-group">
+                <label for="marketSelect">Pilih Market:</label>
+                <select id="marketSelect">
+                    <option value="">-- Pilih Market --</option>
+                    <optgroup label="Oregon">
+                        <option value="oregon-3">Oregon 3 (1:00 PM)</option>
+                        <option value="oregon-6">Oregon 6 (4:00 PM)</option>
+                        <option value="oregon-9">Oregon 9 (7:00 PM)</option>
+                        <option value="oregon-12">Oregon 12 (10:00 PM)</option>
+                    </optgroup>
+                    <optgroup label="New York">
+                        <option value="new-york-midday">New York Midday</option>
+                        <option value="new-york-evening">New York Evening</option>
+                    </optgroup>
+                    <optgroup label="North Carolina">
+                        <option value="north-carolina-day">North Carolina Day</option>
+                        <option value="north-carolina-evening">North Carolina Evening</option>
+                    </optgroup>
+                    <optgroup label="California & Kentucky">
+                        <option value="california-daily-4">California Daily 4</option>
+                        <option value="kentucky-midday">Kentucky Midday</option>
+                        <option value="kentucky-evening">Kentucky Evening</option>
+                    </optgroup>
+                    <optgroup label="Macau">
+                        <option value="macau-00">Macau 00:01</option>
+                        <option value="macau-13">Macau 13:00</option>
+                        <option value="macau-16">Macau 16:00</option>
+                        <option value="macau-19">Macau 19:00</option>
+                        <option value="macau-22">Macau 22:00</option>
+                        <option value="macau-23">Macau 23:00</option>
+                    </optgroup>
+                </select>
+            </div>
+            
+            <div class="quick-add-row">
+                <button type="button" onclick="setToday()">📅 Isi Tanggal Hari Ini</button>
+                <button type="button" onclick="loadCurrentData()" id="btnLoad">🔄 Muat Data Saat Ini</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="inputTanggal">Tanggal (format: DD-MM-YYYY):</label>
+                <input type="text" id="inputTanggal" placeholder="30-08-2026" maxlength="10">
+            </div>
+            
+            <div class="form-group">
+                <label for="inputNomor">Nomor (4 digit):</label>
+                <input type="text" id="inputNomor" placeholder="1234" maxlength="4">
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <button class="btn btn-primary" onclick="submitData()" id="btnSubmit">
+                    💾 Simpan & Update ke GitHub
+                </button>
+                <button class="btn btn-secondary" onclick="resetForm()">🔄 Reset Form</button>
+            </div>
+        </div>
+        
+        <!-- Status Messages -->
+        <div id="statusBox" class="status"></div>
+        
+        <!-- Data Saat Ini -->
+        <div class="current-data" id="currentDataBox" style="display:none;">
+            <h3>📊 Data Saat Ini (30 Hari Terakhir)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Tanggal</th>
+                        <th>Nomor</th>
+                    </tr>
+                </thead>
+                <tbody id="currentDataBody"></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Modal Konfirmasi Overwrite -->
+    <div class="modal-overlay" id="conflictModal">
+        <div class="modal">
+            <h3>⚠️ Konflik Data Terdeteksi!</h3>
+            <p id="conflictMessage">
+                User lain telah mengupdate data ini setelah Anda memuatnya. 
+                Data yang Anda miliki mungkin sudah tidak terbaru.
+            </p>
+            <p><strong>Apa yang ingin Anda lakukan?</strong></p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeConflictModal()">Batal</button>
+                <button class="btn btn-danger" onclick="forceOverwrite()">️ Paksa Overwrite</button>
+                <button class="btn btn-primary" onclick="reloadAndMerge()">🔄 Muat Ulang & Gabungkan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Konfigurasi
+        const REPO_OWNER = 'blinksatan696';
+        const REPO_NAME = 'scraper.py';
+        const BRANCH = 'main';
+        const DATA_PATH = 'data_market';
+        const MAX_RECORDS = 30;
+        
+        // State
+        let currentFileSHA = null;
+        let currentData = [];
+        let pendingSubmit = null;
+        
+        // Load token dari localStorage
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedToken = localStorage.getItem('github_token');
+            if (savedToken) {
+                document.getElementById('githubToken').value = savedToken;
+            }
+        });
+        
+        // Simpan token saat diubah
+        document.getElementById('githubToken').addEventListener('change', (e) => {
+            localStorage.setItem('github_token', e.target.value.trim());
+        });
+        
+        function getToken() {
+            const token = document.getElementById('githubToken').value.trim();
+            if (!token) {
+                showStatus('error', '❌ GitHub Token belum diisi! Silakan isi token di bagian atas.');
+                return null;
+            }
+            return token;
+        }
+        
+        function setToday() {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const yyyy = today.getFullYear();
+            document.getElementById('inputTanggal').value = `${dd}-${mm}-${yyyy}`;
+            showStatus('info', `📅 Tanggal diisi: ${dd}-${mm}-${yyyy}`);
+        }
+        
+        function showStatus(type, message) {
+            const box = document.getElementById('statusBox');
+            box.className = `status ${type}`;
+            box.innerHTML = message;
+            setTimeout(() => {
+                if (type !== 'error') box.style.display = 'none';
+            }, 5000);
+        }
+        
+        function resetForm() {
+            document.getElementById('inputTanggal').value = '';
+            document.getElementById('inputNomor').value = '';
+            document.getElementById('currentDataBox').style.display = 'none';
+            showStatus('info', '🔄 Form direset');
+        }
+        
+        async function loadCurrentData() {
+            const market = document.getElementById('marketSelect').value;
+            const token = getToken();
+            if (!market || !token) return;
+            
+            const btn = document.getElementById('btnLoad');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Memuat...';
+            
+            try {
+                const response = await fetch(
+                    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${market}.json?ref=${BRANCH}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+                
+                if (response.status === 404) {
+                    showStatus('info', `ℹ️ File ${market}.json belum ada di GitHub. Data akan dibuat baru.`);
+                    currentData = [];
+                    currentFileSHA = null;
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const fileData = await response.json();
+                currentFileSHA = fileData.sha;
+                
+                // Decode base64 content
+                const content = atob(fileData.content);
+                currentData = JSON.parse(content);
+                
+                // Tampilkan data
+                displayCurrentData();
+                showStatus('success', `✅ Data berhasil dimuat: ${currentData.length} record`);
+                
+            } catch (error) {
+                showStatus('error', ` Gagal memuat data: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🔄 Muat Data Saat Ini';
+            }
+        }
+        
+        function displayCurrentData() {
+            const tbody = document.getElementById('currentDataBody');
+            tbody.innerHTML = '';
+            
+            currentData.forEach((item, index) => {
+                const row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>${item.tanggal}</td>
+                    <td><strong>${item.nomor}</strong></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+            
+            document.getElementById('currentDataBox').style.display = 'block';
+        }
+        
+        async function submitData() {
+            const market = document.getElementById('marketSelect').value;
+            const tanggal = document.getElementById('inputTanggal').value.trim();
+            const nomor = document.getElementById('inputNomor').value.trim();
+            const token = getToken();
+            
+            if (!market) {
+                showStatus('error', '❌ Pilih market terlebih dahulu!');
+                return;
+            }
+            if (!tanggal || !/^\d{2}-\d{2}-\d{4}$/.test(tanggal)) {
+                showStatus('error', '❌ Format tanggal harus DD-MM-YYYY (contoh: 30-08-2026)');
+                return;
+            }
+            if (!nomor || !/^\d{4}$/.test(nomor)) {
+                showStatus('error', '❌ Nomor harus 4 digit angka!');
+                return;
+            }
+            if (!token) return;
+            
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Menyimpan...';
+            
+            try {
+                // 1. Ambil file terbaru dari GitHub (untuk cek konflik)
+                const fetchResponse = await fetch(
+                    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${market}.json?ref=${BRANCH}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+                
+                let latestSHA = currentFileSHA;
+                let latestData = [...currentData];
+                
+                if (fetchResponse.status === 200) {
+                    const fileData = await fetchResponse.json();
+                    latestSHA = fileData.sha;
+                    const content = atob(fileData.content);
+                    latestData = JSON.parse(content);
+                    
+                    // Cek konflik: jika SHA berbeda dengan yang kita load
+                    if (currentFileSHA && latestSHA !== currentFileSHA) {
+                        pendingSubmit = { market, tanggal, nomor, latestSHA, latestData };
+                        document.getElementById('conflictModal').classList.add('active');
+                        btn.disabled = false;
+                        btn.innerHTML = '💾 Simpan & Update ke GitHub';
+                        return;
+                    }
+                } else if (fetchResponse.status !== 404) {
+                    throw new Error(`HTTP ${fetchResponse.status}`);
+                }
+                
+                // 2. Proses data
+                const newData = await processData(market, tanggal, nomor, latestData);
+                
+                // 3. Upload ke GitHub
+                await uploadToGitHub(market, newData, latestSHA, token);
+                
+                showStatus('success', `✅ Berhasil! Data ${market} untuk tanggal ${tanggal} telah diupdate ke GitHub.`);
+                
+                // Update state lokal
+                currentData = newData;
+                currentFileSHA = latestSHA;
+                displayCurrentData();
+                
+                // Reset input nomor saja (tanggal bisa diisi lagi untuk input berikutnya)
+                document.getElementById('inputNomor').value = '';
+                
+            } catch (error) {
+                showStatus('error', `❌ Gagal menyimpan: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '💾 Simpan & Update ke GitHub';
+            }
+        }
+        
+        async function processData(market, tanggal, nomor, existingData) {
+            // Bersihkan data existing (hapus spasi)
+            let cleanedData = existingData.map(item => ({
+                tanggal: (item.tanggal || item['tanggal '] || '').trim(),
+                nomor: (item.nomor || item['nomor '] || '').trim()
+            })).filter(item => item.tanggal && item.nomor);
+            
+            // Cek duplikasi
+            const exists = cleanedData.some(item => item.tanggal === tanggal && item.nomor === nomor);
+            if (exists) {
+                throw new Error(`Data untuk tanggal ${tanggal} dengan nomor ${nomor} sudah ada!`);
+            }
+            
+            // Hapus data lama untuk tanggal yang sama (jika ada)
+            cleanedData = cleanedData.filter(item => item.tanggal !== tanggal);
+            
+            // Tambahkan data baru
+            cleanedData.unshift({ tanggal, nomor });
+            
+            // Sortir descending (terbaru di atas)
+            cleanedData.sort((a, b) => {
+                const dateA = new Date(a.tanggal.split('-').reverse().join('-'));
+                const dateB = new Date(b.tanggal.split('-').reverse().join('-'));
+                return dateB - dateA;
+            });
+            
+            // Batasi 30 record (rolling window)
+            if (cleanedData.length > MAX_RECORDS) {
+                cleanedData = cleanedData.slice(0, MAX_RECORDS);
+            }
+            
+            return cleanedData;
+        }
+        
+        async function uploadToGitHub(market, data, sha, token) {
+            const content = btoa(JSON.stringify(data, null, 2));
+            const filePath = `${DATA_PATH}/${market}.json`;
+            
+            const payload = {
+                message: `Admin update: ${market} - ${data[0].tanggal}`,
+                content: content,
+                branch: BRANCH
+            };
+            
+            if (sha) {
+                payload.sha = sha;
+            }
+            
+            const response = await fetch(
+                `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                }
+            );
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP ${response.status}`);
+            }
+        }
+        
+        function closeConflictModal() {
+            document.getElementById('conflictModal').classList.remove('active');
+            pendingSubmit = null;
+            showStatus('warning', '️ Operasi dibatalkan. Silakan muat ulang data terbaru.');
+        }
+        
+        async function forceOverwrite() {
+            if (!pendingSubmit) return;
+            
+            const { market, tanggal, nomor, latestSHA, latestData } = pendingSubmit;
+            const token = getToken();
+            if (!token) return;
+            
+            document.getElementById('conflictModal').classList.remove('active');
+            
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Memaksa Overwrite...';
+            
+            try {
+                const newData = await processData(market, tanggal, nomor, latestData);
+                await uploadToGitHub(market, newData, latestSHA, token);
+                
+                showStatus('success', `️ OVERWRITE BERHASIL! Data ${market} telah dipaksa diupdate.`);
+                
+                currentData = newData;
+                currentFileSHA = latestSHA;
+                displayCurrentData();
+                document.getElementById('inputNomor').value = '';
+                
+            } catch (error) {
+                showStatus('error', `❌ Gagal overwrite: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '💾 Simpan & Update ke GitHub';
+                pendingSubmit = null;
+            }
+        }
+        
+        async function reloadAndMerge() {
+            if (!pendingSubmit) return;
+            
+            const { market, tanggal, nomor, latestData } = pendingSubmit;
+            const token = getToken();
+            if (!token) return;
+            
+            document.getElementById('conflictModal').classList.remove('active');
+            
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Menggabungkan...';
+            
+            try {
+                // Gunakan data terbaru dari GitHub (latestData) dan gabungkan
+                const newData = await processData(market, tanggal, nomor, latestData);
+                
+                // Ambil SHA terbaru lagi
+                const fetchResponse = await fetch(
+                    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${market}.json?ref=${BRANCH}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+                
+                let newSHA = null;
+                if (fetchResponse.status === 200) {
+                    const fileData = await fetchResponse.json();
+                    newSHA = fileData.sha;
+                }
+                
+                await uploadToGitHub(market, newData, newSHA, token);
+                
+                showStatus('success', `✅ BERHASIL! Data digabungkan dengan update terbaru.`);
+                
+                currentData = newData;
+                currentFileSHA = newSHA;
+                displayCurrentData();
+                document.getElementById('inputNomor').value = '';
+                
+            } catch (error) {
+                showStatus('error', `❌ Gagal menggabungkan: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '💾 Simpan & Update ke GitHub';
+                pendingSubmit = null;
+            }
+        }
+    </script>
+</body>
+</html>

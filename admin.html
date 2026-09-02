@@ -59,9 +59,7 @@
         
         .main-content { padding: 20px; }
         
-        .form-group {
-            margin-bottom: 20px;
-        }
+        .form-group { margin-bottom: 20px; }
         .form-group label {
             display: block;
             font-weight: bold;
@@ -138,30 +136,10 @@
             font-weight: 500;
             display: none;
         }
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            display: block;
-        }
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            display: block;
-        }
-        .status.warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-            display: block;
-        }
-        .status.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-            display: block;
-        }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; display: block; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; display: block; }
+        .status.warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; display: block; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; display: block; }
         
         .current-data {
             margin: 20px;
@@ -171,24 +149,14 @@
             max-height: 300px;
             overflow-y: auto;
         }
-        .current-data h3 {
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-        .current-data table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .current-data th,
-        .current-data td {
+        .current-data h3 { margin-bottom: 10px; color: #2c3e50; }
+        .current-data table { width: 100%; border-collapse: collapse; }
+        .current-data th, .current-data td {
             padding: 8px 12px;
             text-align: left;
             border-bottom: 1px solid #dee2e6;
         }
-        .current-data th {
-            background: #3498db;
-            color: white;
-        }
+        .current-data th { background: #3498db; color: white; }
         .current-data tr:nth-child(even) { background: #e9ecef; }
         
         .modal-overlay {
@@ -209,19 +177,9 @@
             width: 90%;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
-        .modal h3 {
-            color: #e74c3c;
-            margin-bottom: 15px;
-        }
-        .modal p {
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
+        .modal h3 { color: #e74c3c; margin-bottom: 15px; }
+        .modal p { margin-bottom: 20px; line-height: 1.6; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; }
         
         .loading {
             display: inline-block;
@@ -238,32 +196,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        .batch-section {
-            margin: 20px;
-            padding: 20px;
-            background: #e8f4f8;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
-        }
-        .batch-section h3 {
-            margin-bottom: 15px;
-            color: #2c3e50;
-        }
-        .batch-item {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            align-items: center;
-        }
-        .batch-item select,
-        .batch-item input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .batch-item select { flex: 2; }
-        .batch-item input { flex: 1; }
     </style>
 </head>
 <body>
@@ -273,46 +205,66 @@
             <p>Update langsung ke GitHub | Rolling 30 Hari | Multi-User Safe</p>
         </div>
         
-        <!-- Konfigurasi GitHub Token -->
         <div class="config-section">
-            <label for="githubToken"> GitHub Personal Access Token (PAT)</label>
+            <label for="githubToken">🔑 GitHub Personal Access Token (PAT)</label>
             <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
             <small>Token disimpan di browser Anda (localStorage). Buat token di: GitHub → Settings → Developer Settings → Personal Access Tokens → Tokens (classic) → Generate new token → Centang "repo"</small>
         </div>
         
-        <!-- Form Input Data -->
         <div class="main-content">
             <div class="form-group">
                 <label for="marketSelect">Pilih Market:</label>
                 <select id="marketSelect">
                     <option value="">-- Pilih Market --</option>
-                    <optgroup label="Oregon">
-                        <option value="oregon-3">Oregon 3 (1:00 PM)</option>
-                        <option value="oregon-6">Oregon 6 (4:00 PM)</option>
-                        <option value="oregon-9">Oregon 9 (7:00 PM)</option>
-                        <option value="oregon-12">Oregon 12 (10:00 PM)</option>
-                    </optgroup>
-                    <optgroup label="New York">
-                        <option value="new-york-midday">New York Midday</option>
-                        <option value="new-york-evening">New York Evening</option>
-                    </optgroup>
-                    <optgroup label="North Carolina">
-                        <option value="north-carolina-day">North Carolina Day</option>
-                        <option value="north-carolina-evening">North Carolina Evening</option>
-                    </optgroup>
-                    <optgroup label="California & Kentucky">
-                        <option value="california-daily-4">California Daily 4</option>
-                        <option value="kentucky-midday">Kentucky Midday</option>
-                        <option value="kentucky-evening">Kentucky Evening</option>
-                    </optgroup>
-                    <optgroup label="Macau">
-                        <option value="macau-00">Macau 00:01</option>
-                        <option value="macau-13">Macau 13:00</option>
-                        <option value="macau-16">Macau 16:00</option>
-                        <option value="macau-19">Macau 19:00</option>
-                        <option value="macau-22">Macau 22:00</option>
-                        <option value="macau-23">Macau 23:00</option>
-                    </optgroup>
+                    <option value="bullseye">Bullseye</option>
+                    <option value="california">California</option>
+                    <option value="cambodia">Cambodia</option>
+                    <option value="china">China</option>
+                    <option value="florida-evening">Florida Evening</option>
+                    <option value="florida-midday">Florida Midday</option>
+                    <option value="georgia-evening">Georgia Evening</option>
+                    <option value="georgia-midday">Georgia Midday</option>
+                    <option value="georgia-night">Georgia Night</option>
+                    <option value="germany-plus5">Germany Plus5</option>
+                    <option value="illinois-evening">Illinois Evening</option>
+                    <option value="illinois-midday">Illinois Midday</option>
+                    <option value="indiana-evening">Indiana Evening</option>
+                    <option value="indiana-midday">Indiana Midday</option>
+                    <option value="japan">Japan</option>
+                    <option value="kentucky-evening">Kentucky Evening</option>
+                    <option value="kentucky-midday">Kentucky Midday</option>
+                    <option value="macau-00">Macau 00</option>
+                    <option value="macau-13">Macau 13</option>
+                    <option value="macau-16">Macau 16</option>
+                    <option value="macau-19">Macau 19</option>
+                    <option value="macau-22">Macau 22</option>
+                    <option value="macau-23">Macau 23</option>
+                    <option value="maryland-evening">Maryland Evening</option>
+                    <option value="maryland-midday">Maryland Midday</option>
+                    <option value="missouri-evening">Missouri Evening</option>
+                    <option value="missouri-midday">Missouri Midday</option>
+                    <option value="morocco-quatro-03">Morocco Quatro 03</option>
+                    <option value="new-jersey-evening">New Jersey Evening</option>
+                    <option value="new-jersey-midday">New Jersey Midday</option>
+                    <option value="new-york-evening">New York Evening</option>
+                    <option value="new-york-midday">New York Midday</option>
+                    <option value="north-carolina-day">North Carolina Day</option>
+                    <option value="north-carolina-evening">North Carolina Evening</option>
+                    <option value="oregon-12">Oregon 12</option>
+                    <option value="oregon-3">Oregon 3</option>
+                    <option value="oregon-6">Oregon 6</option>
+                    <option value="oregon-9">Oregon 9</option>
+                    <option value="pcso">PCSO</option>
+                    <option value="tennesse-evening">Tennesse Evening</option>
+                    <option value="tennesse-midday">Tennesse Midday</option>
+                    <option value="tennesse-morning">Tennesse Morning</option>
+                    <option value="texas-day">Texas Day</option>
+                    <option value="texas-evening">Texas Evening</option>
+                    <option value="texas-morning">Texas Morning</option>
+                    <option value="texas-night">Texas Night</option>
+                    <option value="virginia-day">Virginia Day</option>
+                    <option value="washington-dc-evening">Washington DC Evening</option>
+                    <option value="washington-dc-midday">Washington DC Midday</option>
                 </select>
             </div>
             
@@ -332,19 +284,15 @@
             </div>
             
             <div style="margin-top: 20px;">
-                <button class="btn btn-primary" onclick="submitData()" id="btnSubmit">
-                    💾 Simpan & Update ke GitHub
-                </button>
+                <button class="btn btn-primary" onclick="submitData()" id="btnSubmit">💾 Simpan & Update ke GitHub</button>
                 <button class="btn btn-secondary" onclick="resetForm()">🔄 Reset Form</button>
             </div>
         </div>
         
-        <!-- Status Messages -->
         <div id="statusBox" class="status"></div>
         
-        <!-- Data Saat Ini -->
         <div class="current-data" id="currentDataBox" style="display:none;">
-            <h3>📊 Data Saat Ini (30 Hari Terakhir)</h3>
+            <h3>📊 Data Saat Ini (Maksimal 30 Hari Terakhir)</h3>
             <table>
                 <thead>
                     <tr>
@@ -358,45 +306,35 @@
         </div>
     </div>
     
-    <!-- Modal Konfirmasi Overwrite -->
     <div class="modal-overlay" id="conflictModal">
         <div class="modal">
             <h3>⚠️ Konflik Data Terdeteksi!</h3>
-            <p id="conflictMessage">
-                User lain telah mengupdate data ini setelah Anda memuatnya. 
-                Data yang Anda miliki mungkin sudah tidak terbaru.
-            </p>
+            <p id="conflictMessage">User lain telah mengupdate data ini setelah Anda memuatnya. Data yang Anda miliki mungkin sudah tidak terbaru.</p>
             <p><strong>Apa yang ingin Anda lakukan?</strong></p>
             <div class="modal-buttons">
                 <button class="btn btn-secondary" onclick="closeConflictModal()">Batal</button>
-                <button class="btn btn-danger" onclick="forceOverwrite()">️ Paksa Overwrite</button>
+                <button class="btn btn-danger" onclick="forceOverwrite()">⚠️ Paksa Overwrite</button>
                 <button class="btn btn-primary" onclick="reloadAndMerge()">🔄 Muat Ulang & Gabungkan</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Konfigurasi
         const REPO_OWNER = 'blinksatan696';
         const REPO_NAME = 'scraper.py';
         const BRANCH = 'main';
         const DATA_PATH = 'data_market';
         const MAX_RECORDS = 30;
         
-        // State
         let currentFileSHA = null;
         let currentData = [];
         let pendingSubmit = null;
         
-        // Load token dari localStorage
         window.addEventListener('DOMContentLoaded', () => {
             const savedToken = localStorage.getItem('github_token');
-            if (savedToken) {
-                document.getElementById('githubToken').value = savedToken;
-            }
+            if (savedToken) document.getElementById('githubToken').value = savedToken;
         });
         
-        // Simpan token saat diubah
         document.getElementById('githubToken').addEventListener('change', (e) => {
             localStorage.setItem('github_token', e.target.value.trim());
         });
@@ -423,9 +361,7 @@
             const box = document.getElementById('statusBox');
             box.className = `status ${type}`;
             box.innerHTML = message;
-            setTimeout(() => {
-                if (type !== 'error') box.style.display = 'none';
-            }, 5000);
+            setTimeout(() => { if (type !== 'error') box.style.display = 'none'; }, 5000);
         }
         
         function resetForm() {
@@ -447,12 +383,7 @@
             try {
                 const response = await fetch(
                     `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${market}.json?ref=${BRANCH}`,
-                    {
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    }
+                    { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
                 );
                 
                 if (response.status === 404) {
@@ -461,24 +392,15 @@
                     currentFileSHA = null;
                     return;
                 }
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 
                 const fileData = await response.json();
                 currentFileSHA = fileData.sha;
-                
-                // Decode base64 content
-                const content = atob(fileData.content);
-                currentData = JSON.parse(content);
-                
-                // Tampilkan data
+                currentData = JSON.parse(atob(fileData.content));
                 displayCurrentData();
                 showStatus('success', `✅ Data berhasil dimuat: ${currentData.length} record`);
-                
             } catch (error) {
-                showStatus('error', ` Gagal memuat data: ${error.message}`);
+                showStatus('error', `❌ Gagal memuat data: ${error.message}`);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '🔄 Muat Data Saat Ini';
@@ -488,16 +410,9 @@
         function displayCurrentData() {
             const tbody = document.getElementById('currentDataBody');
             tbody.innerHTML = '';
-            
             currentData.forEach((item, index) => {
-                const row = `<tr>
-                    <td>${index + 1}</td>
-                    <td>${item.tanggal}</td>
-                    <td><strong>${item.nomor}</strong></td>
-                </tr>`;
-                tbody.innerHTML += row;
+                tbody.innerHTML += `<tr><td>${index + 1}</td><td>${item.tanggal}</td><td><strong>${item.nomor}</strong></td></tr>`;
             });
-            
             document.getElementById('currentDataBox').style.display = 'block';
         }
         
@@ -507,18 +422,9 @@
             const nomor = document.getElementById('inputNomor').value.trim();
             const token = getToken();
             
-            if (!market) {
-                showStatus('error', '❌ Pilih market terlebih dahulu!');
-                return;
-            }
-            if (!tanggal || !/^\d{2}-\d{2}-\d{4}$/.test(tanggal)) {
-                showStatus('error', '❌ Format tanggal harus DD-MM-YYYY (contoh: 30-08-2026)');
-                return;
-            }
-            if (!nomor || !/^\d{4}$/.test(nomor)) {
-                showStatus('error', '❌ Nomor harus 4 digit angka!');
-                return;
-            }
+            if (!market) { showStatus('error', '❌ Pilih market terlebih dahulu!'); return; }
+            if (!tanggal || !/^\d{2}-\d{2}-\d{4}$/.test(tanggal)) { showStatus('error', '❌ Format tanggal harus DD-MM-YYYY'); return; }
+            if (!nomor || !/^\d{4}$/.test(nomor)) { showStatus('error', '❌ Nomor harus 4 digit angka!'); return; }
             if (!token) return;
             
             const btn = document.getElementById('btnSubmit');
@@ -526,15 +432,9 @@
             btn.innerHTML = '<span class="loading"></span> Menyimpan...';
             
             try {
-                // 1. Ambil file terbaru dari GitHub (untuk cek konflik)
                 const fetchResponse = await fetch(
                     `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${market}.json?ref=${BRANCH}`,
-                    {
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    }
+                    { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
                 );
                 
                 let latestSHA = currentFileSHA;
@@ -543,10 +443,8 @@
                 if (fetchResponse.status === 200) {
                     const fileData = await fetchResponse.json();
                     latestSHA = fileData.sha;
-                    const content = atob(fileData.content);
-                    latestData = JSON.parse(content);
+                    latestData = JSON.parse(atob(fileData.content));
                     
-                    // Cek konflik: jika SHA berbeda dengan yang kita load
                     if (currentFileSHA && latestSHA !== currentFileSHA) {
                         pendingSubmit = { market, tanggal, nomor, latestSHA, latestData };
                         document.getElementById('conflictModal').classList.add('active');
@@ -558,22 +456,14 @@
                     throw new Error(`HTTP ${fetchResponse.status}`);
                 }
                 
-                // 2. Proses data
                 const newData = await processData(market, tanggal, nomor, latestData);
-                
-                // 3. Upload ke GitHub
                 await uploadToGitHub(market, newData, latestSHA, token);
                 
-                showStatus('success', `✅ Berhasil! Data ${market} untuk tanggal ${tanggal} telah diupdate ke GitHub.`);
-                
-                // Update state lokal
+                showStatus('success', `✅ Berhasil! Data ${market} untuk tanggal ${tanggal} telah diupdate.`);
                 currentData = newData;
                 currentFileSHA = latestSHA;
                 displayCurrentData();
-                
-                // Reset input nomor saja (tanggal bisa diisi lagi untuk input berikutnya)
                 document.getElementById('inputNomor').value = '';
-                
             } catch (error) {
                 showStatus('error', `❌ Gagal menyimpan: ${error.message}`);
             } finally {
@@ -583,66 +473,45 @@
         }
         
         async function processData(market, tanggal, nomor, existingData) {
-            // Bersihkan data existing (hapus spasi)
             let cleanedData = existingData.map(item => ({
                 tanggal: (item.tanggal || item['tanggal '] || '').trim(),
                 nomor: (item.nomor || item['nomor '] || '').trim()
             })).filter(item => item.tanggal && item.nomor);
             
-            // Cek duplikasi
             const exists = cleanedData.some(item => item.tanggal === tanggal && item.nomor === nomor);
-            if (exists) {
-                throw new Error(`Data untuk tanggal ${tanggal} dengan nomor ${nomor} sudah ada!`);
-            }
+            if (exists) throw new Error(`Data untuk tanggal ${tanggal} dengan nomor ${nomor} sudah ada!`);
             
-            // Hapus data lama untuk tanggal yang sama (jika ada)
             cleanedData = cleanedData.filter(item => item.tanggal !== tanggal);
-            
-            // Tambahkan data baru
             cleanedData.unshift({ tanggal, nomor });
             
-            // Sortir descending (terbaru di atas)
             cleanedData.sort((a, b) => {
                 const dateA = new Date(a.tanggal.split('-').reverse().join('-'));
                 const dateB = new Date(b.tanggal.split('-').reverse().join('-'));
                 return dateB - dateA;
             });
             
-            // Batasi 30 record (rolling window)
             if (cleanedData.length > MAX_RECORDS) {
                 cleanedData = cleanedData.slice(0, MAX_RECORDS);
             }
-            
             return cleanedData;
         }
         
         async function uploadToGitHub(market, data, sha, token) {
-            const content = btoa(JSON.stringify(data, null, 2));
-            const filePath = `${DATA_PATH}/${market}.json`;
-            
             const payload = {
                 message: `Admin update: ${market} - ${data[0].tanggal}`,
-                content: content,
+                content: btoa(JSON.stringify(data, null, 2)),
                 branch: BRANCH
             };
-            
-            if (sha) {
-                payload.sha = sha;
-            }
+            if (sha) payload.sha = sha;
             
             const response = await fetch(
-                `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`,
+                `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${market}.json`,
                 {
                     method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 }
             );
-            
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || `HTTP ${response.status}`);
@@ -652,18 +521,16 @@
         function closeConflictModal() {
             document.getElementById('conflictModal').classList.remove('active');
             pendingSubmit = null;
-            showStatus('warning', '️ Operasi dibatalkan. Silakan muat ulang data terbaru.');
+            showStatus('warning', '⚠️ Operasi dibatalkan. Silakan muat ulang data terbaru.');
         }
         
         async function forceOverwrite() {
             if (!pendingSubmit) return;
-            
             const { market, tanggal, nomor, latestSHA, latestData } = pendingSubmit;
             const token = getToken();
             if (!token) return;
             
             document.getElementById('conflictModal').classList.remove('active');
-            
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
             btn.innerHTML = '<span class="loading"></span> Memaksa Overwrite...';
@@ -671,14 +538,11 @@
             try {
                 const newData = await processData(market, tanggal, nomor, latestData);
                 await uploadToGitHub(market, newData, latestSHA, token);
-                
-                showStatus('success', `️ OVERWRITE BERHASIL! Data ${market} telah dipaksa diupdate.`);
-                
+                showStatus('success', `⚠️ OVERWRITE BERHASIL! Data ${market} telah dipaksa diupdate.`);
                 currentData = newData;
                 currentFileSHA = latestSHA;
                 displayCurrentData();
                 document.getElementById('inputNomor').value = '';
-                
             } catch (error) {
                 showStatus('error', `❌ Gagal overwrite: ${error.message}`);
             } finally {
@@ -690,47 +554,32 @@
         
         async function reloadAndMerge() {
             if (!pendingSubmit) return;
-            
             const { market, tanggal, nomor, latestData } = pendingSubmit;
             const token = getToken();
             if (!token) return;
             
             document.getElementById('conflictModal').classList.remove('active');
-            
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
             btn.innerHTML = '<span class="loading"></span> Menggabungkan...';
             
             try {
-                // Gunakan data terbaru dari GitHub (latestData) dan gabungkan
                 const newData = await processData(market, tanggal, nomor, latestData);
-                
-                // Ambil SHA terbaru lagi
                 const fetchResponse = await fetch(
                     `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${market}.json?ref=${BRANCH}`,
-                    {
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    }
+                    { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
                 );
-                
                 let newSHA = null;
                 if (fetchResponse.status === 200) {
                     const fileData = await fetchResponse.json();
                     newSHA = fileData.sha;
                 }
-                
                 await uploadToGitHub(market, newData, newSHA, token);
-                
                 showStatus('success', `✅ BERHASIL! Data digabungkan dengan update terbaru.`);
-                
                 currentData = newData;
                 currentFileSHA = newSHA;
                 displayCurrentData();
                 document.getElementById('inputNomor').value = '';
-                
             } catch (error) {
                 showStatus('error', `❌ Gagal menggabungkan: ${error.message}`);
             } finally {

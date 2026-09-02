@@ -540,23 +540,40 @@ async function loadServerMarketData() {
     const tableBody = document.getElementById('tableBodyViewer');
     tableBody.innerHTML = '<tr><td colspan="3">Memuat data...</td></tr>';
 
+    // Menggunakan URL Raw GitHub agar bisa diakses darimana saja tanpa kendala CORS lokal
+    const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${DATA_PATH}/${market}.json`;
+
     try {
-        const response = await fetch(`data_market/${market}.json`);
-        if (!response.ok) throw new Error('File data belum tersedia.');
-        let data = await response.json();
+        // Parameter ?t= digunakan untuk bypass cache browser agar selalu mendapat data terupdate
+        const response = await fetch(`${rawUrl}?t=${new Date().getTime()}`);
         
+        if (!response.ok) {
+            throw new Error('File data belum tersedia di server.');
+        }
+        
+        let data = await response.json();
         tableBody.innerHTML = '';
+        
         if (data.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="3">Tidak ada data tersedia.</td></tr>';
             return;
         }
-        data.reverse();
+        
+        // Membalik urutan agar data terbaru ada di atas (opsional, sesuaikan dengan struktur JSON Anda)
+        data.reverse(); 
+        
         data.forEach((item, index) => {
-            const row = `<tr><td>${index + 1}</td><td>${item.tanggal}</td><td><strong style="color:#1a73e8;">${item.nomor}</strong></td></tr>`;
+            const row = `<tr>
+                <td>${index + 1}</td>
+                <td>${item.tanggal}</td>
+                <td><strong style="color:#1a73e8;">${item.nomor}</strong></td>
+            </tr>`;
             tableBody.innerHTML += row;
         });
+        
     } catch (error) {
-        tableBody.innerHTML = `<tr><td colspan="3" style="color: red;">Gagal memuat data atau file JSON belum terbentuk.</td></tr>`;
+        console.error("Fetch error:", error);
+        tableBody.innerHTML = `<tr><td colspan="3" style="color: red;">Gagal memuat data: ${error.message}</td></tr>`;
     }
 }
 

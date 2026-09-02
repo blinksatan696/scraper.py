@@ -113,7 +113,6 @@ th { background-color: #f8f9fa; color: #555; }
 <button class="tab-btn" onclick="bukaTab(event, 'tabKalkulator')">Kalkulator Slot</button>
 <button class="tab-btn" onclick="bukaTab(event, 'tabTools')">Tools</button>
 <button class="tab-btn" onclick="bukaTab(event, 'tabAdmin')">⚙️ Admin Panel</button>
-<button class="tab-btn" onclick="bukaTab(event, 'tabViewerData')">📊 Viewer Data Server</button>
 </div>
 
 <!-- TAB REKAPITULASI -->
@@ -228,80 +227,6 @@ th { background-color: #f8f9fa; color: #555; }
 <div id="sm4dFoot">KATADATA MOBILE · v1.3</div>
 </nav>
 </div>
-</div>
-
-<!-- TAB VIEWER DATA SERVER -->
-<div id="tabViewerData" class="tab-content" style="display:none;">
-    <div class="section">
-        <div class="section-title">Pilih Market Server</div>
-        <div class="form-group">
-            <select id="marketSelectViewer" onchange="loadServerMarketData()">
-                <option value="macau-00">Macau 00</option>
-                <option value="germany-plus5">Germany Plus5</option>
-                <option value="tennesse-midday">Tennesse Midday</option>
-                <option value="indiana-midday">Indiana Midday</option>
-                <option value="kentucky-midday">Kentucky Midday</option>
-                <option value="texas-day">Texas Day</option>
-                <option value="florida-midday">Florida Midday</option>
-                <option value="illinois-midday">Illinois Midday</option>
-                <option value="missouri-midday">Missouri Midday</option>
-                <option value="washington-dc-midday">Washington DC Midday</option>
-                <option value="virginia-day">Virginia Day</option>
-                <option value="new-york-midday">New York Midday</option>
-                <option value="north-carolina-day">North Carolina Day</option>
-                <option value="oregon-3">Oregon 3</option>
-                <option value="morocco-quatro-03">Morocco Quatro 03</option>
-                <option value="texas-evening">Texas Evening</option>
-                <option value="oregon-6">Oregon 6</option>
-                <option value="georgia-evening">Georgia Evening</option>
-                <option value="tennesse-evening">Tennesse Evening</option>
-                <option value="maryland-evening">Maryland Evening</option>
-                <option value="washington-dc-evening">Washington DC Evening</option>
-                <option value="california">California</option>
-                <option value="florida-evening">Florida Evening</option>
-                <option value="missouri-evening">Missouri Evening</option>
-                <option value="oregon-9">Oregon 9</option>
-                <option value="illinois-evening">Illinois Evening</option>
-                <option value="new-york-evening">New York Evening</option>
-                <option value="indiana-evening">Indiana Evening</option>
-                <option value="new-jersey-evening">New Jersey Evening</option>
-                <option value="kentucky-evening">Kentucky Evening</option>
-                <option value="texas-night">Texas Night</option>
-                <option value="north-carolina-evening">North Carolina Evening</option>
-                <option value="georgia-night">Georgia Night</option>
-                <option value="cambodia">Cambodia</option>
-                <option value="oregon-12">Oregon 12</option>
-                <option value="macau-13">Macau 13</option>
-                <option value="bullseye">Bullseye</option>
-                <option value="china">China</option>
-                <option value="macau-16">Macau 16</option>
-                <option value="japan">Japan</option>
-                <option value="macau-19">Macau 19</option>
-                <option value="pcso">PCSO</option>
-                <option value="tennesse-morning">Tennesse Morning</option>
-                <option value="texas-morning">Texas Morning</option>
-                <option value="macau-22">Macau 22</option>
-                <option value="macau-23">Macau 23</option>
-                <option value="maryland-midday">Maryland Midday</option>
-                <option value="georgia-midday">Georgia Midday</option>
-                <option value="new-jersey-midday">New Jersey Midday</option>
-            </select>
-        </div>
-    </div>
-    <div class="table-scroll-container">
-        <table id="dataTableViewer">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Tanggal</th>
-                    <th>Nomor</th>
-                </tr>
-            </thead>
-            <tbody id="tableBodyViewer">
-                <tr><td colspan="3">Memuat data...</td></tr>
-            </tbody>
-        </table>
-    </div>
 </div>
 
 <!-- TAB ADMIN PANEL -->
@@ -872,7 +797,6 @@ function bukaTab(evt, namaTab) {
   document.getElementById(namaTab).style.display = 'block';
   evt.currentTarget.classList.add('active');
   if (namaTab === 'tabRekap') { updateRekapSinkron(); }
-  if (namaTab === 'tabViewerData') { loadServerMarketData(); }
 }
 
 function bukaMetodeTab(evt, id) {

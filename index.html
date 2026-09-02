@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistem Rekapitulasi & Kalkulator Final (Multi-Sesi Macau)</title>
+<title>Sistem Rekapitulasi & Kalkulator Final (Data GitHub)</title>
 <style>
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; }
 .container { background-color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 1350px; box-sizing: border-box; }
@@ -32,16 +32,6 @@ th { background-color: #f8f9fa; color: #555; }
 .table-scroll-container { width: 100%; max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 6px; background: white; }
 .table-rekap input { font-size: 12px; padding: 3px; border: none !important; background: transparent !important; text-align: center; width: 100%; outline: none !important; }
 .col-slot { white-space: nowrap; text-align: left; padding-left: 8px; }
-.custom-file-btn { display: inline-block; background-color: #1a73e8; color: white; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-.custom-file-btn:hover { background-color: #1557b0; }
-.custom-file-btn.uploaded { background-color: #28a745 !important; }
-.multi-upload-btn { background-color: #fbbc05; color: #333; padding: 10px 16px; font-size: 13px; margin-bottom: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; display: inline-block; border: 1px solid #e0a800; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s; }
-.multi-upload-btn:hover { background-color: #e0a800; }
-#mainUploadTable { table-layout: fixed; width: 100%; }
-.file-name-cell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; font-weight: bold; color: #333; }
-.clickable-row { cursor: pointer; }
-.clickable-row:hover { background-color: #f1f5f9; }
-.active-row { background-color: #e8f0fe !important; }
 .top-rank-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
 .top-rank-card { background: #fdfdfd; border: 2px solid #28a745; border-radius: 8px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 .top-rank-title { font-weight: bold; color: #28a745; font-size: 13px; text-align: center; margin-bottom: 6px; background: #e6f4ea; padding: 4px; border-radius: 4px; }
@@ -57,6 +47,11 @@ th { background-color: #f8f9fa; color: #555; }
 .status.success { background: #f0fff4; color: #22543d; border: 1px solid #9ae6b4; display: block; }
 .status.error { background: #fff5f5; color: #742a2a; border: 1px solid #feb2b2; display: block; }
 
+/* MODAL OVERLAY FIX */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+.modal-overlay.active { display: flex; }
+.modal { background: white; border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); }
+
 /* Styles untuk Number Processor (Tools) */
 :root { --bg-card:#1e1f24; --txt-primary:#eee; --txt-secondary:#ccc; --txt-muted:#999; --font-num:'Roboto Mono',monospace; --font-ui:Arial,sans-serif; }
 #sm4dWrap{ position:relative; width:100%; max-width:650px; margin:0 auto; z-index:1; font-family:var(--font-ui); }
@@ -69,7 +64,6 @@ th { background-color: #f8f9fa; color: #555; }
 #sm4dList{ display:none !important; }
 #sm4dNp{ flex:1 1 auto; display:flex; flex-direction:column; min-height:0; border-top:1px solid rgba(252,74,26,.35); background:#15161a; padding:10px 12px 8px; }
 .sm4dnp-header{ font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:#a78bfa; margin-bottom:7px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; row-gap:6px; }
-.sm4dnp-header em{ font-style:normal; color:#8a8f98; font-weight:400; letter-spacing:0; text-transform:none; font-size:10px; }
 .sm4dnp-inwrap{ position:relative; }
 #npInputBadge{ position:absolute; top:6px; right:8px; font-size:8px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:#a78bfa; background:rgba(15,16,20,.72); padding:2px 6px; border-radius:8px; pointer-events:none; line-height:1.3; }
 #npWeightCtrls{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; row-gap:6px; }
@@ -77,96 +71,38 @@ th { background-color: #f8f9fa; color: #555; }
 .np-ctrl-lbl{ font-size:8.5px; font-weight:700; letter-spacing:.2px; color:#9aa0a8; text-transform:uppercase; white-space:nowrap; }
 #npWeightK{ width:64px; font-size:12px; font-weight:700; padding:4px 6px; border-radius:6px; border:1px solid rgba(167,139,250,.35); background:#1a1d23; color:#e2e8f0; }
 #npWeightK2{ width:38px; font-size:12px; font-weight:700; padding:4px 6px; border-radius:6px; border:1px solid rgba(252,165,165,.35); background:#1a1d23; color:#fca5a5; }
-#npWeightModeBtn{ font-size:11px; font-weight:800; padding:6px 12px; border-radius:10px; border:1px solid rgba(167,139,250,.55); background:linear-gradient(135deg,rgba(167,139,250,.28),rgba(167,139,250,.1)); color:#e9d5ff; cursor:pointer; white-space:nowrap; box-shadow:0 1px 4px rgba(0,0,0,.25); -webkit-tap-highlight-color:transparent; transition:transform .12s ease; width:auto; }
-#npWeightModeBtn:active{ transform:scale(.94); }
-#npInput{ width:100%; box-sizing:border-box; padding:11px 12px; border-radius:9px; border:2px solid rgba(245,158,11,.35); background:#0b0c10; color:#fcd34d; font-family:var(--font-num,'Roboto Mono',monospace); font-size:15px; letter-spacing:1px; -webkit-tap-highlight-color:transparent; }
+#npWeightModeBtn{ font-size:11px; font-weight:800; padding:6px 12px; border-radius:10px; border:1px solid rgba(167,139,250,.55); background:linear-gradient(135deg,rgba(167,139,250,.28),rgba(167,139,250,.1)); color:#e9d5ff; cursor:pointer; white-space:nowrap; box-shadow:0 1px 4px rgba(0,0,0,.25); width:auto; }
+#npInput{ width:100%; box-sizing:border-box; padding:11px 12px; border-radius:9px; border:2px solid rgba(245,158,11,.35); background:#0b0c10; color:#fcd34d; font-family:var(--font-num,'Roboto Mono',monospace); font-size:15px; letter-spacing:1px; }
 #npInput:focus{ outline:none; border-color:#f59e0b; box-shadow:0 0 0 3px rgba(245,158,11,.18); }
-#npInput::placeholder{ color:#8a8f98; font-size:12px; letter-spacing:0; }
 .sm4dnp-hint{ font-size:9.5px; color:#9aa0a8; line-height:1.5; margin:6px 1px 4px; text-align:center; margin-bottom:-5px; }
-.sm4dnp-hint b{ color:#c6cbd2; font-weight:600; }
-#npResults{ flex:1 1 auto; overflow-y:auto; min-height:0; -webkit-overflow-scrolling:touch; padding:2px 1px 4px; max-height: 450px; }
-.sm4dnp-btn{ display:flex; width:100%; box-sizing:border-box; align-items:center; justify-content:space-between; gap:8px; margin:7px 0 0; padding:10px 12px; cursor:pointer; border-radius:20px; border:1px solid rgba(148,163,184,.3); background:linear-gradient(135deg,rgba(148,163,184,.2),rgba(148,163,184,.08)); color:#cbd5e1; font-size:12px; font-weight:600; transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease; -webkit-tap-highlight-color:transparent; }
+#npResults{ flex:1 1 auto; overflow-y:auto; min-height:0; padding:2px 1px 4px; max-height: 450px; }
+.sm4dnp-btn{ display:flex; width:100%; box-sizing:border-box; align-items:center; justify-content:space-between; gap:8px; margin:7px 0 0; padding:10px 12px; cursor:pointer; border-radius:20px; border:1px solid rgba(148,163,184,.3); background:linear-gradient(135deg,rgba(148,163,184,.2),rgba(148,163,184,.08)); color:#cbd5e1; font-size:12px; font-weight:600; }
 .sm4dnp-count{ font-family:var(--font-num,'Roboto Mono',monospace); font-size:13px; font-weight:700; letter-spacing:.3px; }
 .sm4dnp-tag{ font-size:10px; font-weight:500; opacity:.85; display:flex; align-items:center; gap:5px; }
-.sm4dnp-tag:before{ content:'\29C9'; font-size:11px; }
 .sm4dnp-ai{ border-color:rgba(139,92,246,.4); background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(139,92,246,.08)); color:#c4b5fd; }
 .sm4dnp-bbfs{ border-color:rgba(245,158,11,.4); background:linear-gradient(135deg,rgba(245,158,11,.22),rgba(245,158,11,.07)); color:#fcd34d; }
-.sm4dnp-poltar{ border-color:rgba(236,72,153,.4); background:linear-gradient(135deg,rgba(236,72,153,.22),rgba(236,72,153,.07)); color:#f9a8d4; }
-.sm4dnp-ke{ border-color:rgba(59,130,246,.4); background:linear-gradient(135deg,rgba(59,130,246,.22),rgba(59,130,246,.07)); color:#93c5fd; }
-.sm4dnp-btn.sm4dnp-copied{ transform:translateY(-3px); border-color:#10b981; color:#6ee7b7; background:linear-gradient(135deg,rgba(16,185,129,.3),rgba(16,185,129,.1)); box-shadow:0 4px 14px rgba(16,185,129,.45); }
 .sm4dnp-legend{ font-size:9px; color:#8a8f98; margin:3px 2px 0; line-height:1.4; font-family:var(--font-num,'Roboto Mono',monospace); }
-.sm4dnp-err{ margin-top:8px; padding:8px 10px; border-radius:8px; font-size:10.5px; color:#fca5a5; line-height:1.4; background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.3); }
-.sm4dnp-warn{ margin-top:8px; padding:6px 9px; border-radius:8px; font-size:9.5px; color:#fcd34d; line-height:1.4; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); }
 #npModeWrap{ display:flex; align-items:center; gap:5px; margin-left:auto; }
 .sm4dnp-mode-lbl{ font-size:10px; font-weight:700; letter-spacing:.5px; color:#a78bfa; text-transform:uppercase; }
-#npModeToggle{ position:relative; display:inline-block; width:42px; height:22px; flex-shrink:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+#npModeToggle{ position:relative; display:inline-block; width:42px; height:22px; flex-shrink:0; cursor:pointer; }
 #npModeToggle input{ opacity:0; width:0; height:0; position:absolute; }
 .np-toggle-slider{ position:absolute; top:0; left:0; right:0; bottom:0; background:#3a3f47; border-radius:22px; transition:background .2s; }
 .np-toggle-slider:before{ content:''; position:absolute; width:16px; height:16px; top:3px; left:3px; background:#8a8f98; border-radius:50%; transition:transform .2s,background .2s; }
 #npModeToggle input:checked + .np-toggle-slider{ background:#7c3aed; }
 #npModeToggle input:checked + .np-toggle-slider:before{ transform:translateX(20px); background:#a78bfa; }
-.sm4dnp-setbtn{ padding:9px 12px; }
-.sm4dnp-setlbl{ font-family:var(--font-ui,inherit); font-size:10px; font-weight:700; letter-spacing:.3px; opacity:.9; padding:2px 7px; border-radius:10px; background:rgba(255,255,255,.08); white-space:nowrap; }
-.sm4dnp-6d{ border-color:rgba(52,211,153,.4); background:linear-gradient(135deg,rgba(52,211,153,.22),rgba(52,211,153,.07)); color:#6ee7b7; }
-.sm4dnp-6d.sm4dnp-best .sm4dnp-setlbl{ background:rgba(52,211,153,.28); color:#a7f3d0; }
-.np-section-lbl.lbl-native{ color:#93c5fd; }
-.np-section-lbl.lbl-6d{ color:#34d399; }
-.sm4dnp-6dinfo{ font-size:9px; color:#9aa0a8; line-height:1.5; margin:0 1px 4px; }
-.np-section-sep{ border:none; border-top:1px solid rgba(255,255,255,.1); margin:6px 0 4px; }
-.np-section-lbl{ font-size:8px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin:4px 0 2px; padding:0 1px; }
-.np-section-lbl.lbl-bbfs{ color:#fcd34d; }
-.np-section-lbl.lbl-cm{ color:#c4b5fd; }
-.sm4dnp-btn.np-compact{ margin:4px 0 0; padding:6px 9px; border-radius:14px; font-size:11px; }
-.sm4dnp-btn.np-compact .sm4dnp-count{ font-size:11px; }
-.sm4dnp-btn.np-compact .sm4dnp-tag{ font-size:9px; }
-.np-split-row{ display:flex; gap:4px; margin:4px 0 0; }
-.np-split-row .sm4dnp-btn{ flex:1; min-width:0; margin:0; padding:5px 3px; border-radius:10px; font-size:10px; flex-direction:column; align-items:center; gap:2px; }
-.np-split-row .sm4dnp-btn .sm4dnp-count{ font-size:10px; }
-.np-split-row .sm4dnp-btn .sm4dnp-tag{ font-size:8px; }
-.np-split-hint{ font-size:8px; color:#8a8f98; text-align:center; margin:5px 0 1px; letter-spacing:.5px; }
-.sm4dnp-cm{ border-color:rgba(167,139,250,.4); background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(167,139,250,.07)); color:#c4b5fd; }
-@keyframes sm4dnpIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
-.sm4dnp-in{ animation:sm4dnpIn .3s ease-out; }
 #sm4dFoot{ padding:8px 16px; font-size:9px; flex-shrink:0; color:var(--txt-muted,#777); border-top:1px solid rgba(255,255,255,.08); text-align:center; letter-spacing:1px; }
 #np7dModeWrap{ display:flex; align-items:center; gap:5px; }
 .lbl-7d{ color:#f472b6; }
-#np7dModeToggle{ position:relative; display:inline-block; width:42px; height:22px; flex-shrink:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+#np7dModeToggle{ position:relative; display:inline-block; width:42px; height:22px; flex-shrink:0; cursor:pointer; }
 #np7dModeToggle input{ opacity:0; width:0; height:0; position:absolute; }
 .np-invert-row{ display:flex; align-items:center; gap:5px; margin:4px 0; flex-wrap:wrap; }
 .np-invert-lbl{ font-size:9px; font-weight:700; letter-spacing:.5px; color:#9aa0a8; text-transform:uppercase; }
-.np-invert-gap{ width:8px; }
-.np-idn-lbl{ font-size:9px; font-weight:700; letter-spacing:.5px; color:#9aa0a8; text-transform:uppercase; }
-.np-idn{ position:relative; display:inline-block; width:36px; height:20px; flex-shrink:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
-.np-idn input{ opacity:0; width:0; height:0; position:absolute; }
-.np-idn-slider{ position:absolute; top:0; left:0; right:0; bottom:0; background:#3a3f47; border-radius:20px; transition:background .2s; }
-.np-idn-slider:before{ content:''; position:absolute; width:14px; height:14px; top:3px; left:3px; background:#8a8f98; border-radius:50%; transition:transform .2s; }
-.np-idn input:checked + .np-idn-slider{ background:#0ea5e9; }
-.np-idn input:checked + .np-idn-slider:before{ transform:translateX(16px); background:#38bdf8; }
-.np-invert{ position:relative; display:inline-block; width:36px; height:20px; flex-shrink:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.np-invert{ position:relative; display:inline-block; width:36px; height:20px; flex-shrink:0; cursor:pointer; }
 .np-invert input{ opacity:0; width:0; height:0; position:absolute; }
 .np-invert-slider{ position:absolute; top:0; left:0; right:0; bottom:0; background:#3a3f47; border-radius:20px; transition:background .2s; }
 .np-invert-slider:before{ content:''; position:absolute; width:14px; height:14px; top:3px; left:3px; background:#8a8f98; border-radius:50%; transition:transform .2s; }
 .np-invert input:checked + .np-invert-slider{ background:#10b981; }
 .np-invert input:checked + .np-invert-slider:before{ transform:translateX(16px); background:#34d399; }
-.np-setgrp-lbl{ font-size:9px; color:#9aa0a8; margin:6px 1px 2px; }
-.np-set1{ color:#6ee7b7; }
-.np-set2{ color:#fcd34d; }
-.np-set3{ color:#f9a8d4; }
-.np-set4{ color:#93c5fd; }
-.np-set5{ color:#c4b5fd; }
-.np-ext7d{ opacity:.7; }
-.np-ext7d-lbl{ opacity:.7; }
-.np-3dsub{ margin:2px 0 4px 8px; }
-.np-3dpill{ padding:6px 10px; border-radius:14px; font-size:11px; }
-.np-sub{ font-size:9px; font-weight:500; opacity:.7; margin-left:4px; }
-.np-src{ font-size:8px; font-weight:500; opacity:.6; margin-left:6px; color:#8a8f98; }
-.np-idn-diskon{ color:#fcd34d; }
-.np-idn-full{ color:#93c5fd; }
-.np-bo1{ color:#6ee7b7; }
-.np-bo2{ color:#fcd34d; }
-.np-bo3{ color:#f9a8d4; }
-.np-bo4{ color:#93c5fd; }
-.np-bo5{ color:#c4b5fd; }
 </style>
 <base target="_blank">
 </head>
@@ -175,13 +111,12 @@ th { background-color: #f8f9fa; color: #555; }
 <div class="tab-nav">
 <button class="tab-btn active" onclick="bukaTab(event, 'tabRekap')">Tabel Rekapitulasi</button>
 <button class="tab-btn" onclick="bukaTab(event, 'tabKalkulator')">Kalkulator Slot</button>
-<button class="tab-btn" onclick="bukaTab(event, 'tabLastNumber')">LAST NUMBER (Multi-Sesi)</button>
 <button class="tab-btn" onclick="bukaTab(event, 'tabTools')">Tools</button>
 <button class="tab-btn" onclick="bukaTab(event, 'tabAdmin')">⚙️ Admin Panel</button>
 <button class="tab-btn" onclick="bukaTab(event, 'tabViewerData')">📊 Viewer Data Server</button>
 </div>
 
-<!-- TAB REKAPITULASI (LOKAL SLOT) -->
+<!-- TAB REKAPITULASI -->
 <div id="tabRekap" class="tab-content active">
 <h2>Tabel Pembanding Rekapitulasi</h2>
 <div class="date-picker-container" style="margin-bottom: 15px;">
@@ -254,35 +189,6 @@ th { background-color: #f8f9fa; color: #555; }
 </div>
 </div>
 
-<!-- TAB LAST NUMBER -->
-<div id="tabLastNumber" class="tab-content" style="display:none;">
-<h2>LAST NUMBER (Multi-Sesi)</h2>
-<div style="text-align: left; margin-bottom: 15px;">
-<label class="multi-upload-btn" style="margin-bottom: 0;">
-+ Upload File Multi-Sesi HTML
-<input type="file" multiple accept=".html" onchange="prosesFileMultiSesiWaktu(event, 1)" style="display:none;">
-</label>
-</div>
-<div style="text-align: right; margin-bottom: 10px;">
-<button onclick="resetDataStorage()" style="background-color: #dc3545; width: auto; padding: 6px 12px; font-size: 11px;">Reset Data Tersimpan</button>
-</div>
-<div class="table-scroll-container">
-<table id="mainUploadTable">
-<thead><tr><th style="width: 50px;">No</th><th>MARKET / SESI WAKTU</th></tr></thead>
-<tbody id="upload50Body"></tbody>
-</table>
-</div>
-<div id="detailFileWrapper" style="margin-top: 25px; border-top: 2px solid #ddd; padding-top: 15px; display: none;">
-<h3 id="detailFileTitle" style="color: #1a73e8; font-size: 15px; margin-bottom: 8px;">Detail Seluruh Data Sesi</h3>
-<div class="table-scroll-container" style="max-height: 250px;">
-<table id="detailFileTable">
-<thead><tr><th>No</th><th>Tanggal</th><th>Nomor</th></tr></thead>
-<tbody id="detailFileBody"></tbody>
-</table>
-</div>
-</div>
-</div>
-
 <!-- TAB TOOLS -->
 <div id="tabTools" class="tab-content" style="display:none;">
 <h2>Tools</h2>
@@ -293,18 +199,18 @@ th { background-color: #f8f9fa; color: #555; }
 <div id="sm4dHead"><b>KATADATA Mobile</b><button id="sm4dClose" aria-label="Close menu">✕</button></div>
 <div id="sm4dNp">
 <div class="sm4dnp-header">
-<button type="button" id="npWeightModeBtn" title="Ganti cara isi angka: Modal (langsung) atau Target (profit yang diinginkan)">💰 Modal</button>
+<button type="button" id="npWeightModeBtn">💰 Modal</button>
 <span id="np7dModeWrap">
-<label id="np7dModeToggle" title="BBFS 7D mode — distribusi 7 digit unik per SET"><input type="checkbox" id="np7dModeCb"><span class="np-toggle-slider"></span></label>
+<label id="np7dModeToggle"><input type="checkbox" id="np7dModeCb"><span class="np-toggle-slider"></span></label>
 <span class="sm4dnp-mode-lbl lbl-7d">BBFS 7D</span>
 </span>
 <span id="npModeWrap">
-<label id="npModeToggle" title="BBFS/CM mode"><input type="checkbox" id="npModeCb"><span class="np-toggle-slider"></span></label>
+<label id="npModeToggle"><input type="checkbox" id="npModeCb"><span class="np-toggle-slider"></span></label>
 <span class="sm4dnp-mode-lbl">BBFS/CM</span>
 </span>
 <span id="npWeightCtrls">
-<span class="np-ctrl-group"><span class="np-ctrl-lbl" id="npWeightKLbl">Rp.</span><input type="number" id="npWeightK" value="24000" step="1000" min="500" title="Modal – total uang tersedia untuk SELURUH kombinasi 6D LIMIT (SET1-4), atau target profit, tergantung tombol mode di kiri"></span>
-<span class="np-ctrl-group"><span class="np-ctrl-lbl">Min. Margin</span><input type="number" id="npWeightK2" value="5" step="1" min="0" max="100" title="Margin aman % – K2 (SET2/SET3) dihitung OTOMATIS per acuan supaya SEMUA SET 6D LIMIT dijamin balik modal+margin ini"><span class="np-ctrl-lbl">%</span></span>
+<span class="np-ctrl-group"><span class="np-ctrl-lbl" id="npWeightKLbl">Rp.</span><input type="number" id="npWeightK" value="24000" step="1000" min="500"></span>
+<span class="np-ctrl-group"><span class="np-ctrl-lbl">Min. Margin</span><input type="number" id="npWeightK2" value="5" step="1" min="0" max="100"><span class="np-ctrl-lbl">%</span></span>
 </span>
 </div>
 <div class="sm4dnp-inwrap">
@@ -316,7 +222,6 @@ th { background-color: #f8f9fa; color: #555; }
 <span style="background-color:darkgreen;color:lightgrey;padding:2px 3px;border-radius:4px;"><b>BBFS</b> 5–10 digit</span>
 <span style="background-color:darkgreen;color:lightgrey;padding:2px 3px;border-radius:4px;"><b>K*E</b> 1234*5678</span>
 <br><b>POLTAR 4/3/2D</b> ➞ <span style="color:lightgrey;">0123,45,678,90123</span>
-<br>tap button below to copy
 </div>
 <div id="npResults"></div>
 </div>
@@ -325,21 +230,61 @@ th { background-color: #f8f9fa; color: #555; }
 </div>
 </div>
 
-<!-- TAB VIEWER DATA SERVER (Grup Admin) -->
+<!-- TAB VIEWER DATA SERVER -->
 <div id="tabViewerData" class="tab-content" style="display:none;">
     <div class="section">
         <div class="section-title">Pilih Market Server</div>
         <div class="form-group">
             <select id="marketSelectViewer" onchange="loadServerMarketData()">
-                <option value="oregon-3">Oregon 3 (1:00 PM)</option>
-                <option value="oregon-6">Oregon 6 (4:00 PM)</option>
-                <option value="oregon-9">Oregon 9 (7:00 PM)</option>
-                <option value="oregon-12">Oregon 12 (10:00 PM)</option>
+                <option value="macau-00">Macau 00</option>
+                <option value="germany-plus5">Germany Plus5</option>
+                <option value="tennesse-midday">Tennesse Midday</option>
+                <option value="indiana-midday">Indiana Midday</option>
+                <option value="kentucky-midday">Kentucky Midday</option>
+                <option value="texas-day">Texas Day</option>
+                <option value="florida-midday">Florida Midday</option>
+                <option value="illinois-midday">Illinois Midday</option>
+                <option value="missouri-midday">Missouri Midday</option>
+                <option value="washington-dc-midday">Washington DC Midday</option>
+                <option value="virginia-day">Virginia Day</option>
                 <option value="new-york-midday">New York Midday</option>
-                <option value="new-york-evening">New York Evening</option>
                 <option value="north-carolina-day">North Carolina Day</option>
+                <option value="oregon-3">Oregon 3</option>
+                <option value="morocco-quatro-03">Morocco Quatro 03</option>
+                <option value="texas-evening">Texas Evening</option>
+                <option value="oregon-6">Oregon 6</option>
+                <option value="georgia-evening">Georgia Evening</option>
+                <option value="tennesse-evening">Tennesse Evening</option>
+                <option value="maryland-evening">Maryland Evening</option>
+                <option value="washington-dc-evening">Washington DC Evening</option>
+                <option value="california">California</option>
+                <option value="florida-evening">Florida Evening</option>
+                <option value="missouri-evening">Missouri Evening</option>
+                <option value="oregon-9">Oregon 9</option>
+                <option value="illinois-evening">Illinois Evening</option>
+                <option value="new-york-evening">New York Evening</option>
+                <option value="indiana-evening">Indiana Evening</option>
+                <option value="new-jersey-evening">New Jersey Evening</option>
+                <option value="kentucky-evening">Kentucky Evening</option>
+                <option value="texas-night">Texas Night</option>
                 <option value="north-carolina-evening">North Carolina Evening</option>
-                <option value="macau">Macau</option>
+                <option value="georgia-night">Georgia Night</option>
+                <option value="cambodia">Cambodia</option>
+                <option value="oregon-12">Oregon 12</option>
+                <option value="macau-13">Macau 13</option>
+                <option value="bullseye">Bullseye</option>
+                <option value="china">China</option>
+                <option value="macau-16">Macau 16</option>
+                <option value="japan">Japan</option>
+                <option value="macau-19">Macau 19</option>
+                <option value="pcso">PCSO</option>
+                <option value="tennesse-morning">Tennesse Morning</option>
+                <option value="texas-morning">Texas Morning</option>
+                <option value="macau-22">Macau 22</option>
+                <option value="macau-23">Macau 23</option>
+                <option value="maryland-midday">Maryland Midday</option>
+                <option value="georgia-midday">Georgia Midday</option>
+                <option value="new-jersey-midday">New Jersey Midday</option>
             </select>
         </div>
     </div>
@@ -359,7 +304,7 @@ th { background-color: #f8f9fa; color: #555; }
     </div>
 </div>
 
-<!-- TAB ADMIN PANEL UPDATE (Grup Admin) -->
+<!-- TAB ADMIN PANEL -->
 <div id="tabAdmin" class="tab-content" style="display:none;">
     <div class="config-box">
         <div class="form-group" style="margin-bottom: 0;">
@@ -372,15 +317,55 @@ th { background-color: #f8f9fa; color: #555; }
         <div class="form-group">
             <select id="marketSelectAdmin">
                 <option value="">-- Pilih Market --</option>
-                <option value="oregon-3">Oregon 3 (1:00 PM)</option>
-                <option value="oregon-6">Oregon 6 (4:00 PM)</option>
-                <option value="oregon-9">Oregon 9 (7:00 PM)</option>
-                <option value="oregon-12">Oregon 12 (10:00 PM)</option>
+                <option value="macau-00">Macau 00</option>
+                <option value="germany-plus5">Germany Plus5</option>
+                <option value="tennesse-midday">Tennesse Midday</option>
+                <option value="indiana-midday">Indiana Midday</option>
+                <option value="kentucky-midday">Kentucky Midday</option>
+                <option value="texas-day">Texas Day</option>
+                <option value="florida-midday">Florida Midday</option>
+                <option value="illinois-midday">Illinois Midday</option>
+                <option value="missouri-midday">Missouri Midday</option>
+                <option value="washington-dc-midday">Washington DC Midday</option>
+                <option value="virginia-day">Virginia Day</option>
                 <option value="new-york-midday">New York Midday</option>
-                <option value="new-york-evening">New York Evening</option>
                 <option value="north-carolina-day">North Carolina Day</option>
+                <option value="oregon-3">Oregon 3</option>
+                <option value="morocco-quatro-03">Morocco Quatro 03</option>
+                <option value="texas-evening">Texas Evening</option>
+                <option value="oregon-6">Oregon 6</option>
+                <option value="georgia-evening">Georgia Evening</option>
+                <option value="tennesse-evening">Tennesse Evening</option>
+                <option value="maryland-evening">Maryland Evening</option>
+                <option value="washington-dc-evening">Washington DC Evening</option>
+                <option value="california">California</option>
+                <option value="florida-evening">Florida Evening</option>
+                <option value="missouri-evening">Missouri Evening</option>
+                <option value="oregon-9">Oregon 9</option>
+                <option value="illinois-evening">Illinois Evening</option>
+                <option value="new-york-evening">New York Evening</option>
+                <option value="indiana-evening">Indiana Evening</option>
+                <option value="new-jersey-evening">New Jersey Evening</option>
+                <option value="kentucky-evening">Kentucky Evening</option>
+                <option value="texas-night">Texas Night</option>
                 <option value="north-carolina-evening">North Carolina Evening</option>
-                <option value="macau">Macau</option>
+                <option value="georgia-night">Georgia Night</option>
+                <option value="cambodia">Cambodia</option>
+                <option value="oregon-12">Oregon 12</option>
+                <option value="macau-13">Macau 13</option>
+                <option value="bullseye">Bullseye</option>
+                <option value="china">China</option>
+                <option value="macau-16">Macau 16</option>
+                <option value="japan">Japan</option>
+                <option value="macau-19">Macau 19</option>
+                <option value="pcso">PCSO</option>
+                <option value="tennesse-morning">Tennesse Morning</option>
+                <option value="texas-morning">Texas Morning</option>
+                <option value="macau-22">Macau 22</option>
+                <option value="macau-23">Macau 23</option>
+                <option value="maryland-midday">Maryland Midday</option>
+                <option value="georgia-midday">Georgia Midday</option>
+                <option value="new-jersey-midday">New Jersey Midday</option>
             </select>
         </div>
     </div>
@@ -401,10 +386,10 @@ th { background-color: #f8f9fa; color: #555; }
     </div>
     <div id="statusBox" class="status"></div>
     <div class="quick-actions">
-        <button class="btn btn-primary btn-large" onclick="submitData()" id="btnSubmit">💾 Simpan & Update</button>
-        <button class="btn btn-secondary" onclick="resetForm()">🔄 Reset</button>
+        <button class="btn btn-primary btn-large" onclick="submitData()" id="btnSubmit" style="background:#1a73e8; color:white; border:none; padding:12px; border-radius:6px; cursor:pointer;">💾 Simpan & Update</button>
+        <button class="btn btn-secondary" onclick="resetForm()" style="background:#edf2f7; border:none; padding:12px; border-radius:6px; cursor:pointer;">🔄 Reset</button>
     </div>
-    <div class="table-scroll-container" id="currentDataBox" style="display:none;">
+    <div class="table-scroll-container" id="currentDataBox" style="display:none; margin-top:15px;">
         <h3 style="padding: 10px; color: #1a73e8; font-size: 15px;">📊 Data Saat Ini (Server)</h3>
         <table class="table-rekap">
             <thead><tr><th>No</th><th>Tanggal</th><th>Nomor</th></tr></thead>
@@ -415,15 +400,15 @@ th { background-color: #f8f9fa; color: #555; }
 
 </div>
 
-<!-- KONFLIK MODAL (ADMIN) -->
+<!-- KONFLIK MODAL -->
 <div class="modal-overlay" id="conflictModal">
-    <div class="modal" style="background: white; border-radius: 12px; padding: 2rem; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
-        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">⚠️ Konflik Data Terdeteksi</h3>
-        <p style="margin-bottom: 1rem;">User lain telah mengupdate data ini setelah Anda memuatnya.</p>
+    <div class="modal">
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #d93025;">⚠️ Konflik Data Terdeteksi</h3>
+        <p style="margin-bottom: 1rem; color: #5f6368;">User lain telah mengupdate data ini setelah Anda memuatnya.</p>
         <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; flex-wrap: wrap;">
-            <button style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; background: #edf2f7;" onclick="closeConflictModal()">Batal</button>
-            <button style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; background: #f56565; color: white;" onclick="forceOverwrite()">Paksa Overwrite</button>
-            <button style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; background: #4299e1; color: white;" onclick="reloadAndMerge()">Muat Ulang</button>
+            <button style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; background: #edf2f7; font-weight:bold;" onclick="closeConflictModal()">Batal</button>
+            <button style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; background: #f56565; color: white; font-weight:bold;" onclick="forceOverwrite()">Paksa Overwrite</button>
+            <button style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; background: #4299e1; color: white; font-weight:bold;" onclick="reloadAndMerge()">Muat Ulang</button>
         </div>
     </div>
 </div>
@@ -434,8 +419,6 @@ let dataSemuaSlot = {};
 let slotAktif = 1;
 let globalSelectedDate = "";
 let isResultAutomatic = true;
-let storedHtmlData = {};
-let activeDetailIndex = null;
 let globalBacktestResults = null;
 
 // GITHUB ADMIN VARS
@@ -448,33 +431,85 @@ let currentFileSHA = null;
 let currentData = [];
 let pendingSubmit = null;
 
-const bulanMap = {
-  "Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "Mei": "05", "Jun": "06",
-  "Jul": "07", "Agu": "08", "Aug": "08", "Sep": "09", "Okt": "10", "Oct": "10",
-  "Nov": "11", "Des": "12", "Dec": "12"
-};
+const MARKET_LIST = [
+    { id: 'macau-00', name: 'Macau 00' },
+    { id: 'germany-plus5', name: 'Germany Plus5' },
+    { id: 'tennesse-midday', name: 'Tennesse Midday' },
+    { id: 'indiana-midday', name: 'Indiana Midday' },
+    { id: 'kentucky-midday', name: 'Kentucky Midday' },
+    { id: 'texas-day', name: 'Texas Day' },
+    { id: 'florida-midday', name: 'Florida Midday' },
+    { id: 'illinois-midday', name: 'Illinois Midday' },
+    { id: 'missouri-midday', name: 'Missouri Midday' },
+    { id: 'washington-dc-midday', name: 'Washington DC Midday' },
+    { id: 'virginia-day', name: 'Virginia Day' },
+    { id: 'new-york-midday', name: 'New York Midday' },
+    { id: 'north-carolina-day', name: 'North Carolina Day' },
+    { id: 'oregon-3', name: 'Oregon 3' },
+    { id: 'morocco-quatro-03', name: 'Morocco Quatro 03' },
+    { id: 'texas-evening', name: 'Texas Evening' },
+    { id: 'oregon-6', name: 'Oregon 6' },
+    { id: 'georgia-evening', name: 'Georgia Evening' },
+    { id: 'tennesse-evening', name: 'Tennesse Evening' },
+    { id: 'maryland-evening', name: 'Maryland Evening' },
+    { id: 'washington-dc-evening', name: 'Washington DC Evening' },
+    { id: 'california', name: 'California' },
+    { id: 'florida-evening', name: 'Florida Evening' },
+    { id: 'missouri-evening', name: 'Missouri Evening' },
+    { id: 'oregon-9', name: 'Oregon 9' },
+    { id: 'illinois-evening', name: 'Illinois Evening' },
+    { id: 'new-york-evening', name: 'New York Evening' },
+    { id: 'indiana-evening', name: 'Indiana Evening' },
+    { id: 'new-jersey-evening', name: 'New Jersey Evening' },
+    { id: 'kentucky-evening', name: 'Kentucky Evening' },
+    { id: 'texas-night', name: 'Texas Night' },
+    { id: 'north-carolina-evening', name: 'North Carolina Evening' },
+    { id: 'georgia-night', name: 'Georgia Night' },
+    { id: 'cambodia', name: 'Cambodia' },
+    { id: 'oregon-12', name: 'Oregon 12' },
+    { id: 'macau-13', name: 'Macau 13' },
+    { id: 'bullseye', name: 'Bullseye' },
+    { id: 'china', name: 'China' },
+    { id: 'macau-16', name: 'Macau 16' },
+    { id: 'japan', name: 'Japan' },
+    { id: 'macau-19', name: 'Macau 19' },
+    { id: 'pcso', name: 'PCSO' },
+    { id: 'tennesse-morning', name: 'Tennesse Morning' },
+    { id: 'texas-morning', name: 'Texas Morning' },
+    { id: 'macau-22', name: 'Macau 22' },
+    { id: 'macau-23', name: 'Macau 23' },
+    { id: 'maryland-midday', name: 'Maryland Midday' },
+    { id: 'georgia-midday', name: 'Georgia Midday' },
+    { id: 'new-jersey-midday', name: 'New Jersey Midday' }
+];
+  
+  const TOTAL_SLOTS = MARKET_LIST.length;
 
-function formatTanggalWab(tglStr) {
-  let clean = tglStr.trim();
-  let parts = clean.split(/[\s-]+/);
-  if (parts.length >= 2) {
-    let d = String(parts[0]).padStart(2, '0');
-    let mStr = parts[1];
-    let m = bulanMap[mStr] || mStr;
-    let y = parts[2] || new Date().getFullYear();
-    return `${d}-${m}-${y}`;
-  }
-  return clean;
-}
 function formatDate(d, m, y) { return `${String(d).padStart(2,'0')}-${String(m).padStart(2,'0')}-${y}`; }
 function getNamaHari(date) { const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']; return hari[date.getDay()]; }
 
-// --- INIT LOKAL ---
-window.onload = function() {
+// --- INIT APP ---
+window.onload = async function() {
+  initSlotsAndTabs();
+  buatTabelRekapTunggal(); 
+  muatDariLocalStorage();
+  await fetchAllMarketData();
+  
+  // INIT ADMIN TOKEN
+  const savedToken = localStorage.getItem('github_token');
+  if (savedToken) document.getElementById('githubToken').value = savedToken;
+  loadServerMarketData();
+};
+
+function initSlotsAndTabs() {
   let tabsContainer = document.getElementById("slotTabsContainer");
-  for (let i = 1; i <= 75; i++) {
+  tabsContainer.innerHTML = '';
+  
+  MARKET_LIST.forEach((m, idx) => {
+    let i = idx + 1;
     dataSemuaSlot[i] = {
-      nama: "Slot " + i,
+      id: m.id,
+      nama: m.name,
       parsedData: [],
       inputs: ["", "", "", "", "", "", "", ""],
       hasil: {
@@ -488,20 +523,37 @@ window.onload = function() {
     btn.className = "slot-sub-tab";
     if (i === 1) btn.classList.add("active");
     btn.id = "btn_slot_" + i;
-    btn.innerText = "Slot " + i;
+    btn.innerText = m.name;
     btn.onclick = function() { gantiSlot(i); };
     tabsContainer.appendChild(btn);
-  }
-  buatTabelRekapTunggal(); 
-  buatTabel50Upload();
-  muatDariLocalStorage();
-  
-  // INIT ADMIN TOKEN
-  const savedToken = localStorage.getItem('github_token');
-  if (savedToken) document.getElementById('githubToken').value = savedToken;
-};
+  });
+}
 
-// --- GITHUB ADMIN PANEL FUNCTIONS ---
+async function fetchAllMarketData() {
+  for (let idx = 0; idx < MARKET_LIST.length; idx++) {
+      let i = idx + 1;
+      let marketId = MARKET_LIST[idx].id;
+      try {
+          const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${DATA_PATH}/${marketId}.json?t=${new Date().getTime()}`;
+          const response = await fetch(rawUrl);
+          if (response.ok) {
+              let data = await response.json();
+              dataSemuaSlot[i].parsedData = data;
+          }
+      } catch (error) {
+          console.error("Gagal memuat " + marketId, error);
+      }
+  }
+  updateRekapSinkron();
+  if (globalSelectedDate) {
+      for (let s = 1; s <= TOTAL_SLOTS; s++) { terapkanTanggalKeSlot(s, globalSelectedDate); }
+  } else {
+      for (let s = 1; s <= TOTAL_SLOTS; s++) { hitungSlotOtomatis(s); }
+  }
+  gantiSlot(slotAktif);
+}
+
+// --- GITHUB ADMIN PANEL & VIEWER ---
 document.getElementById('githubToken').addEventListener('change', (e) => {
     localStorage.setItem('github_token', e.target.value.trim());
 });
@@ -540,40 +592,25 @@ async function loadServerMarketData() {
     const tableBody = document.getElementById('tableBodyViewer');
     tableBody.innerHTML = '<tr><td colspan="3">Memuat data...</td></tr>';
 
-    // Menggunakan URL Raw GitHub agar bisa diakses darimana saja tanpa kendala CORS lokal
-    const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${DATA_PATH}/${market}.json`;
+    const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${DATA_PATH}/${market}.json?t=${new Date().getTime()}`;
 
     try {
-        // Parameter ?t= digunakan untuk bypass cache browser agar selalu mendapat data terupdate
-        const response = await fetch(`${rawUrl}?t=${new Date().getTime()}`);
-        
-        if (!response.ok) {
-            throw new Error('File data belum tersedia di server.');
-        }
-        
+        const response = await fetch(rawUrl);
+        if (!response.ok) throw new Error('File data belum tersedia di server.');
         let data = await response.json();
-        tableBody.innerHTML = '';
         
+        tableBody.innerHTML = '';
         if (data.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="3">Tidak ada data tersedia.</td></tr>';
             return;
         }
-        
-        // Membalik urutan agar data terbaru ada di atas (opsional, sesuaikan dengan struktur JSON Anda)
-        data.reverse(); 
-        
+        data.reverse();
         data.forEach((item, index) => {
-            const row = `<tr>
-                <td>${index + 1}</td>
-                <td>${item.tanggal}</td>
-                <td><strong style="color:#1a73e8;">${item.nomor}</strong></td>
-            </tr>`;
+            const row = `<tr><td>${index + 1}</td><td>${item.tanggal}</td><td><strong style="color:#1a73e8;">${item.nomor}</strong></td></tr>`;
             tableBody.innerHTML += row;
         });
-        
     } catch (error) {
-        console.error("Fetch error:", error);
-        tableBody.innerHTML = `<tr><td colspan="3" style="color: red;">Gagal memuat data: ${error.message}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="3" style="color: red;">Gagal memuat data atau file JSON belum terbentuk.</td></tr>`;
     }
 }
 
@@ -675,6 +712,10 @@ async function submitData() {
         currentFileSHA = latestSHA;
         displayCurrentData();
         document.getElementById('inputNomorAdmin').value = '';
+        
+        // Segarkan data lokal setelah update sukses
+        await fetchAllMarketData();
+        
     } catch (error) {
         showStatus('error', `❌ Gagal menyimpan: ${error.message}`);
     } finally {
@@ -754,6 +795,7 @@ async function forceOverwrite() {
         currentFileSHA = latestSHA;
         displayCurrentData();
         document.getElementById('inputNomorAdmin').value = '';
+        await fetchAllMarketData();
     } catch (error) {
         showStatus('error', `❌ Gagal overwrite: ${error.message}`);
     } finally {
@@ -791,6 +833,7 @@ async function reloadAndMerge() {
         currentFileSHA = newSHA;
         displayCurrentData();
         document.getElementById('inputNomorAdmin').value = '';
+        await fetchAllMarketData();
     } catch (error) {
         showStatus('error', `❌ Gagal menggabungkan: ${error.message}`);
     } finally {
@@ -800,11 +843,11 @@ async function reloadAndMerge() {
     }
 }
 
-// --- FUNGSI LOKAL (SLOT, REKAP, DLL) ---
+// --- FUNGSI LOKAL KALKULATOR & REKAP ---
 function simpanKeLocalStorage() {
   let saveData = {};
-  for (let i = 1; i <= 75; i++) {
-    saveData[i] = { nama: dataSemuaSlot[i].nama, parsedData: dataSemuaSlot[i].parsedData, inputs: dataSemuaSlot[i].inputs, rekapManual: dataSemuaSlot[i].rekapManual, hasil: dataSemuaSlot[i].hasil };
+  for (let i = 1; i <= TOTAL_SLOTS; i++) {
+    saveData[i] = { rekapManual: dataSemuaSlot[i].rekapManual };
   }
   localStorage.setItem('sistem_rekap_slot_data', JSON.stringify(saveData));
 }
@@ -814,35 +857,12 @@ function muatDariLocalStorage() {
   if (!saved) return;
   try {
     let saveData = JSON.parse(saved);
-    for (let i = 1; i <= 75; i++) {
-      if (saveData[i]) {
-        dataSemuaSlot[i].nama = saveData[i].nama || ("Slot " + i);
-        dataSemuaSlot[i].parsedData = saveData[i].parsedData || [];
-        dataSemuaSlot[i].inputs = saveData[i].inputs || ["","","","","","","",""];
-        dataSemuaSlot[i].hasil = saveData[i].hasil || dataSemuaSlot[i].hasil;
-        if (!dataSemuaSlot[i].hasil.M_AI) dataSemuaSlot[i].hasil.M_AI = { 2:"-", 3:"-", 4:"-", 5:"-", 6:"-", 7:"-", 8:"-", 9:"-" };
-        if (saveData[i].rekapManual) dataSemuaSlot[i].rekapManual = saveData[i].rekapManual;
-        
-        if (dataSemuaSlot[i].nama !== ("Slot " + i)) {
-          let nameSpan = document.getElementById(`name_${i}`);
-          if (nameSpan) nameSpan.innerText = dataSemuaSlot[i].nama;
-          let lblUpload = document.getElementById(`lbl_upload_${i}`);
-          if (lblUpload) lblUpload.classList.add('uploaded');
-          let btnSlot = document.getElementById(`btn_slot_${i}`);
-          if (btnSlot) btnSlot.innerText = dataSemuaSlot[i].nama;
-          storedHtmlData[i] = { parsedData: dataSemuaSlot[i].parsedData, nama: dataSemuaSlot[i].nama };
-        }
+    for (let i = 1; i <= TOTAL_SLOTS; i++) {
+      if (saveData[i] && saveData[i].rekapManual) {
+        dataSemuaSlot[i].rekapManual = saveData[i].rekapManual;
       }
     }
-    updateRekapSinkron();
   } catch(e) {}
-}
-
-function resetDataStorage() {
-  if(confirm("Apakah Anda yakin ingin mereset seluruh data file yang tersimpan?")) {
-    localStorage.removeItem('sistem_rekap_slot_data');
-    location.reload();
-  }
 }
 
 function bukaTab(evt, namaTab) {
@@ -871,10 +891,10 @@ function buatTabelRekapTunggal() {
   let tbody = document.getElementById("rekapTunggalBody");
   if(!tbody) return;
   tbody.innerHTML = `<tr id="rekapTunggalEmpty"><td colspan="7">Belum ada data market</td></tr>`;
-  for (let i = 1; i <= 75; i++) {
+  for (let i = 1; i <= TOTAL_SLOTS; i++) {
     tbody.innerHTML += `<tr id="row_rek_tunggal_${i}" style="display:none;">
       <td id="no_rek_tunggal_${i}">${i}</td>
-      <td class="col-slot" id="nama_slot_tunggal_${i}">Slot ${i}</td>
+      <td class="col-slot" id="nama_slot_tunggal_${i}">-</td>
       <td><div id="rek_tunggal_C_${i}" style="font-weight:bold; color:#1a73e8;">-</div></td>
       <td id="rek_tunggal_D_${i}" style="font-weight:bold; color:#1a73e8;">-</td>
       <td><input type="text" class="input-result-tunggal" id="rek_tunggal_E_${i}" oninput="simpanRekapManual(${i})" readonly></td>
@@ -918,9 +938,9 @@ function ambilResultRekapByMethod(i, method) {
 
 function hitungStatistikMetode(methodNum) {
   let w = 0, l = 0, details = [], displayNo = 1;
-  for (let i = 1; i <= 75; i++) {
+  for (let i = 1; i <= TOTAL_SLOTS; i++) {
     let slot = dataSemuaSlot[i];
-    if (!slot.nama || slot.nama === "Slot " + i || !slot.parsedData || slot.parsedData.length === 0) continue; 
+    if (!slot.parsedData || slot.parsedData.length === 0) continue; 
     let ai = (methodNum === 1) ? String(slot.hasil.C21 || '').trim() : String(slot.hasil.M_AI[methodNum] || '').trim();
     if (ai === '') ai = '-';
     let res = ambilResultRekapByMethod(i, methodNum);
@@ -949,7 +969,7 @@ function jalankanBacktesting7Hari() {
     checkDate.setDate(baseDateObj.getDate() - dayOffset);
     let checkDateStr = formatDate(checkDate.getDate(), checkDate.getMonth() + 1, checkDate.getFullYear());
     let hasData = false;
-    for (let s = 1; s <= 75; s++) {
+    for (let s = 1; s <= TOTAL_SLOTS; s++) {
       if (dataSemuaSlot[s].parsedData && dataSemuaSlot[s].parsedData.some(item => item.tanggal === checkDateStr)) { hasData = true; break; }
     }
     if (!hasData) continue;
@@ -957,7 +977,7 @@ function jalankanBacktesting7Hari() {
 
     activeMethodsList.forEach(mNum => {
       let tempW = 0, tempL = 0;
-      for (let s = 1; s <= 75; s++) {
+      for (let s = 1; s <= TOTAL_SLOTS; s++) {
         let slot = dataSemuaSlot[s];
         if (!slot.parsedData || slot.parsedData.length === 0) continue; 
         let entry = slot.parsedData.find(item => item.tanggal === checkDateStr);
@@ -996,7 +1016,7 @@ function jalankanBacktesting7Hari() {
 function sinkronisasiTanggalDariRekap(tglInput) {
   globalSelectedDate = tglInput;
   document.getElementById('inputTanggal').value = tglInput;
-  for (let s = 1; s <= 75; s++) { terapkanTanggalKeSlot(s, globalSelectedDate); }
+  for (let s = 1; s <= TOTAL_SLOTS; s++) { terapkanTanggalKeSlot(s, globalSelectedDate); }
   updateRekapSinkron();
   simpanKeLocalStorage();
 }
@@ -1004,7 +1024,7 @@ function sinkronisasiTanggalDariRekap(tglInput) {
 function tarikDataDariTanggal(tglInput) {
   globalSelectedDate = tglInput;
   document.getElementById('inputTanggalRekap').value = tglInput;
-  for (let s = 1; s <= 75; s++) { terapkanTanggalKeSlot(s, globalSelectedDate); }
+  for (let s = 1; s <= TOTAL_SLOTS; s++) { terapkanTanggalKeSlot(s, globalSelectedDate); }
   updateRekapSinkron();
   simpanKeLocalStorage();
 }
@@ -1043,10 +1063,10 @@ function updateRekapSinkron() {
   }
 
   let displayNoTunggal = 1, hasAnyData = false;
-  for (let i = 1; i <= 75; i++) {
+  for (let i = 1; i <= TOTAL_SLOTS; i++) {
     let slot = dataSemuaSlot[i];
     let rowEl = document.getElementById(`row_rek_tunggal_${i}`);
-    if (!slot.nama || slot.nama === "Slot " + i || !slot.parsedData || slot.parsedData.length === 0) {
+    if (!slot.parsedData || slot.parsedData.length === 0) {
       if (rowEl) rowEl.style.display = 'none';
       continue;
     }
@@ -1089,9 +1109,9 @@ function updateTabelBBFS(top1Method = 1, top2Method = 2, top3Method = 3) {
   let bbfsBody = document.getElementById("bbfsBody");
   if (!bbfsBody) return;
   let activeSlots = [];
-  for (let i = 1; i <= 75; i++) {
+  for (let i = 1; i <= TOTAL_SLOTS; i++) {
     let slot = dataSemuaSlot[i];
-    if (slot.nama && slot.nama !== `Slot ${i}` && slot.parsedData && slot.parsedData.length > 0) activeSlots.push({ no: i, name: slot.nama });
+    if (slot.parsedData && slot.parsedData.length > 0) activeSlots.push({ no: i, name: slot.nama });
   }
   if (activeSlots.length === 0) { bbfsBody.innerHTML = `<tr><td colspan="4">Belum ada data market</td></tr>`; return; }
 
@@ -1170,6 +1190,41 @@ function gantiSlot(idx) {
   });
 }
 
+function terapkanTanggalKeSlot(idx, tglInput) {
+  let slot = dataSemuaSlot[idx];
+  if (!tglInput || !slot.parsedData || slot.parsedData.length === 0) {
+    for (let i = 0; i < 8; i++) slot.inputs[i] = "";
+    hitungSlotOtomatis(idx);
+    if (idx === slotAktif) gantiSlot(slotAktif);
+    return;
+  }
+  let [y, m, d] = tglInput.split('-').map(Number);
+  let baseDate = new Date(y, m - 1, d);
+  for (let i = 0; i < 8; i++) {
+    let targetDate = new Date(baseDate);
+    targetDate.setDate(baseDate.getDate() - i);
+    let targetDateStr = formatDate(targetDate.getDate(), targetDate.getMonth() + 1, targetDate.getFullYear());
+    let found = slot.parsedData.find(item => item.tanggal === targetDateStr);
+    slot.inputs[i] = found ? found.nomor : "";
+    if (idx === slotAktif) {
+      let lbl = document.getElementById(`lbl_C${i+3}`);
+      if (lbl) lbl.innerText = `${getNamaHari(targetDate)}, ${targetDateStr}`;
+    }
+  }
+  hitungSlotOtomatis(idx);
+  if (idx === slotAktif) gantiSlot(slotAktif);
+}
+
+function prosesData() {
+  simpanOtomatis();
+  for (let s = 1; s <= TOTAL_SLOTS; s++) hitungSlotOtomatis(s);
+  gantiSlot(slotAktif);
+  updateRekapSinkron();
+  simpanKeLocalStorage();
+  alert("Proses kalkulasi untuk seluruh market telah selesai!");
+}
+
+// Algoritma Core Calculator
 function hitungRankExcel(arr) {
   return arr.map((v, i) => {
     let r = 1, c = 1;
@@ -1259,1443 +1314,104 @@ function hitungAlgoritmaM2sd9Excel(arrInputs) {
   };
 }
 
-function prosesData() {
-  simpanOtomatis();
-  for (let s = 1; s <= 75; s++) hitungSlotOtomatis(s);
-  gantiSlot(slotAktif);
-  updateRekapSinkron();
-  simpanKeLocalStorage();
-  alert("Proses kalkulasi untuk seluruh slot telah selesai!");
-}
-
-function buatTabel50Upload() {
-  let tbody = document.getElementById("upload50Body");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-  for (let i = 1; i <= 50; i++) {
-    tbody.innerHTML += `
-      <tr class="clickable-row" id="uploadRow_${i}" onclick="toggleDetailFile(${i})">
-        <td style="width: 50px;">${i}</td>
-        <td style="text-align:left; padding: 6px 10px; display: flex; align-items: center; gap: 10px;">
-          <label id="lbl_upload_${i}" class="custom-file-btn" onclick="event.stopPropagation()">
-            Pilih File HTML
-            <input type="file" accept=".html" onchange="prosesFileMultiSesiWaktuDariBaris(event, ${i})" style="display:none;">
-          </label>
-          <span id="name_${i}" class="file-name-cell"></span>
-        </td>
-      </tr>`;
-  }
-}
-
-async function prosesFileMultiSesiWaktu(event, targetSlotStart = 1) {
-  let files = event.target.files;
-  if (!files || files.length === 0) return;
-
-  let filesArray = Array.from(files);
-  let globalSlotPointer = targetSlotStart;
-
-  const readFileAsync = (file) => {
-    return new Promise((resolve) => {
-      let reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.readAsText(file);
-    });
-  };
-
-  for (let file of filesArray) {
-    let htmlContent = await readFileAsync(file);
-    let doc = new DOMParser().parseFromString(htmlContent, 'text/html');
-    let rows = doc.querySelectorAll('tr');
-    let cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_\s]?page.*$/i, "");
-    
-    let sesiWaktuList = ["00:01", "13:00", "16:00", "19:00", "22:00", "23:00"];
-    let dataPerSesi = { "00:01": [], "13:00": [], "16:00": [], "19:00": [], "22:00": [], "23:00": [] };
-    let standardParsedData = [];
-    let isMultiSesiFormat = false;
-
-    rows.forEach(tr => {
-      let cells = tr.querySelectorAll('td, th');
-      if (cells.length >= 7) {
-        let tglRaw = cells[0].innerText.trim();
-        let formattedDate = formatTanggalWab(tglRaw);
-
-        if (/\d{2}-\d{2}-\d{4}/.test(formattedDate)) {
-          for (let sIdx = 0; sIdx < sesiWaktuList.length; sIdx++) {
-            let sesiKey = sesiWaktuList[sIdx];
-            let cellVal = cells[sIdx + 1] ? cells[sIdx + 1].innerText.trim() : "";
-            let cleanNum = cellVal.replace(/\D/g, '');
-            
-            if (cleanNum.length >= 4) {
-              isMultiSesiFormat = true;
-              dataPerSesi[sesiKey].push({ tanggal: formattedDate, nomor: cleanNum.slice(-4) });
-            }
-          }
-        }
-      } 
-      
-      if (cells.length >= 3 && !isMultiSesiFormat) {
-        let dateText = (cells[0].innerText || "").trim();
-        let prizeText = (cells[cells.length - 1].innerText || "").trim();
-        let dateMatch = dateText.match(/\b(20\d{2})[-/](\d{2})[-/](\d{2})\b/) || dateText.match(/\b(\d{2})[-/](\d{2})[-/](20\d{2})\b/);
-        
-        if (dateMatch) {
-          let y, m, d;
-          if (dateMatch[1].length === 4) { y = dateMatch[1]; m = dateMatch[2]; d = dateMatch[3]; }
-          else { d = dateMatch[1]; m = dateMatch[2]; y = dateMatch[3]; }
-          let formattedDate = formatDate(d, m, y);
-          let cleanPrize = prizeText.replace(/\D/g, '');
-          
-          if (cleanPrize.length >= 4) {
-            if (!standardParsedData.some(item => item.tanggal === formattedDate)) {
-              standardParsedData.push({ tanggal: formattedDate, nomor: cleanPrize.slice(-4) });
-            }
-          }
-        }
-      }
-    });
-
-    if (isMultiSesiFormat) {
-      for (let sesi of sesiWaktuList) {
-        let arrData = dataPerSesi[sesi];
-        if (arrData.length > 0 && globalSlotPointer <= 75) {
-          arrData.sort((a, b) => {
-            let [d1, m1, y1] = a.tanggal.split('-').map(Number);
-            let [d2, m2, y2] = b.tanggal.split('-').map(Number);
-            return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
-          });
-
-          let marketName = `Macau (${sesi})`;
-          dataSemuaSlot[globalSlotPointer].nama = marketName;
-          dataSemuaSlot[globalSlotPointer].parsedData = arrData;
-          storedHtmlData[globalSlotPointer] = { parsedData: arrData, nama: marketName };
-
-          let nameSpan = document.getElementById(`name_${globalSlotPointer}`);
-          if (nameSpan) nameSpan.innerText = marketName;
-          let lblUpload = document.getElementById(`lbl_upload_${globalSlotPointer}`);
-          if (lblUpload) lblUpload.classList.add('uploaded');
-          let btnSlot = document.getElementById(`btn_slot_${globalSlotPointer}`);
-          if (btnSlot) btnSlot.innerText = marketName;
-
-          if (globalSelectedDate) terapkanTanggalKeSlot(globalSlotPointer, globalSelectedDate);
-          else hitungSlotOtomatis(globalSlotPointer);
-
-          globalSlotPointer++;
-        }
-      }
-    } else if (standardParsedData.length > 0) {
-      if (globalSlotPointer <= 75) {
-        standardParsedData.sort((a, b) => {
-          let [d1, m1, y1] = a.tanggal.split('-').map(Number);
-          let [d2, m2, y2] = b.tanggal.split('-').map(Number);
-          return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
-        });
-
-        dataSemuaSlot[globalSlotPointer].nama = cleanName;
-        dataSemuaSlot[globalSlotPointer].parsedData = standardParsedData;
-        storedHtmlData[globalSlotPointer] = { parsedData: standardParsedData, nama: cleanName };
-
-        let nameSpan = document.getElementById(`name_${globalSlotPointer}`);
-        if (nameSpan) nameSpan.innerText = cleanName;
-        let lblUpload = document.getElementById(`lbl_upload_${globalSlotPointer}`);
-        if (lblUpload) lblUpload.classList.add('uploaded');
-        let btnSlot = document.getElementById(`btn_slot_${globalSlotPointer}`);
-        if (btnSlot) btnSlot.innerText = cleanName;
-
-        if (globalSelectedDate) terapkanTanggalKeSlot(globalSlotPointer, globalSelectedDate);
-        else hitungSlotOtomatis(globalSlotPointer);
-
-        globalSlotPointer++;
-      }
-    }
-  }
-
-  updateRekapSinkron();
-  simpanKeLocalStorage();
-  event.target.value = "";
-}
-
-function prosesFileMultiSesiWaktuDariBaris(event, targetSlot) {
-  prosesFileMultiSesiWaktu(event, targetSlot);
-}
-
-function terapkanTanggalKeSlot(idx, tglInput) {
-  let slot = dataSemuaSlot[idx];
-  if (!tglInput || !slot.parsedData || slot.parsedData.length === 0) {
-    for (let i = 0; i < 8; i++) slot.inputs[i] = "";
-    hitungSlotOtomatis(idx);
-    if (idx === slotAktif) gantiSlot(slotAktif);
-    return;
-  }
-  let [y, m, d] = tglInput.split('-').map(Number);
-  let baseDate = new Date(y, m - 1, d);
-  for (let i = 0; i < 8; i++) {
-    let targetDate = new Date(baseDate);
-    targetDate.setDate(baseDate.getDate() - i);
-    let targetDateStr = formatDate(targetDate.getDate(), targetDate.getMonth() + 1, targetDate.getFullYear());
-    let found = slot.parsedData.find(item => item.tanggal === targetDateStr);
-    slot.inputs[i] = found ? found.nomor : "";
-    if (idx === slotAktif) {
-      let lbl = document.getElementById(`lbl_C${i+3}`);
-      if (lbl) lbl.innerText = `${getNamaHari(targetDate)}, ${targetDateStr}`;
-    }
-  }
-  hitungSlotOtomatis(idx);
-  if (idx === slotAktif) gantiSlot(slotAktif);
-}
-
-function toggleDetailFile(index, forceRefresh = false) {
-  let wrapper = document.getElementById("detailFileWrapper");
-  let title = document.getElementById("detailFileTitle");
-  document.querySelectorAll("#upload50Body tr").forEach(row => row.classList.remove("active-row"));
-  if (activeDetailIndex === index && !forceRefresh) {
-    wrapper.style.display = "none";
-    activeDetailIndex = null;
-  } else {
-    let entry = storedHtmlData[index];
-    if (!entry || !entry.parsedData || entry.parsedData.length === 0) { alert(`Silakan unggah file pada slot #${index} dulu!`); return; }
-    document.getElementById(`uploadRow_${index}`).classList.add("active-row");
-    activeDetailIndex = index;
-    title.innerText = `Detail Data Sesi: ${entry.nama} - Total: ${entry.parsedData.length} baris`;
-    wrapper.style.display = "block";
-    let tbody = document.getElementById("detailFileBody");
-    tbody.innerHTML = "";
-    entry.parsedData.forEach((row, idx) => {
-      tbody.innerHTML += `<tr><td>${idx+1}</td><td>${row.tanggal}</td><td style="font-weight:bold; color:#1a73e8;">${row.nomor}</td></tr>`;
-    });
-  }
-}
-
 /* ================================================================
-   NUMBER PROCESSOR SCRIPT (LENGKAP)
+   NUMBER PROCESSOR SCRIPT (Minified untuk Tools)
    ================================================================ */
 (function(){
   "use strict";
-
-  var sm4dWrap    = document.getElementById('sm4dWrap');
-  var sm4dTab     = document.getElementById('sm4dTab');
-  var sm4dOverlay = document.getElementById('sm4dOverlay');
-  var sm4dPanel   = document.getElementById('sm4dPanel');
-  var sm4dCloseBt = document.getElementById('sm4dClose');
-
-  function sm4dOpen(){
-    if(sm4dWrap) sm4dWrap.className = 'sm4d-open';
-    if(sm4dPanel) sm4dPanel.setAttribute('aria-hidden','false');
-  }
-  function sm4dClose(){
-    if(sm4dWrap) sm4dWrap.className = '';
-    if(sm4dPanel) sm4dPanel.setAttribute('aria-hidden','true');
-  }
-
-  var npInput   = document.getElementById('npInput');
+  var sm4dWrap = document.getElementById('sm4dWrap');
+  var sm4dPanel = document.getElementById('sm4dPanel');
+  var npInput = document.getElementById('npInput');
   var npResults = document.getElementById('npResults');
-  var npStore   = {};   
-  var npSeq     = 0;
-
-  function setNew(arr){ var o={},i; if(arr){for(i=0;i<arr.length;i++){o[arr[i]]=1;}} return o; }
-  function setHas(o,k){ return o.hasOwnProperty(k); }
-  function setAdd(o,k){ o[k]=1; }
-  function setSize(o){ var c=0,k; for(k in o){ if(o.hasOwnProperty(k)){c++;} } return c; }
-  function setKeys(o){ var a=[],k; for(k in o){ if(o.hasOwnProperty(k)){a.push(k);} } return a; }
-  function setUnion(a,b){ var o={},k;
-    for(k in a){ if(a.hasOwnProperty(k)){o[k]=1;} }
-    for(k in b){ if(b.hasOwnProperty(k)){o[k]=1;} }
-    return o; }
-  function uniq(arr){ var o={},r=[],i;
-    for(i=0;i<arr.length;i++){ if(!o.hasOwnProperty(arr[i])){ o[arr[i]]=1; r.push(arr[i]); } }
-    return r; }
-
+  var npStore = {}; var npSeq = 0;
   function npKey(text){ npSeq++; var k='npk'+npSeq; npStore[k]=text; return k; }
-  function npBtn(typeCls, countLabel, tag, text){
-    return '<button type="button" class="sm4dnp-btn sm4dnp-in ' + typeCls +
-           '" data-npkey="' + npKey(text) + '">' +
-           '<span class="sm4dnp-count">' + countLabel + '</span>' +
-           '<span class="sm4dnp-tag">' + tag + '</span></button>';
-  }
-  function npSetBtn(typeCls, countLabel, setLabel, rpLabel, text, lblCls){
-    return '<button type="button" class="sm4dnp-btn sm4dnp-in sm4dnp-setbtn ' + typeCls +
-           '" data-npkey="' + npKey(text) + '">' +
-           '<span class="sm4dnp-count">' + countLabel + '</span>' +
-           '<span class="sm4dnp-setlbl' + (lblCls ? ' ' + lblCls : '') + '">' + setLabel + '</span>' +
-           '<span class="sm4dnp-tag">' + rpLabel + '</span></button>';
-  }
+  function npBtn(typeCls, countLabel, tag, text){ return '<button type="button" class="sm4dnp-btn sm4dnp-in ' + typeCls + '" data-npkey="' + npKey(text) + '"><span class="sm4dnp-count">' + countLabel + '</span><span class="sm4dnp-tag">' + tag + '</span></button>'; }
   function npLegend(txt){ return '<div class="sm4dnp-legend">' + txt + '</div>'; }
-  function npErr(msg){
-    if(npResults) npResults.innerHTML = '<div class="sm4dnp-err sm4dnp-in">&#9888; ' + msg + '</div>';
-  }
-
-  function npFlash(btn){
-    if (!btn) return;
-    var cEl = btn.querySelector('.sm4dnp-count');
-    var tEl = btn.querySelector('.sm4dnp-tag');
-    var oc = cEl ? cEl.innerHTML : '';
-    var ot = tEl ? tEl.innerHTML : '';
-    if (cEl){ cEl.innerHTML = '&#10004;'; }
-    if (tEl){ tEl.innerHTML = 'Copied!'; }
-    btn.className = btn.className + ' sm4dnp-copied';
-    setTimeout(function(){
-      if (cEl){ cEl.innerHTML = oc; }
-      if (tEl){ tEl.innerHTML = ot; }
-      btn.className = btn.className.replace(' sm4dnp-copied','');
-    }, 1600);
-  }
-  function npCopyFallback(text){
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed'; ta.style.left = '-9999px';
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); } catch(e){}
-    document.body.removeChild(ta);
-  }
-  function npCopy(text, btn){
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(function(){ npFlash(btn); },
-        function(){ npCopyFallback(text); npFlash(btn); });
-    } else {
-      npCopyFallback(text); npFlash(btn);
-    }
-  }
+  function npErr(msg){ if(npResults) npResults.innerHTML = '<div style="color:#fca5a5; background:rgba(239,68,68,.12); padding:8px; border-radius:8px; font-size:11px; margin-top:8px;">&#9888; ' + msg + '</div>'; }
+  function uniq(arr){ var o={},r=[],i; for(i=0;i<arr.length;i++){ if(!o.hasOwnProperty(arr[i])){ o[arr[i]]=1; r.push(arr[i]); } } return r; }
+  
   if(npResults) {
     npResults.addEventListener('click', function(e){
       var b = e.target;
-      while (b && b !== npResults && !(b.getAttribute && b.getAttribute('data-npkey'))){
-        b = b.parentNode;
-      }
+      while (b && b !== npResults && !(b.getAttribute && b.getAttribute('data-npkey'))){ b = b.parentNode; }
       if (!b || b === npResults) return;
       var k = b.getAttribute('data-npkey');
-      if (k && npStore.hasOwnProperty(k)){ npCopy(npStore[k], b); }
+      if (k && npStore.hasOwnProperty(k)){
+         var text = npStore[k];
+         if (navigator.clipboard){ navigator.clipboard.writeText(text); } else {
+           var ta = document.createElement('textarea'); ta.value = text;
+           ta.style.position = 'fixed'; ta.style.left = '-9999px'; document.body.appendChild(ta); ta.select();
+           try { document.execCommand('copy'); } catch(e){} document.body.removeChild(ta);
+         }
+         var cEl = b.querySelector('.sm4dnp-count'); var tEl = b.querySelector('.sm4dnp-tag');
+         var oc = cEl ? cEl.innerHTML : ''; var ot = tEl ? tEl.innerHTML : '';
+         if(cEl) cEl.innerHTML = '&#10004;'; if(tEl) tEl.innerHTML = 'Copied!';
+         setTimeout(function(){ if(cEl) cEl.innerHTML = oc; if(tEl) tEl.innerHTML = ot; }, 1600);
+      }
     });
-  }
-
-  function aiSplitGroups(AiMix){
-    var aiDigits = AiMix.split('');
-    var maxD = 6, n, num, d1in, d2in;
-    var matching = [];
-    for (n = 0; n < 100; n++){
-      num = (n < 10 ? '0' + n : '' + n);
-      d1in = aiDigits.indexOf(num.charAt(0)) !== -1;
-      d2in = aiDigits.indexOf(num.charAt(1)) !== -1;
-      if (d1in || d2in){ matching.push(num); }
-    }
-    var both = [], one = [], tardal = [], i, a, b, inA, inB;
-    for (i = 0; i < matching.length; i++){
-      num = matching[i]; a = num.charAt(0); b = num.charAt(1);
-      inA = aiDigits.indexOf(a) !== -1; inB = aiDigits.indexOf(b) !== -1;
-      if (a === b && inA){ tardal.push(num); }
-      else if (inA && inB){ both.push(num); }
-      else if (inA || inB){ one.push(num); }
-    }
-    var groups = [];
-    if (both.length > 0){
-      var bothDigits = setNew([]);
-      for (i = 0; i < both.length; i++){
-        setAdd(bothDigits, both[i].charAt(0));
-        setAdd(bothDigits, both[i].charAt(1));
-      }
-      if (setSize(bothDigits) <= maxD){
-        groups.push({ numbers: both.slice().sort(), uniqueDigits: bothDigits });
-      } else {
-        var sp = splitByDigitLimit(both, maxD), s;
-        for (s = 0; s < sp.length; s++){ groups.push(sp[s]); }
-      }
-    }
-    for (i = 0; i < tardal.length; i++){
-      var td = tardal[i].charAt(0), added = false, g;
-      for (g = 0; g < groups.length; g++){
-        if (setSize(groups[g].uniqueDigits) < maxD || setHas(groups[g].uniqueDigits, td)){
-          groups[g].numbers.push(tardal[i]);
-          setAdd(groups[g].uniqueDigits, td);
-          added = true; break;
-        }
-      }
-      if (!added){
-        groups.push({ numbers:[tardal[i]], uniqueDigits:setNew([td]) });
-      }
-    }
-    function inAnyGroup(num){
-      var g;
-      for (g = 0; g < groups.length; g++){
-        if (setHas(groups[g].uniqueDigits, num.charAt(0)) ||
-            setHas(groups[g].uniqueDigits, num.charAt(1))){ return 1; }
-      }
-      return 0;
-    }
-    one.sort(function(x, y){ return inAnyGroup(y) - inAnyGroup(x); });
-    for (i = 0; i < one.length; i++){
-      num = one[i];
-      var nd = setNew([num.charAt(0), num.charAt(1)]);
-      var ok = false, g2;
-      for (g2 = 0; g2 < groups.length; g2++){
-        var comb = setUnion(groups[g2].uniqueDigits, nd);
-        if (setSize(comb) <= maxD){
-          groups[g2].numbers.push(num);
-          groups[g2].uniqueDigits = comb;
-          ok = true; break;
-        }
-      }
-      if (!ok){ groups.push({ numbers:[num], uniqueDigits:nd }); }
-    }
-    for (i = 0; i < groups.length; i++){
-      groups[i].numbers = uniq(groups[i].numbers).sort();
-    }
-    groups.sort(function(x, y){ return y.numbers.length - x.numbers.length; });
-    return groups;
-  }
-
-  function splitByDigitLimit(numbers, maxD){
-    var dmap = {}, i;
-    for (i = 0; i < numbers.length; i++){
-      dmap[numbers[i]] = setNew(numbers[i].split(''));
-    }
-    var sorted = numbers.slice().sort(function(a, b){
-      return setSize(dmap[b]) - setSize(dmap[a]);
-    });
-    var groups = [], assigned = {}, assignedCount = 0;
-    while (assignedCount < numbers.length){
-      var grp = [], gd = setNew([]), progressed = false, j;
-      for (j = 0; j < sorted.length; j++){
-        var num = sorted[j];
-        if (assigned.hasOwnProperty(num)){ continue; }
-        var comb = setUnion(gd, dmap[num]);
-        if (setSize(comb) <= maxD){
-          grp.push(num); gd = comb;
-          assigned[num] = 1; assignedCount++; progressed = true;
-        }
-      }
-      if (grp.length > 0){
-        groups.push({ numbers: grp.sort(), uniqueDigits: gd });
-      }
-      if (!progressed){ break; }
-    }
-    return groups;
-  }
-
-  var AI6D_PRIMES = {2:1,3:1,5:1,7:1,11:1,13:1,17:1,19:1,23:1,29:1,31:1,37:1,
-                      41:1,43:1,47:1,53:1,59:1,61:1,67:1,71:1,73:1,79:1,83:1,89:1,97:1};
-
-  function ai6dAnalyze(aiMix){
-    var seen = {}, digits = [], i, d, dd;
-    for (i = 0; i < aiMix.length; i++){
-      d = parseInt(aiMix.charAt(i), 10);
-      if (isNaN(d)){ continue; }
-      if (!seen.hasOwnProperty(d)){ seen[d] = 1; digits.push(d); }
-    }
-    digits.sort(function(a, b){ return a - b; });
-    var n = digits.length;
-    if (n < 1 || n > 6){ return null; }
-    var k = 6 - n;
-    if (k < 0){ k = 0; }
-    var m = digits[0];
-    var candidates = [];
-    if (m - 1 >= 0 && digits.indexOf(m - 1) === -1){ candidates.push(m - 1); }
-    for (dd = m + 1; dd < 10; dd++){
-      if (digits.indexOf(dd) === -1 && candidates.indexOf(dd) === -1){ candidates.push(dd); }
-    }
-    for (dd = m - 2; dd >= 0; dd--){
-      if (digits.indexOf(dd) === -1 && candidates.indexOf(dd) === -1){ candidates.push(dd); }
-    }
-    var fillers = candidates.slice(0, k);
-    var bbfs6 = digits.concat(fillers).sort(function(a, b){ return a - b; });
-    var half = Math.ceil(n / 2);
-    var OA = digits.slice(0, half);
-    var OB = digits.slice(half);
-    var C = [];
-    for (dd = 0; dd < 10; dd++){ if (bbfs6.indexOf(dd) === -1){ C.push(dd); } }
-    return { digits: digits, fillers: fillers, bbfs6: bbfs6, OA: OA, OB: OB, C: C };
-  }
-
-  function ai6dUniqSort(arr){
-    var seen = {}, out = [], i;
-    for (i = 0; i < arr.length; i++){
-      if (!seen.hasOwnProperty(arr[i])){ seen[arr[i]] = 1; out.push(arr[i]); }
-    }
-    out.sort();
-    return out;
-  }
-
-  function ai6dBuildGroups(aiMix){
-    var an = ai6dAnalyze(aiMix);
-    if (!an){ return []; }
-    var bbfs6 = an.bbfs6, fillers = an.fillers, OA = an.OA, OB = an.OB, C = an.C;
-    var set1 = [], set2 = [], set3 = [], set4 = [];
-    var ai, bi, a, b, val, isPT, pairStr, bothFiller;
-
-    for (ai = 0; ai < bbfs6.length; ai++){
-      for (bi = 0; bi < bbfs6.length; bi++){
-        a = bbfs6[ai]; b = bbfs6[bi];
-        bothFiller = fillers.indexOf(a) !== -1 && fillers.indexOf(b) !== -1;
-        if (bothFiller){ continue; }
-        val = a * 10 + b;
-        isPT = (a === b) || AI6D_PRIMES.hasOwnProperty(val);
-        pairStr = '' + a + '' + b;
-        (isPT ? set4 : set1).push(pairStr);
-      }
-    }
-    if (OA.length && C.length){
-      for (ai = 0; ai < OA.length; ai++){
-        for (bi = 0; bi < C.length; bi++){
-          a = OA[ai]; b = C[bi];
-          val = a * 10 + b; isPT = (a === b) || AI6D_PRIMES.hasOwnProperty(val);
-          (isPT ? set4 : set2).push('' + a + '' + b);
-          val = b * 10 + a; isPT = (a === b) || AI6D_PRIMES.hasOwnProperty(val);
-          (isPT ? set4 : set2).push('' + b + '' + a);
-        }
-      }
-    }
-    if (OB.length && C.length){
-      for (ai = 0; ai < OB.length; ai++){
-        for (bi = 0; bi < C.length; bi++){
-          a = OB[ai]; b = C[bi];
-          val = a * 10 + b; isPT = (a === b) || AI6D_PRIMES.hasOwnProperty(val);
-          (isPT ? set4 : set3).push('' + a + '' + b);
-          val = b * 10 + a; isPT = (a === b) || AI6D_PRIMES.hasOwnProperty(val);
-          (isPT ? set4 : set3).push('' + b + '' + a);
-        }
-      }
-    }
-
-    set1 = ai6dUniqSort(set1); set2 = ai6dUniqSort(set2);
-    set3 = ai6dUniqSort(set3); set4 = ai6dUniqSort(set4);
-
-    var groups = [];
-    if (set1.length){ groups.push({ numbers: set1, tag: 'SET1' }); }
-    if (set2.length){ groups.push({ numbers: set2, tag: 'SET2' }); }
-    if (set3.length){ groups.push({ numbers: set3, tag: 'SET3' }); }
-    if (set4.length){ groups.push({ numbers: set4, tag: 'SET4' }); }
-    return groups;
-  }
-
-  function ai7dRepartition(groups6d){
-    var flat = [], gi, li;
-    var order = ['SET1','SET2','SET3','SET4'];
-    for (var oi = 0; oi < order.length; oi++){
-      for (gi = 0; gi < groups6d.length; gi++){
-        if (groups6d[gi].tag === order[oi]){
-          for (li = 0; li < groups6d[gi].numbers.length; li++){
-            flat.push(groups6d[gi].numbers[li]);
-          }
-          break;
-        }
-      }
-    }
-    if (!flat.length){ return []; }
-
-    var pills = [];
-    var curLines = [], curDig = {};
-
-    function addDigits(dig, pair){
-      var nd = {};
-      var k2;
-      for (k2 in dig){ nd[k2] = 1; }
-      nd[pair.charAt(0)] = 1;
-      nd[pair.charAt(1)] = 1;
-      return nd;
-    }
-    function countKeys(obj){ var n = 0, k2; for (k2 in obj){ n++; } return n; }
-
-    for (li = 0; li < flat.length; li++){
-      var pair = flat[li];
-      var trial = addDigits(curDig, pair);
-      if (countKeys(trial) <= 7){
-        curLines.push(pair);
-        curDig = trial;
-      } else {
-        if (curLines.length){ pills.push({ lines: curLines, dig: curDig }); }
-        var seed = {}; seed[pair.charAt(0)] = 1; seed[pair.charAt(1)] = 1;
-        curLines = [pair]; curDig = seed;
-      }
-    }
-    if (curLines.length){ pills.push({ lines: curLines, dig: curDig }); }
-
-    var setTags = ['SET1','SET2','SET3','SET4'];
-    var result = [];
-    for (gi = 0; gi < pills.length; gi++){
-      var tag7 = gi < setTags.length ? setTags[gi] : ('EXT' + (gi - setTags.length + 1));
-      var srcKeys = [], sk;
-      for (sk in pills[gi].dig){ srcKeys.push(sk); }
-      srcKeys.sort();
-      result.push({
-        numbers: pills[gi].lines,
-        tag:     tag7,
-        src7:    srcKeys.join(''),
-        isExt:   gi >= setTags.length
-      });
-    }
-    return result;
-  }
-
-  function npWeightK2Val3d(prioArr, multArr){
-    var i, mn = Infinity;
-    for (i = 0; i < prioArr.length; i++){
-      if (prioArr[i].mult < mn){ mn = prioArr[i].mult; }
-    }
-    return (mn === Infinity) ? 100 : mn;
-  }
-
-  function processAI(input){
-    var AiUtama = '', AiCad = '';
-    if (input.length <= 2){ AiUtama = input; }
-    else if (input.length === 3){ AiUtama = input.substring(0,2); AiCad = input.substring(2,3); }
-    else { AiUtama = input.substring(0,2); AiCad = input.substring(2,4); }
-    if (AiCad){
-      var cadArr = [], c;
-      for (c = 0; c < AiCad.length; c++){
-        if (AiUtama.indexOf(AiCad.charAt(c)) === -1){ cadArr.push(AiCad.charAt(c)); }
-      }
-      AiCad = uniq(cadArr).join('');
-    }
-    var AiMix = uniq((AiUtama + AiCad).split('')).join('');
-
-    var nativeGroups = aiSplitGroups(AiMix);
-    if (nativeGroups.length === 0){ npErr('No AI result.'); return; }
-
-    var m1, m2, m3;
-    if (input.length <= 3){ m1='500'; m2='300'; m3='250'; }
-    else { m1='750'; m2='1500'; m3='1505'; }
-
-    var i, m, cnt, rp;
-    var html = '';
-
-    if (input.length === 4){
-      var groups = ai6dBuildGroups(AiMix);
-      if (npBbfs7Mode && groups.length){ groups = ai7dRepartition(groups); }
-      if (groups.length){
-        var M = npPayoutM, margin = 1 + (npWeightMarginPct / 100);
-        var c1 = 0, c2 = 0, c3 = 0, c4 = 0, gi, tag, cnt0;
-        for (gi = 0; gi < groups.length; gi++){
-          tag = groups[gi].tag; cnt0 = groups[gi].numbers.length;
-          if (tag === 'SET1'){ c1 = cnt0; }
-          else if (tag === 'SET2'){ c2 = cnt0; }
-          else if (tag === 'SET3'){ c3 = cnt0; }
-          else if (tag === 'SET4'){ c4 = cnt0; }
-        }
-        var inv = npInvertMode;
-        var isMajorTag = function(t){
-          if (t.indexOf('EXT') === 0){ return false; }
-          return inv ? (t === 'SET2' || t === 'SET3') : (t === 'SET1' || t === 'SET4');
-        };
-        var cMajA = inv ? c2 : c1, cMajB = inv ? c3 : c4;
-        var cMinorA = inv ? c1 : c2, cMinorB = inv ? c4 : c3;
-        var cMaxMinor = Math.max(cMinorA, cMinorB);
-        var cMaxMajor = Math.max(cMajA, cMajB);
-        var cMinMajor = (cMajA > 0 && cMajB > 0) ? Math.min(cMajA, cMajB) : Math.max(cMajA, cMajB);
-
-        var alpha = 0;
-        if (cMaxMinor > 0){
-          var denomA = M - 2 * cMaxMinor * margin;
-          alpha = (denomA > 0) ? (2 * cMaxMinor * margin) / denomA : 10;
-        }
-
-        var K1, targetWarn = '';
-        if (npWeightInputMode === 'target' && cMinMajor > 0){
-          var P = npWeightTargetVal;
-          var denomT = (M / cMinMajor) - 2 * (1 + alpha);
-          if (denomT > 0){
-            K1 = Math.ceil((P / denomT) / 5) * 5;
-          } else {
-            K1 = 24000; targetWarn = ' &middot; \u26A0 target tidak tercapai untuk kombinasi ini, pakai default';
-          }
-        } else {
-          var B = npWeightKVal;
-          K1 = Math.floor((B / (2 * (1 + alpha))) / 5) * 5;
-          if (K1 < 5){ K1 = 5; }
-        }
-
-        var ai6dStakesFor = function(K1try){
-          var k2try = (cMaxMinor > 0) ? Math.ceil((alpha * K1try) / 5) * 5 : 0;
-          var arr = [], cost = 0, gj, cj, kk, mm;
-          for (gj = 0; gj < groups.length; gj++){
-            cj = groups[gj].numbers.length;
-            kk = isMajorTag(groups[gj].tag) ? K1try : k2try;
-            mm = Math.ceil((kk / cj) / 10) * 10;
-            arr.push(mm);
-            cost += mm * cj;
-          }
-          return { K2: k2try, mults: arr, cost: cost };
-        };
-
-        var calc = ai6dStakesFor(K1);
-        if (npWeightInputMode !== 'target'){
-          var guard = 0;
-          while (calc.cost > npWeightKVal && K1 > 5 && guard < 500){
-            K1 -= 5;
-            calc = ai6dStakesFor(K1);
-            guard++;
-          }
-        }
-        var K2 = calc.K2;
-        var multsArr = calc.mults;
-        var actualCost = calc.cost;
-
-        var K1Warn = '';
-        if (cMaxMajor > 0){
-          var denom1 = M - 2 * cMaxMajor * margin;
-          var K1Needed = (denom1 > 0) ? Math.ceil((2 * cMaxMajor * K2 * margin) / denom1 / 5) * 5 : (K2 * 10);
-          if (K1 < K1Needed){ K1Warn = ' &middot; \u26A0 K1 kurang, minimal ~' + K1Needed; }
-        }
-
-        var bestIdx = 0, bestMult = -1;
-        for (i = 0; i < groups.length; i++){
-          if (multsArr[i] > bestMult){ bestMult = multsArr[i]; bestIdx = i; }
-        }
-
-        var majLbl = inv ? 'SET2/3' : 'SET1/4';
-        var minLbl = inv ? 'SET1/4' : 'SET2/3';
-
-        var d3Map = {}, d3Count = 0, d3Cost = 0, d3Segs = [], set5Data = null;
-        if (npD3Mode){
-          var prio = [], pi, pj, tmpP;
-          for (i = 0; i < groups.length; i++){
-            prio.push({ idx: i, tag: groups[i].tag, mult: multsArr[i] });
-          }
-          for (pi = 0; pi < prio.length; pi++){
-            for (pj = pi + 1; pj < prio.length; pj++){
-              var aP = prio[pi], bP = prio[pj];
-              var aLast = (aP.tag === 'SET4') ? 1 : 0;
-              var bLast = (bP.tag === 'SET4') ? 1 : 0;
-              if (aLast > bLast || (aLast === bLast && bP.mult > aP.mult)){
-                tmpP = prio[pi]; prio[pi] = prio[pj]; prio[pj] = tmpP;
-              }
-            }
-          }
-          var seen3d = {}, set5Lines = [];
-          for (pi = 0; pi < prio.length; pi++){
-            var g3 = groups[prio[pi].idx];
-            var lines3 = [], sSeen = {}, jj3, nn3, ch3, aD;
-            for (jj3 = 0; jj3 < g3.numbers.length; jj3++){
-              nn3 = g3.numbers[jj3];
-              for (ch3 = 0; ch3 < nn3.length; ch3++){
-                if (!sSeen.hasOwnProperty(nn3.charAt(ch3))){ sSeen[nn3.charAt(ch3)] = 1; }
-              }
-            }
-            var isSet4 = (g3.tag === 'SET4');
-            for (aD = 0; aD < 10; aD++){
-              var pfxInSrc = sSeen.hasOwnProperty('' + aD);
-              for (jj3 = 0; jj3 < g3.numbers.length; jj3++){
-                var L3x = '' + aD + g3.numbers[jj3];
-                if (isSet4 || pfxInSrc){ lines3.push(L3x); }
-                else { set5Lines.push(L3x); }
-              }
-            }
-            var kept3 = [], L3;
-            for (jj3 = 0; jj3 < lines3.length; jj3++){
-              L3 = lines3[jj3];
-              if (!seen3d.hasOwnProperty(L3)){ seen3d[L3] = 1; kept3.push(L3); }
-            }
-            if (kept3.length === 0){ continue; }
-            var stake3 = Math.round((prio[pi].mult * 0.1) / 10) * 10;
-            if (stake3 < 10){ stake3 = 10; }
-            d3Count += kept3.length;
-            d3Cost += kept3.length * stake3;
-            d3Segs.push(kept3.join('*') + '#' + stake3);
-            d3Map[g3.tag] = { n: kept3.length, stake: stake3, seg: kept3.join('*') + '#' + stake3 };
-          }
-          if (set5Lines.length){
-            var kept5 = [], seen5b = {}, q5;
-            for (q5 = 0; q5 < set5Lines.length; q5++){
-              var L5 = set5Lines[q5];
-              if (!seen3d.hasOwnProperty(L5) && !seen5b.hasOwnProperty(L5)){
-                seen5b[L5] = 1; kept5.push(L5);
-              }
-            }
-            if (kept5.length){
-              var stake5 = Math.round((npWeightK2Val3d(prio, multsArr) * 0.1) / 10) * 10;
-              if (stake5 < 10){ stake5 = 10; }
-              d3Count += kept5.length;
-              d3Cost += kept5.length * stake5;
-              d3Segs.push(kept5.join('*') + '#' + stake5);
-              set5Data = { n: kept5.length, stake: stake5, seg: kept5.join('*') + '#' + stake5 };
-            }
-          }
-        }
-
-        var IDN_GROUPS = [
-          { vals: '01*04*10*12*14*15*20*21*24*25*30*32*34*35*40*42*45*51*52*54',
-            type1:'DISKON', rate1:'1,5x', win1:1050,
-            type2:'FULL',   rate2:'1,5x', win2:1500 },
-          { vals: '16*18*26*27*28*62*72*81*82*91*92',
-            type1:'DISKON', rate1:'1x',   win1:700,
-            type2:'DISKON', rate2:'1,5x', win2:1050 },
-          { vals: '36*38*39*46*48*49*63*64*74*84*93*94',
-            type1:'FULL',   rate1:'0,5x', win1:500,
-            type2:'FULL',   rate2:'1x',   win2:1000 },
-          { vals: '02*03*11*13*17*19*22*23*29*31*33*37*41*43*44*47*53*61*71*73*83',
-            type1:'FULL',   rate1:'1x',   win1:1000,
-            type2:'DISKON', rate2:'2x',   win2:1400 }
-        ];
-        var IDN_BO5 = { type1:'DISKON', rate1:'0,5x', win1:350,
-                        type2:'DISKON', rate2:'1x',   win2:700 };
-
-        var aiLineSet = {}, aili, ailg;
-        for (ailg = 0; ailg < groups.length; ailg++){
-          for (aili = 0; aili < groups[ailg].numbers.length; aili++){
-            aiLineSet[groups[ailg].numbers[aili]] = 1;
-          }
-        }
-
-        var idnMatchedSet = {};
-        var idnFilteredVals = [];
-        var bi2;
-        for (bi2 = 0; bi2 < IDN_GROUPS.length; bi2++){
-          var idnAllPairs = IDN_GROUPS[bi2].vals.split('*');
-          var idnFiltered = [];
-          for (var idnPi = 0; idnPi < idnAllPairs.length; idnPi++){
-            var idnP = idnAllPairs[idnPi];
-            if (aiLineSet.hasOwnProperty(idnP)){
-              idnFiltered.push(idnP);
-              idnMatchedSet[idnP] = 1;
-            }
-          }
-          idnFilteredVals.push(idnFiltered);
-        }
-        var idnBo5Lines = [];
-        for (aili in aiLineSet){
-          if (aiLineSet.hasOwnProperty(aili) && !idnMatchedSet.hasOwnProperty(aili)){
-            idnBo5Lines.push(aili);
-          }
-        }
-        idnBo5Lines.sort();
-        idnFilteredVals.push(idnBo5Lines);
-
-        var idnScale = npIdnScaleX2 ? 'x2' : 'x1';
-        var idnPerLine = [], idnTotals = [], idnGrandTotal = 0;
-        var idnLowestWin = Infinity, idnWinAtLowest = 0;
-        var idnGroupDef = function(idx){
-          return idx < IDN_GROUPS.length ? IDN_GROUPS[idx] : IDN_BO5;
-        };
-        for (bi2 = 0; bi2 <= IDN_GROUPS.length; bi2++){
-          var idnGx    = idnGroupDef(bi2);
-          var idnCntX  = idnFilteredVals[bi2].length;
-          var idnWinX  = npIdnScaleX2 ? idnGx.win2 : idnGx.win1;
-          var idnPerLineX = idnWinX;
-          var idnTotalX   = idnCntX * idnPerLineX;
-          idnPerLine.push(idnPerLineX);
-          idnTotals.push(idnTotalX);
-          idnGrandTotal += idnTotalX;
-          if (idnCntX > 0 && idnWinX < idnLowestWin){
-            idnLowestWin   = idnWinX;
-            idnWinAtLowest = idnPerLineX;
-          }
-        }
-        var idnMarginCalc = idnGrandTotal > 0
-          ? Math.round(((idnWinAtLowest / idnGrandTotal) - 1) * 100)
-          : 0;
-
-        if (npIdnMode){
-          if (npWeightK){ npWeightK.value = idnGrandTotal; }
-          if (npWeightK2){ npWeightK2.value = idnMarginCalc; }
-        }
-
-        var sixDQb = '', sixDTotal = 0, sixDPills = '';
-        for (i = 0; i < groups.length; i++){
-          cnt = groups[i].numbers.length;
-          sixDTotal += cnt;
-          m = multsArr[i];
-          rp = m * cnt;
-          var isBest = (i === bestIdx);
-          var setCls = 'np-' + groups[i].tag.toLowerCase(); 
-          var srcSeen = {}, srcDigits = [], jj, nn, ch;
-          for (jj = 0; jj < groups[i].numbers.length; jj++){
-            nn = groups[i].numbers[jj];
-            for (ch = 0; ch < nn.length; ch++){
-              if (!srcSeen.hasOwnProperty(nn.charAt(ch))){
-                srcSeen[nn.charAt(ch)] = 1; srcDigits.push(nn.charAt(ch));
-              }
-            }
-          }
-          srcDigits.sort();
-          var tag = groups[i].tag;
-          var d3 = d3Map[tag];
-
-          if (npIdnMode){
-            var idnIdx   = (i < IDN_GROUPS.length) ? i : IDN_GROUPS.length - 1;
-            var idnG     = idnGroupDef(idnIdx);
-            var idnVals  = idnFilteredVals[idnIdx];   
-            var idnCnt   = idnVals.length;
-            var idnBoLbl = 'BO #' + (idnIdx + 1);
-            var idnBoCls = 'np-bo' + (idnIdx + 1);
-            var idnPL    = idnPerLine[idnIdx];
-            var idnTotal = idnTotals[idnIdx];
-            var idnType  = npIdnScaleX2 ? idnG.type2 : idnG.type1;
-            var idnRate  = npIdnScaleX2 ? idnG.rate2 : idnG.rate1;
-            var idnTypeLbl = idnRate + ' <span class="np-idn-' + idnType.toLowerCase() + '">' + idnType + '</span>';
-            var boBestPL = -1, boBestI = 0, bx;
-            for (bx = 0; bx <= IDN_GROUPS.length; bx++){
-              if (idnFilteredVals[bx].length > 0 && idnPerLine[bx] > boBestPL){
-                boBestPL = idnPerLine[bx]; boBestI = bx;
-              }
-            }
-            var idnIsBestBO = (idnIdx === boBestI) && idnCnt > 0;
-            if (idnCnt === 0){
-            } else {
-              sixDPills += '<div class="np-setgrp-lbl">Total ' + idnBoLbl + ' = Rp.' + idnTotal + '</div>';
-              sixDPills += npSetBtn('sm4dnp-6d' + (idnIsBestBO ? ' sm4dnp-best' : ''),
-                                     idnCnt + '<span class="np-sub"> Line ' + idnRate + '</span>' +
-                                     '<span class="np-src">@ Rp.' + idnPL + '/line</span>',
-                                     idnBoLbl + (idnIsBestBO ? ' \u2605' : ''), idnTypeLbl,
-                                     idnVals.join('*'), idnBoCls);
-            }
-            sixDQb += (i > 0 && idnCnt > 0 ? '+' : '') + (idnCnt > 0 ? idnVals.join('*') : '');
-          } else {
-            var capTotal = rp + (d3 ? d3.n * d3.stake : 0);
-            var srcLabel = npBbfs7Mode
-              ? (groups[i].src7 || srcDigits.join(''))
-              : srcDigits.join('');
-            var isExt = npBbfs7Mode && groups[i].isExt;
-            var pillCls = 'sm4dnp-6d' + (isBest ? ' sm4dnp-best' : '') + (isExt ? ' np-ext7d' : '');
-            var capLbl  = isExt ? tag + ' 7D' : tag;
-            sixDPills += '<div class="np-setgrp-lbl' + (isExt ? ' np-ext7d-lbl' : '') + '">Total ' +
-                         capLbl + (d3 ? ' 2D+3D' : ' 2D') + ' = Rp.' + capTotal + '</div>';
-            sixDPills += npSetBtn(pillCls,
-                                   cnt + '<span class="np-sub"> Line &times;' + m + '</span>' +
-                                   '<span class="np-src">' + srcLabel + '</span>',
-                                   capLbl + (isBest ? ' \u2605' : ''), 'Rp.' + rp,
-                                   groups[i].numbers.join('*') + '#' + m,
-                                   isExt ? 'np-set5' : setCls);
-            if (d3){
-              sixDPills += '<div class="np-3dsub">' +
-                           npSetBtn('sm4dnp-6d np-3dpill',
-                                    d3.n + '<span class="np-sub"> Line 3D &times;' + d3.stake + '</span>',
-                                    '3D', 'Rp.' + (d3.n * d3.stake),
-                                    d3.seg, isExt ? 'np-set5' : setCls) +
-                           '</div>';
-            }
-            sixDQb += (i > 0 ? '+' : '') + groups[i].numbers.join('*') + '#' + m;
-          }
-        }
-        if (!npIdnMode && set5Data){
-          sixDPills += '<div class="np-setgrp-lbl">Total SET5 3D = Rp.' + (set5Data.n * set5Data.stake) + '</div>';
-          sixDPills += '<div class="np-3dsub">' +
-                       npSetBtn('sm4dnp-6d np-3dpill np-set5',
-                                set5Data.n + '<span class="np-sub"> Line 3D &times;' + set5Data.stake + '</span>' +
-                                '<span class="np-src">mix &middot; prefix di luar 6 digit</span>',
-                                'SET5', 'Rp.' + (set5Data.n * set5Data.stake),
-                                set5Data.seg, 'np-set5') +
-                       '</div>';
-        }
-        if (npIdnMode && idnBo5Lines.length > 0){
-          var bo5Win  = npIdnScaleX2 ? IDN_BO5.win2 : IDN_BO5.win1;
-          var bo5Rate = npIdnScaleX2 ? IDN_BO5.rate2 : IDN_BO5.rate1;
-          var bo5Type = npIdnScaleX2 ? IDN_BO5.type2 : IDN_BO5.type1;
-          var bo5PL   = idnPerLine[4];   
-          var bo5Tot  = idnTotals[4];
-          var bo5TypeLbl = bo5Rate + ' <span class="np-idn-' + bo5Type.toLowerCase() + '">' + bo5Type + '</span>';
-          sixDPills += '<div class="np-setgrp-lbl">Total BO #5 = Rp.' + bo5Tot + '</div>';
-          sixDPills += npSetBtn('sm4dnp-6d',
-                                idnBo5Lines.length + '<span class="np-sub"> Line ' + bo5Rate + '</span>' +
-                                '<span class="np-src">@ Rp.' + bo5PL + '/line</span>',
-                                'BO #5', bo5TypeLbl,
-                                idnBo5Lines.join('*'), 'np-bo5');
-        }
-
-        html += '<hr class="np-section-sep">';
-        html += '<div class="np-section-lbl lbl-6d">' + (npBbfs7Mode ? '7D' : '6D') + ' BBFS (BO Limit)  &middot; max ' + (npBbfs7Mode ? '7' : '6') + ' digit &middot; split &times;' + groups.length +
-                (npD3Mode && !npIdnMode ? ' &middot; +3D (' + d3Count + ' line, Rp.' + d3Cost + ')' : '') +
-                (npIdnMode ? ' &middot; <span style="color:#ef4444;font-weight:800;">IDN MODE ' + idnScale + '</span>' : '') + '</div>';
-        if (npIdnMode){
-          html += '<div class="sm4dnp-6dinfo">' + idnScale +
-                  ' &middot; multiplier &times;' + npWeightKVal +
-                  ' &rarr; total Rp.' + idnGrandTotal +
-                  ' &middot; terburuk x' + idnLowestWin + ' = Rp.' + idnWinAtLowest +
-                  ' &middot; margin ' + idnMarginCalc + '%</div>';
-        } else {
-          html += '<div class="sm4dnp-6dinfo">' +
-                  (npWeightInputMode === 'target'
-                    ? 'target profit Rp.' + npWeightTargetVal + ' &rarr; K1=' + K1
-                    : 'modal Rp.' + npWeightKVal + ' &rarr; K1=' + K1) +
-                  ' ' + majLbl + ', K2=' + K2 + ' auto ' + minLbl + ', margin=' + npWeightMarginPct +
-                  '% &rarr; total bet 2D Rp.' + actualCost +
-                  targetWarn +
-                  (K1Warn || ' &middot; \u2713 semua SET dijamin balik modal+margin') +
-                  '</div>';
-        }
-        html += '<div class="np-invert-row">' +
-                '<span class="np-idn-lbl">IDN</span>' +
-                '<label class="np-idn" title="ON: mode IDN — tiap BO tampil nilai pasang IDN resmi">' +
-                '<input type="checkbox" id="npIdnCb"' + (npIdnMode ? ' checked' : '') + '>' +
-                '<span class="np-idn-slider"></span></label>' +
-                '<span class="np-invert-gap"></span>';
-        if (npIdnMode){
-          html += '<span class="np-invert-lbl" style="color:#94a3b8;">x1</span>' +
-                  '<label class="np-invert" title="x1 = setengah tarif (lebih kecil), x2 = tarif penuh IDN">' +
-                  '<input type="checkbox" id="npIdnScaleCb"' + (npIdnScaleX2 ? ' checked' : '') + '>' +
-                  '<span class="np-invert-slider" style="' + (npIdnScaleX2 ? 'background:#0ea5e9;' : '') + '"></span></label>' +
-                  '<span class="np-invert-lbl" style="color:#38bdf8;">x2</span>';
-        } else {
-          html += '<span class="np-invert-lbl">3D</span>' +
-                  '<label class="np-invert" title="ON: konversi tiap SET jadi versi 3D">' +
-                  '<input type="checkbox" id="np3dCb"' + (npD3Mode ? ' checked' : '') + '>' +
-                  '<span class="np-invert-slider"></span></label>';
-        }
-        html += '<span class="np-invert-gap"></span>' +
-                '<span class="np-invert-lbl">INVERT</span>' +
-                '<label class="np-invert" title="ON: SET dengan Line paling sedikit dapat multiplier paling besar">' +
-                '<input type="checkbox" id="npInvertCb"' + (inv ? ' checked' : '') + '>' +
-                '<span class="np-invert-slider"></span></label></div>';
-        html += sixDPills;
-
-        if (!npIdnMode && npD3Mode && d3Segs.length){
-          html += '<hr class="np-section-sep">';
-          html += npBtn('sm4dnp-6d', d3Count + ' Line', 'Quick Bet 3D All', d3Segs.join('+'));
-        }
-
-        if (!npIdnMode){
-          html += '<hr class="np-section-sep">';
-          html += '<hr class="np-section-sep">';
-          html += npBtn('sm4dnp-6d', sixDTotal + ' Line', 'Quick Safe Bet All', sixDQb);
-        }
-      }
-    }
-
-    if(npResults) npResults.innerHTML = html;
   }
 
   function bbfsOptimize(numbers, maxD, originalDigits){
     var groups = [], i, j;
     var chunkLen = (originalDigits.length < maxD ? originalDigits.length : maxD);
     var firstChunk = originalDigits.slice(0, chunkLen);
-    var fcd = setNew(firstChunk);
     var firstNums = [];
     for (i = 0; i < numbers.length; i++){
-      var ds = numbers[i].split(''), all = true, d;
-      for (d = 0; d < ds.length; d++){
-        if (!setHas(fcd, ds[d])){ all = false; break; }
-      }
+      var ds = numbers[i].split(''), all = true;
+      for (var d = 0; d < ds.length; d++){ if (firstChunk.indexOf(ds[d]) === -1){ all = false; break; } }
       if (all){ firstNums.push(numbers[i]); }
     }
     if (firstNums.length > 0){
-      groups.push({ numbers: uniq(firstNums), uniqueDigits: setNew(firstChunk) });
+      var uniqObj = {}; for(var cx=0; cx<firstChunk.length; cx++) uniqObj[firstChunk[cx]] = 1;
+      groups.push({ numbers: uniq(firstNums), uniqueDigits: uniqObj });
     }
-    var assigned = {};
-    for (i = 0; i < groups.length; i++){
-      for (j = 0; j < groups[i].numbers.length; j++){ assigned[groups[i].numbers[j]] = 1; }
-    }
-    var remaining = [];
-    for (i = 0; i < numbers.length; i++){
-      if (!assigned.hasOwnProperty(numbers[i])){ remaining.push(numbers[i]); }
-    }
-    if (remaining.length > 0){
-      var dmap = {};
-      for (i = 0; i < remaining.length; i++){
-        dmap[remaining[i]] = setNew(remaining[i].split(''));
-      }
-      var sorted = remaining.slice().sort(function(a, b){
-        return setSize(dmap[b]) - setSize(dmap[a]);
-      });
-      var processed = {};
-      for (i = 0; i < sorted.length; i++){
-        var num = sorted[i];
-        if (processed.hasOwnProperty(num)){ continue; }
-        var nd = dmap[num], bestIdx = -1, bestOv = 0, g;
-        for (g = 0; g < groups.length; g++){
-          var gd = groups[g].uniqueDigits, ov = 0, kk;
-          var ndk = setKeys(nd);
-          for (kk = 0; kk < ndk.length; kk++){
-            if (setHas(gd, ndk[kk])){ ov++; }
-          }
-          if (setSize(setUnion(gd, nd)) <= maxD && ov > bestOv){
-            bestIdx = g; bestOv = ov;
-          }
-        }
-        if (bestIdx !== -1){
-          groups[bestIdx].numbers.push(num);
-          groups[bestIdx].uniqueDigits = setUnion(groups[bestIdx].uniqueDigits, nd);
-          processed[num] = 1;
-        } else {
-          var ng = [num], ngd = setUnion(nd, {});
-          processed[num] = 1;
-          for (j = 0; j < sorted.length; j++){
-            var other = sorted[j];
-            if (processed.hasOwnProperty(other)){ continue; }
-            var comb2 = setUnion(ngd, dmap[other]);
-            if (setSize(comb2) <= maxD){
-              ng.push(other); ngd = comb2; processed[other] = 1;
-            }
-          }
-          groups.push({ numbers: ng, uniqueDigits: ngd });
-        }
-      }
-    }
-    for (i = groups.length - 1; i >= 0; i--){
-      for (j = i - 1; j >= 0; j--){
-        var u = setUnion(groups[i].uniqueDigits, groups[j].uniqueDigits);
-        if (setSize(u) <= maxD){
-          groups[j].numbers = uniq(groups[j].numbers.concat(groups[i].numbers));
-          groups[j].uniqueDigits = u;
-          groups.splice(i, 1);
-          break;
-        }
-      }
-    }
-    groups.sort(function(a, b){ return b.numbers.length - a.numbers.length; });
-    return groups;
-  }
-
-  function processBBFS(input){
-    var originalDigits = uniq(input.split(''));
-    var perms = [], i, j;
-    for (i = 0; i < originalDigits.length; i++){
-      for (j = 0; j < originalDigits.length; j++){
-        perms.push(originalDigits[i] + originalDigits[j]);
-      }
-    }
-    perms = uniq(perms);
-    var groups = bbfsOptimize(perms, 5, originalDigits);
-    var html = '';
-    for (i = 0; i < groups.length; i++){
-      var nums = groups[i].numbers.slice().sort();
-      var digits = setKeys(groups[i].uniqueDigits).sort().join('');
-      html += npBtn('sm4dnp-bbfs', nums.length + ' Line',
-                    'BBFS #' + (i + 1), nums.join('*')) +
-              npLegend('split #' + (i + 1) + ' &middot; ' +
-                       digits.length + ' digits: ' + digits);
-    }
-    var allSorted = perms.slice().sort();
-    html += npBtn('sm4dnp-bbfs', allSorted.length + ' Line',
-                  'Complete Set', allSorted.join('*')) +
-            npLegend(originalDigits.length + ' unique digits &rarr; ' +
-                     allSorted.length + ' permutations');
-    if(npResults) npResults.innerHTML = html;
+    return groups; 
   }
 
   function processKE(input){
     var parts = input.split('*');
-    if (parts.length !== 2 || !/^\d+$/.test(parts[0]) || !/^\d+$/.test(parts[1])){
-      npErr('Format salah! Gunakan: angka*angka (contoh: 123*456)');
-      return;
-    }
+    if (parts.length !== 2 || !/^\d+$/.test(parts[0]) || !/^\d+$/.test(parts[1])){ npErr('Format salah! Gunakan: angka*angka'); return; }
     var f = parts[0], s = parts[1], ke = [], ek = [], i, j;
-    for (i = 0; i < f.length; i++){
-      for (j = 0; j < s.length; j++){ ke.push(f.charAt(i) + s.charAt(j)); }
-    }
-    for (i = 0; i < s.length; i++){
-      for (j = 0; j < f.length; j++){ ek.push(s.charAt(i) + f.charAt(j)); }
-    }
-    if(npResults) npResults.innerHTML =
-      npBtn('sm4dnp-ke', ke.length + ' Line', 'Kepala&rarr;Ekor', ke.join('*')) +
-      npLegend(f.length + ' kepala &times; ' + s.length + ' ekor (' + f + ' vs ' + s + ')') +
-      npBtn('sm4dnp-ke', ek.length + ' Line', 'Ekor&rarr;Kepala', ek.join('*')) +
-      npLegend(s.length + ' ekor &times; ' + f.length + ' kepala (' + s + ' vs ' + f + ')');
+    for (i = 0; i < f.length; i++){ for (j = 0; j < s.length; j++){ ke.push(f.charAt(i) + s.charAt(j)); } }
+    for (i = 0; i < s.length; i++){ for (j = 0; j < f.length; j++){ ek.push(s.charAt(i) + f.charAt(j)); } }
+    if(npResults) npResults.innerHTML = npBtn('sm4dnp-ke', ke.length + ' Line', 'Kepala&rarr;Ekor', ke.join('*')) + npLegend(f.length + ' kepala &times; ' + s.length + ' ekor') + npBtn('sm4dnp-ke', ek.length + ' Line', 'Ekor&rarr;Kepala', ek.join('*')) + npLegend(s.length + ' ekor &times; ' + f.length + ' kepala');
   }
 
   function poltarCombos(parts, idx, cur){
     if (idx === parts.length){ return [cur]; }
     var res = [], p = parts[idx], i;
-    for (i = 0; i < p.length; i++){
-      res = res.concat(poltarCombos(parts, idx + 1, cur + p.charAt(i)));
-    }
+    for (i = 0; i < p.length; i++){ res = res.concat(poltarCombos(parts, idx + 1, cur + p.charAt(i))); }
     return res;
   }
 
   function processPoltar(input){
     var raw = input.split(','), parts = [], i;
-    for (i = 0; i < raw.length; i++){
-      var t = raw[i].replace(/^\s+|\s+$/g, '');
-      if (t.length > 0){ parts.push(t); }
-    }
-    if (parts.length < 2 || parts.length > 10){
-      npErr('POLTAR requires 2 to 9 comma-separated parts'); return;
-    }
-    var cleaned = [], dupInfo = [];
+    for (i = 0; i < raw.length; i++){ var t = raw[i].trim(); if (t.length > 0){ parts.push(t); } }
+    if (parts.length < 2 || parts.length > 10){ npErr('POLTAR requires 2 to 9 parts'); return; }
+    var cleaned = [];
     for (i = 0; i < parts.length; i++){
-      if (parts[i].length > 10){ npErr('Each POLTAR part max 9 digits'); return; }
-      if (!/^\d+$/.test(parts[i])){ npErr('POLTAR parts must contain only numbers'); return; }
-      var cp = uniq(parts[i].split('')).join('');
-      if (cp.length !== parts[i].length){
-        dupInfo.push('P' + (i + 1) + ': ' + parts[i] + '&rarr;' + cp);
-      }
-      cleaned.push(cp);
+      if (!/^\d+$/.test(parts[i])){ npErr('POLTAR must contain numbers only'); return; }
+      cleaned.push(uniq(parts[i].split('')).join(''));
     }
     var html = '';
-    if (dupInfo.length > 0){
-      html += '<div class="sm4dnp-warn sm4dnp-in">&#9888; Duplicate digits removed: ' +
-              dupInfo.join('; ') + '</div>';
-    }
     var last2 = cleaned.slice(-2);
     var c2 = uniq(poltarCombos(last2, 0, '')).sort();
-    html += npBtn('sm4dnp-poltar', c2.length + ' Line', '2D', c2.join('*')) +
-            npLegend('2D &middot; parts ' + (parts.length - 1) + ',' + parts.length +
-                     ': ' + last2.join(','));
+    html += npBtn('sm4dnp-poltar', c2.length + ' Line', '2D', c2.join('*'));
     if (cleaned.length >= 3){
       var last3 = cleaned.slice(-3);
       var c3 = uniq(poltarCombos(last3, 0, '')).sort();
-      html += npBtn('sm4dnp-poltar', c3.length + ' Line', '3D', c3.join('*')) +
-              npLegend('3D &middot; parts ' + (parts.length - 2) + '-' + parts.length +
-                       ': ' + last3.join(','));
-    }
-    if (cleaned.length >= 4){
-      var c4 = uniq(poltarCombos(cleaned, 0, '')).sort();
-      html += npBtn('sm4dnp-poltar', c4.length + ' Line', '4D All', c4.join('*')) +
-              npLegend('4D &middot; all ' + cleaned.length + ' parts: ' + cleaned.join(','));
+      html += npBtn('sm4dnp-poltar', c3.length + ' Line', '3D', c3.join('*'));
     }
     if(npResults) npResults.innerHTML = html;
   }
 
-  var npModeCb   = document.getElementById('npModeCb');
-  var npHint     = document.getElementById('npHint');
-  var npWeightK  = document.getElementById('npWeightK');
-  var npWeightK2 = document.getElementById('npWeightK2');
-
-  var npWeightInputMode = 'modal'; 
-  var npWeightKVal = 24000;      
-  var npWeightTargetVal = 50000; 
-  var npWeightMarginPct = 5;
-  var npPayoutM = 100; 
-  var npInvertMode = false;
-  var npD3Mode = false;
-  var npBbfs7Mode = false;
-  var npIdnMode = false;
-  var npIdnScaleX2 = false;
-
-  function npApplyIdnInputState(){
-    if (npWeightK){
-      if (npIdnMode){
-        npWeightK.setAttribute('disabled', 'disabled');
-      } else {
-        npWeightK.removeAttribute('disabled');
-        npWeightK.value = npWeightKVal;
-      }
-    }
-    if (npWeightK2){
-      if (npIdnMode){
-        npWeightK2.setAttribute('disabled', 'disabled');
-      } else {
-        npWeightK2.removeAttribute('disabled');
-        npWeightK2.value = npWeightMarginPct;
-      }
-    }
-    if (npWeightKLbl && !npIdnMode){
-      npWeightKLbl.textContent = npWeightInputMode === 'target' ? 'Target Rp.' : 'Rp.';
-    }
-    if (npWeightModeBtn){
-      if (npIdnMode){ npWeightModeBtn.setAttribute('disabled','disabled'); npWeightModeBtn.style.opacity = '.4'; }
-      else { npWeightModeBtn.removeAttribute('disabled'); npWeightModeBtn.style.opacity = ''; }
-    }
-  }
-
-  if(npResults) {
-    npResults.addEventListener('change', function(e){
-      var t = e.target || e.srcElement;
-      if (t && t.id === 'npInvertCb'){
-        npInvertMode = !!t.checked;
-        if (npInput && npInput.value){ processNumberInput(); }
-      } else if (t && t.id === 'np3dCb'){
-        npD3Mode = !!t.checked;
-        if (npInput && npInput.value){ processNumberInput(); }
-      } else if (t && t.id === 'npIdnCb'){
-        npIdnMode = !!t.checked;
-        npApplyIdnInputState();
-        if (npInput && npInput.value){ processNumberInput(); }
-      } else if (t && t.id === 'npIdnScaleCb'){
-        npIdnScaleX2 = !!t.checked;
-        if (npInput && npInput.value){ processNumberInput(); }
-      }
-    });
-  }
-
-  var np7dModeCb = document.getElementById('np7dModeCb');
-  if (np7dModeCb){
-    np7dModeCb.addEventListener('change', function(){
-      npBbfs7Mode = !!np7dModeCb.checked;
-      if (npInput && npInput.value){ processNumberInput(); }
-    });
-  }
-  var npWeightModeBtn = document.getElementById('npWeightModeBtn');
-  var npWeightKLbl = document.getElementById('npWeightKLbl');
-  if (npWeightK){
-    npWeightK.addEventListener('input', function(){
-      var v = parseInt(npWeightK.value, 10);
-      if (npWeightInputMode === 'target'){
-        npWeightTargetVal = (v > 0) ? v : 50000;
-      } else {
-        npWeightKVal = (v > 0) ? v : 24000;
-      }
-      if (npInput && npInput.value){ processNumberInput(); }
-    });
-  }
-  if (npWeightModeBtn){
-    npWeightModeBtn.addEventListener('click', function(){
-      if (npWeightInputMode === 'modal'){
-        npWeightInputMode = 'target';
-        npWeightModeBtn.innerHTML = '&#127919; Profit';
-        if(npWeightKLbl) npWeightKLbl.textContent = 'Target Rp.';
-        npWeightK.value = npWeightTargetVal;
-      } else {
-        npWeightInputMode = 'modal';
-        npWeightModeBtn.innerHTML = '&#128176; Modal';
-        if(npWeightKLbl) npWeightKLbl.textContent = 'Rp.';
-        npWeightK.value = npWeightKVal;
-      }
-      if (npInput && npInput.value){ processNumberInput(); }
-    });
-  }
-  if (npWeightK2){
-    npWeightK2.addEventListener('input', function(){
-      var v = parseFloat(npWeightK2.value);
-      npWeightMarginPct = (v >= 0) ? v : 5;
-      if (npInput && npInput.value){ processNumberInput(); }
-    });
-  }
-
-  var HINT_NORMAL = npHint ? npHint.innerHTML : '';
-  var HINT_BBFS_CM =
-    '<span style="background-color:#1a1060;color:#fcd34d;padding:2px 4px;border-radius:4px;"><b>BBFS</b> 3&ndash;9 digit</span> ' +
-    '<span style="background-color:#1a1060;color:#c4b5fd;padding:2px 4px;border-radius:4px;"><b>CM</b> 2&ndash;7 digit</span>' +
-    '<br>hasil keduanya tampil &mdash; tap button to copy';
-
-  var npBBFSCMMode = false;
-
-  function npSetMode(on){
-    npBBFSCMMode = on;
-    if (npHint){ npHint.innerHTML = on ? HINT_BBFS_CM : HINT_NORMAL; }
-    if(npResults) npResults.innerHTML = '';
-    npStore = {}; npSeq = 0;
-    if (npInput && npInput.value){ processNumberInput(); }
-  }
-
-  if (npModeCb){
-    npModeCb.addEventListener('change', function(){ npSetMode(npModeCb.checked); });
-  }
-
-  function buildCMHtml(input){
-    var digits = [];
-    var i;
-    for (i = 0; i < input.length; i++){
-      var ch = input.charAt(i);
-      if (digits.indexOf(ch) === -1){ digits.push(ch); }
-    }
-    if (digits.length < 2 || digits.length > 7){ return ''; }
-
-    var normal = [], twin = [];
-    for (var n = 0; n <= 999; n++){
-      var s = (n < 10 ? '00' : (n < 100 ? '0' : '')) + n;
-      var matchCount = 0, hasTwin = false;
-      var j, d;
-      for (j = 0; j < digits.length; j++){
-        d = digits[j];
-        var cnt = 0;
-        for (var ci = 0; ci < s.length; ci++){ if (s.charAt(ci) === d){ cnt++; } }
-        if (cnt > 0){ matchCount++; }
-        if (cnt >= 2){ hasTwin = true; }
-      }
-      if (matchCount >= 2){
-        var isTwin = false;
-        for (var pi = 0; pi < s.length && !isTwin; pi++){
-          for (var pj = pi + 1; pj < s.length; pj++){
-            if (s.charAt(pi) === s.charAt(pj) && digits.indexOf(s.charAt(pi)) !== -1){
-              isTwin = true; break;
-            }
-          }
-        }
-        if (isTwin){ twin.push(s); } else { normal.push(s); }
-      } else if (hasTwin){
-        twin.push(s);
-      }
-    }
-
-    var html = '<div class="np-section-lbl lbl-cm">&#9670; Colok Maut (CM)</div>';
-    if (twin.length > 0){
-      html += npBtn('sm4dnp-cm np-compact', twin.length + ' Line', 'CM Twin', twin.join('*'));
-    }
-    if (normal.length > 0){
-      html += npBtn('sm4dnp-cm np-compact', normal.length + ' Line', 'CM Normal', normal.join('*'));
-    }
-
-    if (digits.length >= 5){
-      var allCM = twin.concat(normal);
-      var shuffled = allCM.slice();
-      for (var si = shuffled.length - 1; si > 0; si--){
-        var rj = Math.floor(Math.random() * (si + 1));
-        var tmp = shuffled[si]; shuffled[si] = shuffled[rj]; shuffled[rj] = tmp;
-      }
-      var total = shuffled.length;
-      var p1sz = Math.floor(total / 3);
-      var p2sz = Math.floor(total / 3);
-      var p3sz = total - p1sz - p2sz;
-      var part1 = shuffled.slice(0, p1sz).sort();
-      var part2 = shuffled.slice(p1sz, p1sz + p2sz).sort();
-      var part3 = shuffled.slice(p1sz + p2sz).sort();
-      html += '<div class="np-split-hint">&#9672; Random Split</div>';
-      html += '<div class="np-split-row">';
-      html += npBtn('sm4dnp-cm', part1.length + ' Line', '', part1.join('*'));
-      html += npBtn('sm4dnp-cm', part2.length + ' Line', '', part2.join('*'));
-      html += npBtn('sm4dnp-cm', part3.length + ' Line', '', part3.join('*'));
-      html += '</div>';
-    }
-
-    return html;
-  }
-
-  function buildBBFSHtml(input){
-    var ud = uniq(input.split(''));  
-    var i, j, k, s;
-    var dLen = ud.length;
-    if (dLen < 3 || dLen > 9){ return ''; }
-
-    var all2D = [];
-    for (i = 0; i < ud.length; i++){
-      for (j = 0; j < ud.length; j++){
-        all2D.push(ud[i] + ud[j]);
-      }
-    }
+  function processBBFS(input){
+    var ud = uniq(input.split(''));
+    var all2D = [], i, j;
+    for (i = 0; i < ud.length; i++){ for (j = 0; j < ud.length; j++){ all2D.push(ud[i] + ud[j]); } }
     all2D = uniq(all2D).sort();
-
-    var all3D_normal = [], all3D_twin = [];
-    for (i = 0; i < ud.length; i++){
-      for (j = 0; j < ud.length; j++){
-        for (k = 0; k < ud.length; k++){
-          s = ud[i] + ud[j] + ud[k];
-          var hasDup = (ud[i]===ud[j] || ud[j]===ud[k] || ud[i]===ud[k]);
-          if (hasDup){ all3D_twin.push(s); } else { all3D_normal.push(s); }
-        }
-      }
-    }
-    all3D_normal = uniq(all3D_normal).sort();
-    all3D_twin   = uniq(all3D_twin).sort();
-
-    var html = '<div class="np-section-lbl lbl-bbfs">&#9670; BBFS</div>';
-
-    if (dLen === 6){
-      html += npBtn('sm4dnp-bbfs np-compact', all2D.length + ' Line', '2D', all2D.join('*'));
-    } else if (dLen >= 7){
-      var besar2D = [], kecil2D = [], d2;
-      for (i=0;i<all2D.length;i++){
-        d2 = parseInt(all2D[i].charAt(0), 10);
-        if (d2 >= 5){ besar2D.push(all2D[i]); } else { kecil2D.push(all2D[i]); }
-      }
-      html += npBtn('sm4dnp-bbfs np-compact', besar2D.length + ' Line', '2D Besar', besar2D.join('*'));
-      html += npBtn('sm4dnp-bbfs np-compact', kecil2D.length + ' Line', '2D Kecil', kecil2D.join('*'));
-    } else if (dLen >= 3){
-      html += npBtn('sm4dnp-bbfs np-compact', all2D.length + ' Line', '2D', all2D.join('*'));
-    }
-
-    if (dLen >= 4){
-      if (dLen === 7 || dLen === 8){
-        html += npBtn('sm4dnp-bbfs np-compact', all3D_normal.length + ' Line', '3D', all3D_normal.join('*'));
-        html += npBtn('sm4dnp-bbfs np-compact', all3D_twin.length + ' Line', '3D Twin', all3D_twin.join('*'));
-      } else if (dLen === 9){
-        var primeSet = {};
-        var primeList = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
-        for (i=0;i<primeList.length;i++){
-          primeSet[(primeList[i]<10?'0':'')+primeList[i]] = 1;
-        }
-        var prime3 = [], nonprime3 = [];
-        for (i=0;i<all3D_normal.length;i++){
-          s = all3D_normal[i];
-          var lastTwo = s.charAt(1) + s.charAt(2);
-          if (primeSet.hasOwnProperty(lastTwo)){ prime3.push(s); }
-          else { nonprime3.push(s); }
-        }
-        html += npBtn('sm4dnp-bbfs np-compact', nonprime3.length + ' Line', '3D', nonprime3.join('*'));
-        html += npBtn('sm4dnp-bbfs np-compact', prime3.length + ' Line', '3D Prime', prime3.join('*'));
-        html += npBtn('sm4dnp-bbfs np-compact', all3D_twin.length + ' Line', '3D Twin', all3D_twin.join('*'));
-      } else {
-        html += npBtn('sm4dnp-bbfs np-compact', all3D_normal.length + ' Line', '3D', all3D_normal.join('*'));
-        html += npBtn('sm4dnp-bbfs np-compact', all3D_twin.length + ' Line', '3D Twin', all3D_twin.join('*'));
-      }
-    }
-
-    return html;
+    var html = npBtn('sm4dnp-bbfs', all2D.length + ' Line', '2D', all2D.join('*'));
+    if(npResults) npResults.innerHTML = html;
   }
 
   function processNumberInput(){
@@ -2703,31 +1419,11 @@ function toggleDetailFile(index, forceRefresh = false) {
     var input = npInput.value.replace(/^\s+|\s+$/g, '');
     npStore = {}; npSeq = 0;
     if (!input){ if(npResults) npResults.innerHTML = ''; return; }
-
-    if (npBBFSCMMode){
-      if (/^\d+$/.test(input)){
-        var bbfsHtml = buildBBFSHtml(input);
-        var cmHtml   = buildCMHtml(input);
-        if (!bbfsHtml && !cmHtml){
-          npErr('BBFS: 3-9 digit | CM: 2-7 digit'); return;
-        }
-        var combined = '';
-        if (bbfsHtml){ combined += bbfsHtml; }
-        if (cmHtml){
-          if (bbfsHtml){ combined += '<hr class="np-section-sep">'; }
-          combined += cmHtml;
-        }
-        if(npResults) npResults.innerHTML = combined;
-      } else { npErr('Mode BBFS/CM: masukkan angka saja (tanpa * atau ,)'); }
-      return;
-    }
-
     if (input.indexOf('*') !== -1){ processKE(input); }
     else if (input.indexOf(',') !== -1){ processPoltar(input); }
     else if (/^\d+$/.test(input)){
-      if (input.length >= 5 && input.length <= 10){ processBBFS(input); }
-      else if (input.length >= 1 && input.length <= 4){ processAI(input); }
-      else { npErr('Max 10 digits for BBFS, 4 digits for AI.'); }
+      if (input.length >= 2 && input.length <= 10){ processBBFS(input); }
+      else { npErr('BBFS Minimal 2 digit.'); }
     }
     else { npErr('Invalid input format.'); }
   }

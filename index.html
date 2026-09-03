@@ -227,9 +227,7 @@ th { background-color: #f8f9fa; color: #555; }
 <div id="sm4dFoot">KATADATA MOBILE · v1.3</div>
 </nav>
 </div>
-</div>
-
-<!-- TAB ADMIN PANEL -->
+</div><!-- TAB ADMIN PANEL -->
 <div id="tabAdmin" class="tab-content" style="display:none;">
     <div class="config-box">
         <div class="form-group" style="margin-bottom: 0;">
@@ -237,85 +235,95 @@ th { background-color: #f8f9fa; color: #555; }
             <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
         </div>
     </div>
-    <div class="section">
-        <div class="section-title">Pilih Market untuk Diupdate</div>
-        <div class="form-group">
-            <select id="marketSelectAdmin">
-                <option value="">-- Pilih Market --</option>
-                <option value="macau-00">Macau 00</option>
-                <option value="germany-plus5">Germany Plus5</option>
-                <option value="tennesse-midday">Tennesse Midday</option>
-                <option value="indiana-midday">Indiana Midday</option>
-                <option value="kentucky-midday">Kentucky Midday</option>
-                <option value="texas-day">Texas Day</option>
-                <option value="florida-midday">Florida Midday</option>
-                <option value="illinois-midday">Illinois Midday</option>
-                <option value="missouri-midday">Missouri Midday</option>
-                <option value="washington-dc-midday">Washington DC Midday</option>
-                <option value="virginia-day">Virginia Day</option>
-                <option value="new-york-midday">New York Midday</option>
-                <option value="north-carolina-day">North Carolina Day</option>
-                <option value="oregon-3">Oregon 3</option>
-                <option value="morocco-quatro-03">Morocco Quatro 03</option>
-                <option value="texas-evening">Texas Evening</option>
-                <option value="oregon-6">Oregon 6</option>
-                <option value="georgia-evening">Georgia Evening</option>
-                <option value="tennesse-evening">Tennesse Evening</option>
-                <option value="maryland-evening">Maryland Evening</option>
-                <option value="washington-dc-evening">Washington DC Evening</option>
-                <option value="california">California</option>
-                <option value="florida-evening">Florida Evening</option>
-                <option value="missouri-evening">Missouri Evening</option>
-                <option value="oregon-9">Oregon 9</option>
-                <option value="illinois-evening">Illinois Evening</option>
-                <option value="new-york-evening">New York Evening</option>
-                <option value="indiana-evening">Indiana Evening</option>
-                <option value="new-jersey-evening">New Jersey Evening</option>
-                <option value="kentucky-evening">Kentucky Evening</option>
-                <option value="texas-night">Texas Night</option>
-                <option value="north-carolina-evening">North Carolina Evening</option>
-                <option value="georgia-night">Georgia Night</option>
-                <option value="cambodia">Cambodia</option>
-                <option value="oregon-12">Oregon 12</option>
-                <option value="macau-13">Macau 13</option>
-                <option value="bullseye">Bullseye</option>
-                <option value="china">China</option>
-                <option value="macau-16">Macau 16</option>
-                <option value="japan">Japan</option>
-                <option value="macau-19">Macau 19</option>
-                <option value="pcso">PCSO</option>
-                <option value="tennesse-morning">Tennesse Morning</option>
-                <option value="texas-morning">Texas Morning</option>
-                <option value="macau-22">Macau 22</option>
-                <option value="macau-23">Macau 23</option>
-                <option value="maryland-midday">Maryland Midday</option>
-                <option value="georgia-midday">Georgia Midday</option>
-                <option value="new-jersey-midday">New Jersey Midday</option>
-            </select>
+
+    <!-- Layout Bersebelahan: Pilih Market & Input Data -->
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
+        <div style="flex: 1; min-width: 280px;">
+            <div class="section">
+                <div class="section-title">Pilih Market untuk Diupdate</div>
+                <div class="form-group">
+                    <select id="marketSelectAdmin" onchange="onAdminMarketChange()">
+                        <option value="">-- Pilih Market --</option>
+                        <option value="macau-00">Macau 00</option>
+                        <option value="germany-plus5">Germany Plus5</option>
+                        <option value="tennesse-midday">Tennesse Midday</option>
+                        <option value="indiana-midday">Indiana Midday</option>
+                        <option value="kentucky-midday">Kentucky Midday</option>
+                        <option value="texas-day">Texas Day</option>
+                        <option value="florida-midday">Florida Midday</option>
+                        <option value="illinois-midday">Illinois Midday</option>
+                        <option value="missouri-midday">Missouri Midday</option>
+                        <option value="washington-dc-midday">Washington DC Midday</option>
+                        <option value="virginia-day">Virginia Day</option>
+                        <option value="new-york-midday">New York Midday</option>
+                        <option value="north-carolina-day">North Carolina Day</option>
+                        <option value="oregon-3">Oregon 3</option>
+                        <option value="morocco-quatro-03">Morocco Quatro 03</option>
+                        <option value="texas-evening">Texas Evening</option>
+                        <option value="oregon-6">Oregon 6</option>
+                        <option value="georgia-evening">Georgia Evening</option>
+                        <option value="tennesse-evening">Tennesse Evening</option>
+                        <option value="maryland-evening">Maryland Evening</option>
+                        <option value="washington-dc-evening">Washington DC Evening</option>
+                        <option value="california">California</option>
+                        <option value="florida-evening">Florida Evening</option>
+                        <option value="missouri-evening">Missouri Evening</option>
+                        <option value="oregon-9">Oregon 9</option>
+                        <option value="illinois-evening">Illinois Evening</option>
+                        <option value="new-york-evening">New York Evening</option>
+                        <option value="indiana-evening">Indiana Evening</option>
+                        <option value="new-jersey-evening">New Jersey Evening</option>
+                        <option value="kentucky-evening">Kentucky Evening</option>
+                        <option value="texas-night">Texas Night</option>
+                        <option value="north-carolina-evening">North Carolina Evening</option>
+                        <option value="georgia-night">Georgia Night</option>
+                        <option value="cambodia">Cambodia</option>
+                        <option value="oregon-12">Oregon 12</option>
+                        <option value="macau-13">Macau 13</option>
+                        <option value="bullseye">Bullseye</option>
+                        <option value="china">China</option>
+                        <option value="macau-16">Macau 16</option>
+                        <option value="japan">Japan</option>
+                        <option value="macau-19">Macau 19</option>
+                        <option value="pcso">PCSO</option>
+                        <option value="tennesse-morning">Tennesse Morning</option>
+                        <option value="texas-morning">Texas Morning</option>
+                        <option value="macau-22">Macau 22</option>
+                        <option value="macau-23">Macau 23</option>
+                        <option value="maryland-midday">Maryland Midday</option>
+                        <option value="georgia-midday">Georgia Midday</option>
+                        <option value="new-jersey-midday">New Jersey Midday</option>
+                    </select>
+                </div>
+            </div>
+            <div class="quick-actions">
+                <button type="button" class="btn btn-secondary" onclick="setToday()">Isi Tanggal Hari Ini</button>
+            </div>
+        </div>
+
+        <div style="flex: 1; min-width: 280px;">
+            <div class="section">
+                <div class="section-title">Input Data</div>
+                <div class="form-group">
+                    <label for="inputTanggalAdmin">Tanggal</label>
+                    <input type="text" id="inputTanggalAdmin" placeholder="DD-MM-YYYY" maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label for="inputNomorAdmin">Nomor (4 digit)</label>
+                    <input type="text" id="inputNomorAdmin" placeholder="1234" maxlength="4">
+                </div>
+            </div>
         </div>
     </div>
-    <div class="quick-actions">
-        <button type="button" class="btn btn-secondary" onclick="setToday()">📅 Isi Tanggal Hari Ini</button>
-        <button type="button" class="btn btn-secondary" onclick="loadCurrentData()" id="btnLoad">🔄 Muat Data Saat Ini</button>
-    </div>
-    <div class="section">
-        <div class="section-title">Input Data</div>
-        <div class="form-group">
-            <label for="inputTanggalAdmin">Tanggal</label>
-            <input type="text" id="inputTanggalAdmin" placeholder="DD-MM-YYYY" maxlength="10">
-        </div>
-        <div class="form-group">
-            <label for="inputNomorAdmin">Nomor (4 digit)</label>
-            <input type="text" id="inputNomorAdmin" placeholder="1234" maxlength="4">
-        </div>
-    </div>
+
     <div id="statusBox" class="status"></div>
     <div class="quick-actions">
-        <button class="btn btn-primary btn-large" onclick="submitData()" id="btnSubmit" style="background:#1a73e8; color:white; border:none; padding:12px; border-radius:6px; cursor:pointer;">💾 Simpan & Update</button>
-        <button class="btn btn-secondary" onclick="resetForm()" style="background:#edf2f7; border:none; padding:12px; border-radius:6px; cursor:pointer;">🔄 Reset</button>
+        <button class="btn btn-primary btn-large" onclick="submitData()" id="btnSubmit" style="background:#1a73e8; color:white; border:none; padding:12px; border-radius:6px; cursor:pointer;">Simpan & Update</button>
+        <button class="btn btn-secondary" onclick="resetForm()" style="background:#edf2f7; border:none; padding:12px; border-radius:6px; cursor:pointer;">Reset</button>
     </div>
+
     <div class="table-scroll-container" id="currentDataBox" style="display:none; margin-top:15px;">
-        <h3 style="padding: 10px; color: #1a73e8; font-size: 15px;">📊 Data Saat Ini (Server)</h3>
+        <h3 id="currentDataTitle" style="padding: 10px; color: #1a73e8; font-size: 15px;">Data Saat Ini</h3>
         <table class="table-rekap">
             <thead><tr><th>No</th><th>Tanggal</th><th>Nomor</th></tr></thead>
             <tbody id="currentDataBody"></tbody>
@@ -495,7 +503,7 @@ function setToday() {
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const yyyy = today.getFullYear();
     document.getElementById('inputTanggalAdmin').value = `${dd}-${mm}-${yyyy}`;
-    showStatus('info', `📅 Tanggal diisi: ${dd}-${mm}-${yyyy}`);
+    showStatus('info', `Tanggal diisi: ${dd}-${mm}-${yyyy}`);
 }
 
 function showStatus(type, message) {
@@ -509,7 +517,7 @@ function resetForm() {
     document.getElementById('inputTanggalAdmin').value = '';
     document.getElementById('inputNomorAdmin').value = '';
     document.getElementById('currentDataBox').style.display = 'none';
-    showStatus('info', '🔄 Form direset');
+    showStatus('info', 'Form direset');
 }
 
 async function loadServerMarketData() {
@@ -539,14 +547,28 @@ async function loadServerMarketData() {
     }
 }
 
+// Dipanggil otomatis saat dropdown market di admin berubah
+async function onAdminMarketChange() {
+    const marketSelect = document.getElementById('marketSelectAdmin');
+    const selectedValue = marketSelect.value;
+    
+    if (!selectedValue) {
+        document.getElementById('currentDataBox').style.display = 'none';
+        return;
+    }
+    
+    // Update judul tabel dengan nama market yang dipilih dari dropdown
+    const selectedText = marketSelect.options[marketSelect.selectedIndex].text;
+    document.getElementById('currentDataTitle').innerText = `Data Saat Ini: ${selectedText}`;
+
+    // Otomatis muat data tanpa klik tombol
+    await loadCurrentData();
+}
+
 async function loadCurrentData() {
     const market = document.getElementById('marketSelectAdmin').value;
     const token = getToken();
-    if (!market || !token) { if (!market) showStatus('error', '❌ Pilih market terlebih dahulu!'); return; }
-
-    const btn = document.getElementById('btnLoad');
-    btn.disabled = true;
-    btn.innerHTML = 'Memuat...';
+    if (!market || !token) return;
 
     try {
         const response = await fetch(
@@ -555,8 +577,8 @@ async function loadCurrentData() {
         );
 
         if (response.status === 404) {
-            showStatus('info', `ℹ️ File ${market}.json belum ada. Data akan dibuat baru.`);
-            currentData = []; currentFileSHA = null;
+            currentData = []; 
+            currentFileSHA = null;
             document.getElementById('currentDataBody').innerHTML = '<tr><td colspan="3">Belum ada data (File baru)</td></tr>';
             document.getElementById('currentDataBox').style.display = 'block';
             return;
@@ -567,16 +589,10 @@ async function loadCurrentData() {
         currentFileSHA = fileData.sha;
         currentData = JSON.parse(atob(fileData.content));
         displayCurrentData();
-        showStatus('success', `✅ Data berhasil dimuat: ${currentData.length} record`);
     } catch (error) {
-        showStatus('error', `❌ Gagal memuat data: ${error.message}`);
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '🔄 Muat Data Saat Ini';
+        console.error("Gagal memuat data:", error.message);
     }
-}
-
-function displayCurrentData() {
+}function displayCurrentData() {
     const tbody = document.getElementById('currentDataBody');
     tbody.innerHTML = '';
     if(currentData.length === 0) {
@@ -622,7 +638,7 @@ async function submitData() {
                 pendingSubmit = { market, tanggal, nomor, latestSHA, latestData };
                 document.getElementById('conflictModal').classList.add('active');
                 btn.disabled = false;
-                btn.innerHTML = '💾 Simpan & Update';
+                btn.innerHTML = 'Simpan & Update';
                 return;
             }
         } else if (fetchResponse.status !== 404) {
@@ -645,7 +661,7 @@ async function submitData() {
         showStatus('error', `❌ Gagal menyimpan: ${error.message}`);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '💾 Simpan & Update';
+        btn.innerHTML = 'Simpan & Update';
     }
 }
 
@@ -725,7 +741,7 @@ async function forceOverwrite() {
         showStatus('error', `❌ Gagal overwrite: ${error.message}`);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '💾 Simpan & Update';
+        btn.innerHTML = 'Simpan & Update';
         pendingSubmit = null;
     }
 }
@@ -763,7 +779,7 @@ async function reloadAndMerge() {
         showStatus('error', `❌ Gagal menggabungkan: ${error.message}`);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '💾 Simpan & Update';
+        btn.innerHTML = 'Simpan & Update';
         pendingSubmit = null;
     }
 }

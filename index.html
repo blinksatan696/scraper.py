@@ -227,7 +227,8 @@ th { background-color: #f8f9fa; color: #555; }
 <div id="sm4dFoot">KATADATA MOBILE · v1.3</div>
 </nav>
 </div>
-  
+</div>
+
 <!-- TAB ADMIN PANEL -->
 <div id="tabAdmin" class="tab-content" style="display:none;">
     <!-- GitHub Token Pendek -->
@@ -240,8 +241,8 @@ th { background-color: #f8f9fa; color: #555; }
         </div>
     </div>
 
-    <!-- Pilihan Market dan Input Data dalam Satu Baris -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 15px; align-items: start;">
+    <!-- Pilihan Market, Tanggal, dan Nomor dalam Satu Baris Sejajar -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; align-items: start;">
         <div class="section" style="margin-bottom: 0;">
             <div class="section-title" style="margin-bottom: 6px;">Pilih Market</div>
             <div class="form-group" style="margin-bottom: 6px;">
@@ -332,7 +333,9 @@ th { background-color: #f8f9fa; color: #555; }
         </table>
     </div>
 </div>
-  
+
+</div>
+
 <!-- KONFLIK MODAL -->
 <div class="modal-overlay" id="conflictModal">
     <div class="modal">
@@ -415,8 +418,8 @@ const MARKET_LIST = [
     { id: 'georgia-midday', name: 'Georgia Midday' },
     { id: 'new-jersey-midday', name: 'New Jersey Midday' }
 ];
-  
-  const TOTAL_SLOTS = MARKET_LIST.length;
+
+const TOTAL_SLOTS = MARKET_LIST.length;
 
 function formatDate(d, m, y) { return `${String(d).padStart(2,'0')}-${String(m).padStart(2,'0')}-${y}`; }
 function getNamaHari(date) { const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']; return hari[date.getDay()]; }
@@ -431,7 +434,6 @@ window.onload = async function() {
   // INIT ADMIN TOKEN
   const savedToken = localStorage.getItem('github_token');
   if (savedToken) document.getElementById('githubToken').value = savedToken;
-  loadServerMarketData();
 };
 
 function initSlotsAndTabs() {
@@ -486,7 +488,7 @@ async function fetchAllMarketData() {
   gantiSlot(slotAktif);
 }
 
-// --- GITHUB ADMIN PANEL & VIEWER ---
+// --- GITHUB ADMIN PANEL ---
 document.getElementById('githubToken').addEventListener('change', (e) => {
     localStorage.setItem('github_token', e.target.value.trim());
 });
@@ -520,33 +522,6 @@ function resetForm() {
     showStatus('info', 'Form direset');
 }
 
-async function loadServerMarketData() {
-    const market = document.getElementById('marketSelectViewer').value;
-    const tableBody = document.getElementById('tableBodyViewer');
-    tableBody.innerHTML = '<tr><td colspan="3">Memuat data...</td></tr>';
-
-    const rawUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${DATA_PATH}/${market}.json?t=${new Date().getTime()}`;
-
-    try {
-        const response = await fetch(rawUrl);
-        if (!response.ok) throw new Error('File data belum tersedia di server.');
-        let data = await response.json();
-        
-        tableBody.innerHTML = '';
-        if (data.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="3">Tidak ada data tersedia.</td></tr>';
-            return;
-        }
-        data.reverse();
-        data.forEach((item, index) => {
-            const row = `<tr><td>${index + 1}</td><td>${item.tanggal}</td><td><strong style="color:#1a73e8;">${item.nomor}</strong></td></tr>`;
-            tableBody.innerHTML += row;
-        });
-    } catch (error) {
-        tableBody.innerHTML = `<tr><td colspan="3" style="color: red;">Gagal memuat data atau file JSON belum terbentuk.</td></tr>`;
-    }
-}
-
 // Dipanggil otomatis saat dropdown market di admin berubah
 async function onAdminMarketChange() {
     const marketSelect = document.getElementById('marketSelectAdmin');
@@ -557,11 +532,9 @@ async function onAdminMarketChange() {
         return;
     }
     
-    // Update judul tabel dengan nama market yang dipilih dari dropdown
     const selectedText = marketSelect.options[marketSelect.selectedIndex].text;
     document.getElementById('currentDataTitle').innerText = `Data Saat Ini: ${selectedText}`;
 
-    // Otomatis muat data tanpa klik tombol
     await loadCurrentData();
 }
 
@@ -592,7 +565,9 @@ async function loadCurrentData() {
     } catch (error) {
         console.error("Gagal memuat data:", error.message);
     }
-}function displayCurrentData() {
+}
+
+function displayCurrentData() {
     const tbody = document.getElementById('currentDataBody');
     tbody.innerHTML = '';
     if(currentData.length === 0) {
@@ -654,7 +629,6 @@ async function submitData() {
         displayCurrentData();
         document.getElementById('inputNomorAdmin').value = '';
         
-        // Segarkan data lokal setelah update sukses
         await fetchAllMarketData();
         
     } catch (error) {

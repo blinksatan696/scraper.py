@@ -33,13 +33,6 @@ th { background-color: #f8f9fa; color: #555; }
 .table-rekap input { font-size: 12px; padding: 3px; border: none !important; background: transparent !important; text-align: center; width: 100%; outline: none !important; }
 .col-slot { white-space: nowrap; text-align: left; padding-left: 8px; }
 .top-rank-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
-.top-rank-wrapper {
-    display: grid;
-    /* Membuat 3 kolom di desktop, otomatis susun ke bawah di HP */
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 15px;
-    margin-bottom: 15px;
-}
 .top-rank-title { font-weight: bold; color: #28a745; font-size: 13px; text-align: center; margin-bottom: 6px; background: #e6f4ea; padding: 4px; border-radius: 4px; }
 .top-rank-card table td:nth-child(2) { text-align: left; padding-left: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
 
@@ -127,27 +120,71 @@ th { background-color: #f8f9fa; color: #555; }
 
 <!-- TAB REKAPITULASI -->
 <div id="tabRekap" class="tab-content active">
-<h2>Tabel Pembanding Rekapitulasi</h2>
-<div class="date-picker-container" style="margin-bottom: 15px;">
-<label style="font-size:13px; font-weight:bold; color: #856404;">Pilih Tanggal:</label>
-<input type="date" id="inputTanggalRekap" style="padding: 6px; border-radius: 4px; border: 1px solid #ffe69c; font-weight:bold; outline:none; cursor:pointer;" onchange="sinkronisasiTanggalDariRekap(this.value)">
-</div>
-<div class="top-rank-wrapper" id="topRankContainer">
-  <div class="top-rank-card"><div class="top-rank-title" id="title_top_1">TOP 1: -</div><div class="table-scroll-container" style="max-height: 180px;"><table class="table-rekap" style="font-size:11px;"><thead><tr><th>NO</th><th>MARKET</th><th>LAST</th><th>AI</th><th>RES</th><th>W/L</th></tr></thead><tbody id="tbody_top_1"></tbody></table></div></div>
-  <div class="top-rank-card"><div class="top-rank-title" id="title_top_2">TOP 2: -</div><div class="table-scroll-container" style="max-height: 180px;"><table class="table-rekap" style="font-size:11px;"><thead><tr><th>NO</th><th>MARKET</th><th>LAST</th><th>AI</th><th>RES</th><th>W/L</th></tr></thead><tbody id="tbody_top_2"></tbody></table></div></div>
-  <div class="top-rank-card"><div class="top-rank-title" id="title_top_3">TOP 3: -</div><div class="table-scroll-container" style="max-height: 180px;"><table class="table-rekap" style="font-size:11px;"><thead><tr><th>NO</th><th>MARKET</th><th>LAST</th><th>AI</th><th>RES</th><th>W/L</th></tr></thead><tbody id="tbody_top_3"></tbody></table></div></div>
-</div>
+  <h2>Tabel Pembanding Rekapitulasi</h2>
+  
+  <div class="date-picker-container" style="margin-bottom: 15px;">
+    <label style="font-size:13px; font-weight:bold; color: #856404;">Pilih Tanggal:</label>
+    <input type="date" id="inputTanggalRekap" style="padding: 6px; border-radius: 4px; border: 1px solid #ffe69c; font-weight:bold; outline:none; cursor:pointer;" onchange="sinkronisasiTanggalDariRekap(this.value)">
+  </div>
 
-<div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: stretch; width: 100%;">
-  <div class="top-rank-card" id="rekomendasi-card" style="flex: 1.5; margin-bottom: 0; display: flex; flex-direction: column;">
-    <div class="top-rank-title"><span id="rekomendasiMetodeText">Pilih tanggal untuk melihat Hasil Analisis 7 Hari</span></div>
-    <div class="table-scroll-container" style="flex: 1;"><table class="table-rekap"><thead><tr><th rowspan="2">NO</th><th rowspan="2">MARKET</th><th rowspan="2">LAST RESULT</th><th rowspan="2">AI</th><th rowspan="2">RESULT</th><th id="rekomendasi_w">W: 0</th><th id="rekomendasi_l">L: 0</th></tr><tr><th colspan="2" id="rekomendasi_diff">+/- 0</th></tr></thead><tbody id="rekapTunggalBody"></tbody></table></div>
-  </div>
-  <div class="top-rank-card" id="bbfs-card" style="flex: 1; margin-bottom: 0; display: flex; flex-direction: column;">
-    <div class="top-rank-title"><span>Tabel Prediction</span></div>
-    <div class="table-scroll-container" style="flex: 1; max-height: none;"><table class="table-rekap"><thead><tr><th>NO</th><th>MARKET</th><th>CB</th><th>BBFS</th></tr></thead><tbody id="bbfsBody"><tr><td colspan="4">Belum ada data market</td></tr></tbody></table></div>
-  </div>
-</div>
+  <!-- BAGIAN TOP 1, TOP 2, TOP 3 (SEJAJAR) -->
+  <div class="top-rank-wrapper" id="topRankContainer">
+    <div class="top-rank-card">
+      <div class="top-rank-title" id="title_top_1">TOP 1: -</div>
+      <div class="table-scroll-container" style="max-height: 180px;">
+        <table class="table-rekap" style="font-size:11px;">
+          <thead><tr><th>NO</th><th>MARKET</th><th>LAST</th><th>AI</th><th>RES</th><th>W/L</th></tr></thead>
+          <tbody id="tbody_top_1"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="top-rank-card">
+      <div class="top-rank-title" id="title_top_2">TOP 2: -</div>
+      <div class="table-scroll-container" style="max-height: 180px;">
+        <table class="table-rekap" style="font-size:11px;">
+          <thead><tr><th>NO</th><th>MARKET</th><th>LAST</th><th>AI</th><th>RES</th><th>W/L</th></tr></thead>
+          <tbody id="tbody_top_2"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="top-rank-card">
+      <div class="top-rank-title" id="title_top_3">TOP 3: -</div>
+      <div class="table-scroll-container" style="max-height: 180px;">
+        <table class="table-rekap" style="font-size:11px;">
+          <thead><tr><th>NO</th><th>MARKET</th><th>LAST</th><th>AI</th><th>RES</th><th>W/L</th></tr></thead>
+          <tbody id="tbody_top_3"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BAGIAN BAWAH (Rekomendasi & BBFS) -->
+  <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: stretch; width: 100%;">
+    <div class="top-rank-card" id="rekomendasi-card" style="flex: 1.5; margin-bottom: 0; display: flex; flex-direction: column;">
+      <div class="top-rank-title"><span id="rekomendasiMetodeText">Pilih tanggal untuk melihat Hasil Analisis 7 Hari</span></div>
+      <div class="table-scroll-container" style="flex: 1;">
+        <table class="table-rekap">
+          <thead>
+            <tr><th rowspan="2">NO</th><th rowspan="2">MARKET</th><th rowspan="2">LAST RESULT</th><th rowspan="2">AI</th><th rowspan="2">RESULT</th><th id="rekomendasi_w">W: 0</th><th id="rekomendasi_l">L: 0</th></tr>
+            <tr><th colspan="2" id="rekomendasi_diff">+/- 0</th></tr>
+          </thead>
+          <tbody id="rekapTunggalBody"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="top-rank-card" id="bbfs-card" style="flex: 1; margin-bottom: 0; display: flex; flex-direction: column;">
+      <div class="top-rank-title"><span>Tabel Prediction</span></div>
+      <div class="table-scroll-container" style="flex: 1; max-height: none;">
+        <table class="table-rekap">
+          <thead><tr><th>NO</th><th>MARKET</th><th>CB</th><th>BBFS</th></tr></thead>
+          <tbody id="bbfsBody"><tr><td colspan="4">Belum ada data market</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
   
 <!-- TAB KALKULATOR -->

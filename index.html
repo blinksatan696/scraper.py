@@ -385,7 +385,10 @@ th { background-color: #f8f9fa; color: #555; }
                 </select>
     <button type="button" onclick="setToday()" style="margin-top: 8px; background: #e2e8f0; color: #4a5568; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; width: auto;">Isi Tanggal Hari Ini</button>
     <button type="button" onclick="syncPick4ToGithub(document.getElementById('marketSelectAdmin').value)" style="margin-top: 8px; margin-left: 8px; background: #6f42c1; color: white; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer;">🔄 Sync dari Pick-4</button>
-</div>
+    <button type="button" onclick="location.reload()" style="margin-top: 8px; margin-left: 8px; background: #dc3545; color: white; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+    🔄 Muat Ulang Pick-4
+</button>
+        </div>
             
             <!-- Quick Grid 7 Hari -->
             <div id="quickGridContainer" style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
@@ -849,6 +852,7 @@ async function handleBulkImportAdmin() {
         
         // Refresh seluruh sistem agar tabel rekap ikut terupdate
         await fetchAllMarketData();
+        syncToPick4LocalStorage(market, combinedData);
 
     } catch (error) {
         showStatus('error', `❌ Gagal import: ${error.message}`);
@@ -856,6 +860,50 @@ async function handleBulkImportAdmin() {
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = 'Simpan & Update';
     }
+}
+
+function syncToPick4LocalStorage(marketId, githubData) {
+    const pick4Key = 'pick4_data_' + marketId;
+    let existingPick4 = [];
+    try {
+        const raw = localStorage.getItem(pick4Key);
+        if (raw) existingPick4 = JSON.parse(raw);
+    } catch (e) { existingPick4 = []; }
+
+    // Konversi data GitHub (DD-MM-YYYY) ke format Pick-4 (YYYY-MM-DD + digits array)
+    const newPick4 = githubData.map(item => {
+        const [dd, mm, yyyy] = item.tanggal.split('-');
+        return {
+            id: Date.now() + Math.random(), // ID unik
+            date: `${yyyy}-${mm}-${dd}`,
+            digits: item.nomor.split('').map(Number),
+            session: 'evening', // Asumsikan sesi evening (atau bisa disesuaikan)
+            dateAdded: new Date().toISOString()
+        };
+    });
+
+    // Gabungkan dengan data lama, hindari duplikat berdasarkan tanggal & sesi
+    let merged = [...existingPick4];
+    for (const entry of newPick4) {
+        const existingIndex = merged.findIndex(item => item.date === entry.date && item.session === entry.session);
+        if (existingIndex !== -1) {
+            merged[existingIndex] = entry; // Update
+        } else {
+            merged.push(entry); // Tambah baru
+        }
+    }
+
+    // Urutkan berdasarkan tanggal (terbaru di atas)
+    merged.sort((a, b) => b.date.localeCompare(a.date));
+
+    // Simpan ke LocalStorage
+    localStorage.setItem(pick4Key, JSON.stringify(merged));
+
+    // Beri tahu pengguna untuk me-refresh halaman Pick-4
+    // (Karena React tidak otomatis membaca perubahan LocalStorage dari luar)
+    setTimeout(() => {
+        alert("✅ Data berhasil disinkronkan ke Pick-4. Silakan buka tab Pick-4 dan muat ulang halaman untuk melihat data terbaru.");
+    }, 100);
 }
   
 async function submitData() {
@@ -908,7 +956,10 @@ async function submitData() {
         document.getElementById('inputNomorAdmin').value = '';
         
         await fetchAllMarketData();
-        
+
+        // Sinkronkan ke LocalStorage Pick-4
+        syncToPick4LocalStorage(market, newData);
+  
     } catch (error) {
         showStatus('error', `❌ Gagal menyimpan: ${error.message}`);
     } finally {
@@ -989,6 +1040,7 @@ async function forceOverwrite() {
         displayCurrentData();
         document.getElementById('inputNomorAdmin').value = '';
         await fetchAllMarketData();
+        syncToPick4LocalStorage(market, newData);
     } catch (error) {
         showStatus('error', `❌ Gagal overwrite: ${error.message}`);
     } finally {
@@ -1027,6 +1079,7 @@ async function reloadAndMerge() {
         displayCurrentData();
         document.getElementById('inputNomorAdmin').value = '';
         await fetchAllMarketData();
+        syncToPick4LocalStorage(market, newData);
     } catch (error) {
         showStatus('error', `❌ Gagal menggabungkan: ${error.message}`);
     } finally {

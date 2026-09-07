@@ -173,14 +173,51 @@ th { background-color: #f8f9fa; color: #555; }
 </div>
 
 <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: stretch; width: 100%;">
-  <div class="top-rank-card" id="rekomendasi-card" style="flex: 1.5; margin-bottom: 0; display: flex; flex-direction: column;">
-    <div class="top-rank-title"><span id="rekomendasiMetodeText">Pilih tanggal untuk melihat Hasil Analisis 7 Hari</span></div>
-    <div class="table-scroll-container" style="flex: 1;"><table class="table-rekap"><thead><tr><th rowspan="2">NO</th><th rowspan="2">MARKET</th><th rowspan="2">LAST RESULT</th><th rowspan="2">AI</th><th rowspan="2">RESULT</th><th id="rekomendasi_w">W: 0</th><th id="rekomendasi_l">L: 0</th></tr><tr><th colspan="2" id="rekomendasi_diff">+/- 0</th></tr></thead><tbody id="rekapTunggalBody"></tbody></table></div>
-  </div>
-  <div class="top-rank-card" id="bbfs-card" style="flex: 1; margin-bottom: 0; display: flex; flex-direction: column;">
-    <div class="top-rank-title"><span>Tabel Prediction</span></div>
-    <div class="table-scroll-container" style="flex: 1; max-height: none;"><table class="table-rekap"><thead><tr><th>NO</th><th>MARKET</th><th>CB</th><th>BBFS</th></tr></thead><tbody id="bbfsBody"><tr><td colspan="4">Belum ada data market</td></tr></tbody></table></div>
-  </div>
+  
+  <div class="top-rank-card" id="rekomendasi-card" style="flex: 1.5; margin-bottom: 0; display: flex; flex-direction: column;">
+    <div class="top-rank-title">
+      <span id="rekomendasiMetodeText">Pilih tanggal untuk melihat Hasil Analisis 7 Hari</span>
+    </div>
+    <div class="table-scroll-container" style="flex: 1;">
+      <table class="table-rekap">
+        <thead>
+          <tr>
+            <th rowspan="2">NO</th>
+            <th rowspan="2">MARKET</th>
+            <th rowspan="2"><div>LAST RESULT</div></th>
+            <th rowspan="2">AI</th>
+            <th rowspan="2">RESULT</th>
+            <th id="rekomendasi_w">W: 0</th>
+            <th id="rekomendasi_l">L: 0</th>
+          </tr>
+          <tr><th colspan="2" id="rekomendasi_diff">+/- 0</th></tr>
+        </thead>
+        <tbody id="rekapTunggalBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="top-rank-card" id="bbfs-card" style="flex: 1; margin-bottom: 0; display: flex; flex-direction: column;">
+    <div class="top-rank-title">
+      <span>Tabel BBFS</span>
+    </div>
+    <div class="table-scroll-container" style="flex: 1; max-height: none;">
+      <table class="table-rekap">
+        <thead>
+          <tr>
+            <th>NO</th>
+            <th>MARKET</th>
+            <th>AI</th>
+            <th>BBFS</th>
+          </tr>
+        </thead>
+        <tbody id="bbfsBody">
+          <tr><td colspan="4">Belum ada data market</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 </div>
   

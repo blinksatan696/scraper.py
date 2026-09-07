@@ -317,7 +317,6 @@ th { background-color: #f8f9fa; color: #555; }
 
 <!-- TAB ADMIN PANEL -->
 <div id="tabAdmin" class="tab-content" style="display:none;">
-    <h2>Admin Panel - Manajemen Data Market</h2>
     
     <!-- Wrapper Utama Admin agar rapi di dalam container -->
     <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; margin-top: 10px;">
@@ -384,11 +383,9 @@ th { background-color: #f8f9fa; color: #555; }
                     <option value="georgia-midday">Georgia Midday</option>
                     <option value="new-jersey-midday">New Jersey Midday</option>
                 </select>
-                <button type="button" onclick="setToday()" style="margin-top: 8px; background: #e2e8f0; color: #4a5568; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; width: auto;">Isi Tanggal Hari Ini</button>
-                <button type="button" onclick="syncPick4ToGithub(document.getElementById('marketSelectAdmin').value)" style="margin-top: 8px; margin-left: 8px; background: #6f42c1; color: white; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer;">
-    🔄 Sync dari Pick-4
-</button>
-        </div>
+    <button type="button" onclick="setToday()" style="margin-top: 8px; background: #e2e8f0; color: #4a5568; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; width: auto;">Isi Tanggal Hari Ini</button>
+    <button type="button" onclick="syncPick4ToGithub(document.getElementById('marketSelectAdmin').value)" style="margin-top: 8px; margin-left: 8px; background: #6f42c1; color: white; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer;">🔄 Sync dari Pick-4</button>
+</div>
             
             <!-- Quick Grid 7 Hari -->
             <div id="quickGridContainer" style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
@@ -396,6 +393,18 @@ th { background-color: #f8f9fa; color: #555; }
                 <div id="quickGridBody"></div>
             </div>
 
+            <!-- Form Manual: Tanggal & Nomor Berdampingan -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label for="inputTanggalAdmin" style="display: block; font-size: 13px; font-weight: bold; color: #495057; margin-bottom: 6px;">Input Tanggal</label>
+                    <input type="text" id="inputTanggalAdmin" placeholder="DD-MM-YYYY" maxlength="10" style="width: 100%; padding: 10px; font-size: 13px; border: 1px solid #ced4da; border-radius: 6px; background: white; box-sizing: border-box; text-align: center;">
+                </div>
+                <div>
+                    <label for="inputNomorAdmin" style="display: block; font-size: 13px; font-weight: bold; color: #495057; margin-bottom: 6px;">Input Nomor (4 digit)</label>
+                    <input type="text" id="inputNomorAdmin" placeholder="1234" maxlength="4" style="width: 100%; padding: 10px; font-size: 13px; border: 1px solid #ced4da; border-radius: 6px; background: white; box-sizing: border-box; text-align: center;">
+                </div>
+            </div>
+              
             <!-- Bulk Import -->
             <div style="margin-bottom: 20px;">
                 <label for="bulkInputAdmin" style="display: block; font-size: 13px; font-weight: bold; color: #495057; margin-bottom: 6px;">Bulk Import (Format: DD-MM-YYYY,1234 per baris)</label>

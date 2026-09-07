@@ -385,7 +385,10 @@ th { background-color: #f8f9fa; color: #555; }
                     <option value="new-jersey-midday">New Jersey Midday</option>
                 </select>
                 <button type="button" onclick="setToday()" style="margin-top: 8px; background: #e2e8f0; color: #4a5568; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; width: auto;">Isi Tanggal Hari Ini</button>
-            </div>
+                <button type="button" onclick="syncPick4ToGithub(document.getElementById('marketSelectAdmin').value)" style="margin-top: 8px; margin-left: 8px; background: #6f42c1; color: white; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+    🔄 Sync dari Pick-4
+</button>
+        </div>
             
             <!-- Quick Grid 7 Hari -->
             <div id="quickGridContainer" style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
@@ -1024,6 +1027,98 @@ async function reloadAndMerge() {
     }
 }
 
+// Fungsi untuk Sinkronisasi dari Pick-4 ke GitHub
+async function syncPick4ToGithub(marketId) {
+    const token = getToken();
+    if (!token) return;
+
+    // 1. Ambil data dari LocalStorage Pick-4
+    const storageKey = 'pick4_data_' + marketId;
+    const rawPick4 = localStorage.getItem(storageKey);
+    if (!rawPick4) {
+        showStatus('error', `❌ Tidak ada data Pick-4 untuk market ${marketId}.`);
+        return;
+    }
+
+    let pick4Data = [];
+    try {
+        pick4Data = JSON.parse(rawPick4);
+    } catch (e) {
+        showStatus('error', '❌ Gagal membaca data LocalStorage.');
+        return;
+    }
+
+    // 2. Konversi format data ke format sistem (DD-MM-YYYY, 4 digit)
+    // Data Pick-4 format: { date: 'YYYY-MM-DD', digits: [1,2,3,4] }
+    const formattedData = pick4Data.map(item => {
+        if (!item.date || !item.digits || item.digits.length !== 4) return null;
+        const [y, m, d] = item.date.split('-');
+        return {
+            tanggal: `${d}-${m}-${y}`,
+            nomor: item.digits.join('')
+        };
+    }).filter(item => item !== null);
+
+    if (formattedData.length === 0) {
+        showStatus('error', '❌ Data Pick-4 kosong atau format tidak valid.');
+        return;
+    }
+
+    // 3. Ambil data & SHA terbaru dari GitHub
+    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${marketId}.json?ref=${BRANCH}`;
+    
+    let latestSHA = null;
+    let latestData = [];
+    
+    try {
+        const response = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+        if (response.status === 200) {
+            const file = await response.json();
+            latestSHA = file.sha;
+            latestData = JSON.parse(atob(file.content));
+        } else if (response.status !== 404) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+    } catch (error) {
+        showStatus('error', `❌ Gagal mengambil data GitHub: ${error.message}`);
+        return;
+    }
+
+    // 4. Gabungkan data (Hindari duplikat tanggal)
+    let combinedData = latestData.map(item => ({
+        tanggal: (item.tanggal || '').trim(),
+        nomor: (item.nomor || '').trim()
+    })).filter(item => item.tanggal && item.nomor);
+
+    for (const entry of formattedData) {
+        // Hapus jika tanggal sudah ada, lalu masukkan yang baru
+        combinedData = combinedData.filter(item => item.tanggal !== entry.tanggal);
+        combinedData.unshift(entry);
+    }
+
+    // 5. Urutkan dari tanggal terbaru & batasi 30 record
+    combinedData.sort((a, b) => {
+        const dateA = new Date(a.tanggal.split('-').reverse().join('-'));
+        const dateB = new Date(b.tanggal.split('-').reverse().join('-'));
+        return dateB - dateA;
+    });
+    if (combinedData.length > MAX_RECORDS) {
+        combinedData = combinedData.slice(0, MAX_RECORDS);
+    }
+
+    // 6. Upload ke GitHub
+    await uploadToGitHub(marketId, combinedData, latestSHA, token);
+
+    // 7. Update UI & Refresh data sistem
+    currentData = combinedData;
+    currentFileSHA = latestSHA;
+    showStatus('success', `✅ Sinkronisasi berhasil! ${combinedData.length} data dari Pick-4 di-upload ke GitHub.`);
+    
+    renderQuickGrid(currentData);
+    displayCurrentData();
+    await fetchAllMarketData();
+}
+  
 // --- FUNGSI LOKAL KALKULATOR & REKAP ---
 function simpanKeLocalStorage() {
   let saveData = {};

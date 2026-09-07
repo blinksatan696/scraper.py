@@ -182,7 +182,7 @@ th { background-color: #f8f9fa; color: #555; }
       <table class="table-rekap">
         <thead>
           <tr>
-            <th rowspan="2">NO</th>
+            <th rowspan="2" style="width: 40px;">NO</th>
             <th rowspan="2">MARKET</th>
             <th rowspan="2"><div>LAST RESULT</div></th>
             <th rowspan="2">AI</th>
@@ -575,6 +575,9 @@ async function fetchAllMarketData() {
           console.error("Gagal memuat " + marketId, error);
       }
   }
+
+  buatTabelRekapTunggal();
+  
   updateRekapSinkron();
   if (globalSelectedDate) {
       for (let s = 1; s <= TOTAL_SLOTS; s++) { terapkanTanggalKeSlot(s, globalSelectedDate); }
@@ -898,19 +901,22 @@ function bukaMetodeTab(evt, id) {
 }
 
 function buatTabelRekapTunggal() {
-  let tbody = document.getElementById("rekapTunggalBody");
-  if(!tbody) return;
-  tbody.innerHTML = `<tr id="rekapTunggalEmpty"><td colspan="7">Belum ada data market</td></tr>`;
-  for (let i = 1; i <= TOTAL_SLOTS; i++) {
-    tbody.innerHTML += `<tr id="row_rek_tunggal_${i}" style="display:none;">
-      <td id="no_rek_tunggal_${i}">${i}</td>
-      <td class="col-slot" id="nama_slot_tunggal_${i}">-</td>
-      <td><div id="rek_tunggal_C_${i}" style="font-weight:bold; color:#1a73e8;">-</div></td>
-      <td id="rek_tunggal_D_${i}" style="font-weight:bold; color:#1a73e8;">-</td>
-      <td><input type="text" class="input-result-tunggal" id="rek_tunggal_E_${i}" oninput="simpanRekapManual(${i})" readonly></td>
-      <td colspan="2" id="rek_tunggal_icon_${i}" class="result-icon-cell"></td>
-    </tr>`;
-  }
+  let tbody = document.getElementById("rekapTunggalBody");
+  if(!tbody) return;
+  tbody.innerHTML = `<tr id="rekapTunggalEmpty"><td colspan="7">Belum ada data market</td></tr>`;
+  for (let i = 1; i <= TOTAL_SLOTS; i++) {
+    // Hanya buat baris jika slot memiliki data
+    if (dataSemuaSlot[i].parsedData && dataSemuaSlot[i].parsedData.length > 0) {
+      tbody.innerHTML += `<tr id="row_rek_tunggal_${i}">
+        <td id="no_rek_tunggal_${i}" style="width: 40px;">${i}</td>
+        <td class="col-slot" id="nama_slot_tunggal_${i}">-</td>
+        <td><div id="rek_tunggal_C_${i}" style="font-weight:bold; color:#1a73e8;">-</div></td>
+        <td id="rek_tunggal_D_${i}" style="font-weight:bold; color:#1a73e8;">-</td>
+        <td><input type="text" class="input-result-tunggal" id="rek_tunggal_E_${i}" oninput="simpanRekapManual(${i})" readonly></td>
+        <td colspan="2" id="rek_tunggal_icon_${i}" class="result-icon-cell"></td>
+      </tr>`;
+    }
+  }
 }
 
 function simpanRekapManual(idx) {

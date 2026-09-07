@@ -180,48 +180,48 @@ th { background-color: #f8f9fa; color: #555; }
     </div>
     <div class="table-scroll-container" style="flex: 1;">
       <style>
-  .table-rekap {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed; /* Kunci utama agar lebar kolom bisa diatur secara konsisten */
-  }
-  
-  .table-rekap th, 
-  .table-rekap td {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    word-wrap: break-word;
-  }
-
-  /* Mengatur lebar spesifik tiap kolom agar proporsional dan kolom NO tidak melebar */
-  .table-rekap th:nth-child(1), .table-rekap td:nth-child(1) { width: 45px; text-align: center; } /* NO */
-  .table-rekap th:nth-child(2), .table-rekap td:nth-child(2) { width: 110px; } /* MARKET */
-  .table-rekap th:nth-child(3), .table-rekap td:nth-child(3) { width: 100px; text-align: center; } /* LAST RESULT */
-  .table-rekap th:nth-child(4), .table-rekap td:nth-child(4) { width: 60px; text-align: center; } /* AI */
-  .table-rekap th:nth-child(5), .table-rekap td:nth-child(5) { width: 70px; text-align: center; } /* RESULT */
-  .table-rekap th:nth-child(6), .table-rekap td:nth-child(6) { width: 65px; text-align: center; } /* W / Rekomendasi W */
-  .table-rekap th:nth-child(7), .table-rekap td:nth-child(7) { width: 65px; text-align: center; } /* L / Rekomendasi L */
-</style>
-
-<div class="table-scroll-container">
-  <table class="table-rekap">
-    <thead>
-      <tr>
-        <th rowspan="2">NO</th>
-        <th rowspan="2">MARKET</th>
-        <th rowspan="2"><div>LAST RESULT</div></th>
-        <th rowspan="2">AI</th>
-        <th rowspan="2">RESULT</th>
-        <th id="rekomendasi_w">W: 0</th>
-        <th id="rekomendasi_l">L: 0</th>
-      </tr>
-      <tr>
-        <th colspan="2" id="rekomendasi_diff">+/- 0</th>
-      </tr>
-    </thead>
-    <tbody id="rekapTunggalBody"></tbody>
-  </table>
-</div>
+        .table-rekap {
+          width: 100%;
+          border-collapse: collapse;
+          table-layout: fixed; /* Kunci utama agar lebar kolom bisa diatur secara konsisten */
+        }
+        
+        .table-rekap th, 
+        .table-rekap td {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          word-wrap: break-word;
+        }
+      
+        /* Mengatur lebar spesifik tiap kolom agar proporsional dan kolom NO tidak melebar */
+        .table-rekap th:nth-child(1), .table-rekap td:nth-child(1) { width: 45px; text-align: center; } /* NO */
+        .table-rekap th:nth-child(2), .table-rekap td:nth-child(2) { width: 110px; } /* MARKET */
+        .table-rekap th:nth-child(3), .table-rekap td:nth-child(3) { width: 100px; text-align: center; } /* LAST RESULT */
+        .table-rekap th:nth-child(4), .table-rekap td:nth-child(4) { width: 60px; text-align: center; } /* AI */
+        .table-rekap th:nth-child(5), .table-rekap td:nth-child(5) { width: 70px; text-align: center; } /* RESULT */
+        .table-rekap th:nth-child(6), .table-rekap td:nth-child(6) { width: 65px; text-align: center; } /* W / Rekomendasi W */
+        .table-rekap th:nth-child(7), .table-rekap td:nth-child(7) { width: 65px; text-align: center; } /* L / Rekomendasi L */
+      </style>
+      
+      <div class="table-scroll-container">
+        <table class="table-rekap">
+          <thead>
+            <tr>
+              <th rowspan="2">NO</th>
+              <th rowspan="2">MARKET</th>
+              <th rowspan="2"><div>LAST RESULT</div></th>
+              <th rowspan="2">AI</th>
+              <th rowspan="2">RESULT</th>
+              <th id="rekomendasi_w">W: 0</th>
+              <th id="rekomendasi_l">L: 0</th>
+            </tr>
+            <tr>
+              <th colspan="2" id="rekomendasi_diff">+/- 0</th>
+            </tr>
+          </thead>
+          <tbody id="rekapTunggalBody"></tbody>
+        </table>
+      </div>
 
   <div class="top-rank-card" id="bbfs-card" style="flex: 1; margin-bottom: 0; display: flex; flex-direction: column;">
     <div class="top-rank-title">

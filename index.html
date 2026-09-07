@@ -111,7 +111,7 @@ th { background-color: #f8f9fa; color: #555; }
 <button class="tab-btn active" onclick="bukaTab(event, 'tabRekap')">Tabel Rekapitulasi</button>
 <button class="tab-btn" onclick="bukaTab(event, 'tabKalkulator')">Kalkulator Slot</button>
 <button class="tab-btn" onclick="bukaTab(event, 'tabTools')">Tools</button>
-<a href="pick4.html" class="tab-btn">Pick-4 Analysis</a>
+<button class="tab-btn" onclick="bukaTab(event, 'tabPick4')">Pick-4 Analysis</button>
 <button class="tab-btn" onclick="bukaTab(event, 'tabAdmin')">Admin Panel</button>
 </div>
 
@@ -229,6 +229,16 @@ th { background-color: #f8f9fa; color: #555; }
 </div>
 </div>
 
+<!-- TAB PICK-4 ANALYSIS -->
+<div id="tabPick4" class="tab-content" style="display:none;">
+    <h2>Pick-4 Pro Analyzer</h2>
+    <!-- Sematkan iframe atau muat elemen aplikasi Pick-4 Anda di sini -->
+    <div style="width: 100%; min-height: 800px; border: none; border-radius: 8px; overflow: hidden;">
+        <!-- Jika aplikasi Pick-4 berupa file HTML terpisah, Anda bisa memuatnya atau menyatukan kodenya langsung di sini -->
+        <iframe src="pick4_content.html" style="width: 1005; height: 800px; border: none;"></iframe>
+    </div>
+</div>
+  
 <!-- TAB ADMIN PANEL -->
 <div id="tabAdmin" class="tab-content" style="display:none;">
     <!-- GitHub Token Pendek -->

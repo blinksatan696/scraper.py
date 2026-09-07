@@ -329,10 +329,10 @@ th { background-color: #f8f9fa; color: #555; }
         </div>
 
         <!-- Grid Input Market, Tanggal, dan Nomor -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; align-items: start;">
-            <div>
-                <label style="display: block; font-size: 13px; font-weight: bold; color: #495057; margin-bottom: 6px;">Pilih Market</label>
-                <select id="marketSelectAdmin" onchange="onAdminMarketChange()" style="width: 100%; padding: 10px; font-size: 13px; border: 1px solid #ced4da; border-radius: 6px; background: white;">
+        <!-- Dropdown Market (Tetap) -->
+        <div style="margin-bottom: 20px;">
+            <label for="marketSelectAdmin" style="display: block; font-size: 13px; font-weight: bold; color: #495057; margin-bottom: 6px;">Pilih Market</label>
+            <select id="marketSelectAdmin" onchange="onAdminMarketChange()" style="width: 100%; padding: 10px; font-size: 13px; border: 1px solid #ced4da; border-radius: 6px; background: white;">
                     <option value="">-- Pilih Market --</option>
                     <option value="macau-00">Macau 00</option>
                     <option value="germany-plus5">Germany Plus5</option>
@@ -384,9 +384,22 @@ th { background-color: #f8f9fa; color: #555; }
                     <option value="georgia-midday">Georgia Midday</option>
                     <option value="new-jersey-midday">New Jersey Midday</option>
                 </select>
-                <button type="button" onclick="setToday()" style="margin-top: 8px; background: #e2e8f0; color: #4a5568; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; width: auto;">Isi Tanggal Hari Ini</button>
-            </div>
+                <button type="button" onclick="setToday()" style="margin-top: 8px; background: #e2e8f0; color: #4a5568; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; width: auto;">Isi Tanggal Hari Ini</button>
+            </div>
+            
+            <!-- Quick Grid 7 Hari -->
+            <div id="quickGridContainer" style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                <h4 style="margin:0 0 10px 0; color: #333; font-size: 14px;">Input Cepat 7 Hari Terakhir</h4>
+                <div id="quickGridBody"></div>
+            </div>
 
+            <!-- Bulk Import -->
+            <div style="margin-bottom: 20px;">
+                <label for="bulkInputAdmin" style="display: block; font-size: 13px; font-weight: bold; color: #495057; margin-bottom: 6px;">Bulk Import (Format: DD-MM-YYYY,1234 per baris)</label>
+                <textarea id="bulkInputAdmin" rows="5" placeholder="Contoh:&#10;01-09-2026,1234&#10;02-09-2026,5678" style="width: 100%; padding: 10px; font-size: 13px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; font-family: monospace;"></textarea>
+                <button type="button" onclick="handleBulkImportAdmin()" style="margin-top: 10px; background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; width: auto;">Import & Simpan</button>
+            </div>
+      
             <div>
                 <label style="display: block; font-size: 13px; font-weight: bold; color: #495057; margin-bottom: 6px;">Input Tanggal</label>
                 <input type="text" id="inputTanggalAdmin" placeholder="DD-MM-YYYY" maxlength="10" style="width: 100%; padding: 10px; font-size: 13px; border: 1px solid #ced4da; border-radius: 6px; background: white; box-sizing: border-box; text-align: center;">
@@ -638,34 +651,90 @@ async function onAdminMarketChange() {
 }
 
 async function loadCurrentData() {
-    const market = document.getElementById('marketSelectAdmin').value;
-    const token = getToken();
-    if (!market || !token) return;
+    const market = document.getElementById('marketSelectAdmin').value;
+    const token = getToken();
+    if (!market || !token) return;
 
-    try {
-        const response = await fetch(
-            `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${market}.json?ref=${BRANCH}`,
-            { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
-        );
+    try {
+        const response = await fetch(
+            `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${market}.json?ref=${BRANCH}`,
+            { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
+        );
 
-        if (response.status === 404) {
-            currentData = []; 
-            currentFileSHA = null;
-            document.getElementById('currentDataBody').innerHTML = '<tr><td colspan="3">Belum ada data (File baru)</td></tr>';
-            document.getElementById('currentDataBox').style.display = 'block';
-            return;
-        }
-        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (response.status === 404) {
+            currentData = []; 
+            currentFileSHA = null;
+            // Tampilkan grid kosong jika file belum ada
+            renderQuickGrid([]);
+            document.getElementById('currentDataBox').style.display = 'none';
+            return;
+        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 
-        const fileData = await response.json();
-        currentFileSHA = fileData.sha;
-        currentData = JSON.parse(atob(fileData.content));
-        displayCurrentData();
-    } catch (error) {
-        console.error("Gagal memuat data:", error.message);
-    }
+        const fileData = await response.json();
+        currentFileSHA = fileData.sha;
+        currentData = JSON.parse(atob(fileData.content));
+        
+        // Tampilkan grid dan tabel lama (jika masih ingin dipertahankan)
+        renderQuickGrid(currentData);
+        displayCurrentData();
+    } catch (error) {
+        console.error("Gagal memuat data:", error.message);
+    }
 }
 
+function renderQuickGrid(data) {
+    const container = document.getElementById('quickGridBody');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    const today = new Date();
+    let html = '<table style="width:100%; border-collapse:collapse; font-size:12px;">';
+    html += '<tr><th style="border:1px solid #ddd; padding:6px; text-align:left;">Tanggal</th><th style="border:1px solid #ddd; padding:6px;">Nomor</th><th style="border:1px solid #ddd; padding:6px; width:100px;">Aksi</th></tr>';
+    
+    for (let i = 0; i < 7; i++) {
+        let d = new Date(today);
+        d.setDate(today.getDate() - i);
+        let tanggal = formatDate(d.getDate(), d.getMonth() + 1, d.getFullYear());
+        
+        // Cari data existing
+        let existing = data.find(item => item.tanggal === tanggal);
+        let nomor = existing ? existing.nomor : '';
+        
+        html += `<tr>
+            <td style="border:1px solid #ddd; padding:6px;">${tanggal}</td>
+            <td style="border:1px solid #ddd; padding:6px; text-align:center; font-weight:bold; color:${nomor ? '#1a73e8' : '#999'};">${nomor || '-'}</td>
+            <td style="border:1px solid #ddd; padding:6px; text-align:center;">
+                <button onclick="handleQuickAdd('${tanggal}', '${nomor}')" style="padding:4px 8px; font-size:11px; background:${nomor ? '#fbc02d' : '#1a73e8'}; color:white; border:none; border-radius:4px; cursor:pointer;">
+                    ${nomor ? 'Edit' : '+ Add'}
+                </button>
+            </td>
+        </tr>`;
+    }
+    html += '</table>';
+    container.innerHTML = html;
+}
+
+// Fungsi yang dipanggil saat tombol Add/Edit diklik
+function handleQuickAdd(tanggal, existingNomor) {
+    // Gunakan prompt sederhana untuk demo, nanti bisa diganti modal
+    const inputNomor = prompt(`Masukkan nomor untuk tanggal ${tanggal}:`, existingNomor);
+    if (inputNomor === null) return; // User cancel
+    
+    // Validasi 4 digit
+    if (!/^\d{4}$/.test(inputNomor.trim())) {
+        alert('Nomor harus 4 digit angka!');
+        return;
+    }
+    
+    // Set nilai input lama agar fungsi submitData bisa jalan (sesuaikan logika)
+    document.getElementById('inputTanggalAdmin').value = tanggal;
+    document.getElementById('inputNomorAdmin').value = inputNomor.trim();
+    
+    // Panggil fungsi submitData yang sudah ada
+    submitData();
+}
+  
 function displayCurrentData() {
     const tbody = document.getElementById('currentDataBody');
     tbody.innerHTML = '';
@@ -679,6 +748,104 @@ function displayCurrentData() {
     document.getElementById('currentDataBox').style.display = 'block';
 }
 
+async function handleBulkImportAdmin() {
+    const market = document.getElementById('marketSelectAdmin').value;
+    const textareaVal = document.getElementById('bulkInputAdmin').value.trim();
+    const token = getToken();
+
+    if (!market) { showStatus('error', '❌ Pilih market terlebih dahulu!'); return; }
+    if (!textareaVal) { showStatus('error', '❌ Textarea kosong!'); return; }
+    if (!token) return;
+
+    // Parse textarea menjadi array objek
+    const lines = textareaVal.split('\n');
+    const newEntries = [];
+    for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+        const parts = line.split(',');
+        if (parts.length !== 2) { 
+            alert(`Format salah pada baris: "${line}". Gunakan DD-MM-YYYY,1234`); 
+            return; 
+        }
+        const [tanggal, nomor] = parts.map(s => s.trim());
+        if (!/^\d{2}-\d{2}-\d{4}$/.test(tanggal) || !/^\d{4}$/.test(nomor)) {
+            alert(`Data tidak valid pada baris: "${line}". Periksa format tanggal dan nomor.`);
+            return;
+        }
+        newEntries.push({ tanggal, nomor });
+    }
+
+    // Kunci tombol submit agar tidak dobel klik
+    const btnSubmit = document.getElementById('btnSubmit');
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = 'Menyimpan...';
+
+    try {
+        // Fetch data terbaru dari GitHub
+        const fetchResponse = await fetch(
+            `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${market}.json?ref=${BRANCH}`,
+            { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
+        );
+
+        let latestSHA = null;
+        let latestData = [];
+        if (fetchResponse.status === 200) {
+            const fileData = await fetchResponse.json();
+            latestSHA = fileData.sha;
+            latestData = JSON.parse(atob(fileData.content));
+        } else if (fetchResponse.status !== 404) {
+            throw new Error(`HTTP ${fetchResponse.status}`);
+        }
+
+        // Gabungkan data baru ke data existing
+        let combinedData = latestData.map(item => ({
+            tanggal: (item.tanggal || item['tanggal '] || '').trim(),
+            nomor: (item.nomor || item['nomor '] || '').trim()
+        })).filter(item => item.tanggal && item.nomor);
+
+        for (const entry of newEntries) {
+            // Hapus jika tanggal sudah ada, lalu tambahkan di depan
+            combinedData = combinedData.filter(item => item.tanggal !== entry.tanggal);
+            combinedData.unshift(entry);
+        }
+
+        // Sort berdasarkan tanggal terbaru
+        combinedData.sort((a, b) => {
+            const dateA = new Date(a.tanggal.split('-').reverse().join('-'));
+            const dateB = new Date(b.tanggal.split('-').reverse().join('-'));
+            return dateB - dateA;
+        });
+
+        // Batasi jumlah record
+        if (combinedData.length > MAX_RECORDS) {
+            combinedData = combinedData.slice(0, MAX_RECORDS);
+        }
+
+        // Upload ke GitHub
+        await uploadToGitHub(market, combinedData, latestSHA, token);
+
+        showStatus('success', `✅ Berhasil! ${newEntries.length} data berhasil di-import ke market ${market}.`);
+        
+        // Reset textarea dan refresh data
+        document.getElementById('bulkInputAdmin').value = '';
+        currentData = combinedData;
+        currentFileSHA = latestSHA;
+        
+        renderQuickGrid(currentData);
+        displayCurrentData();
+        
+        // Refresh seluruh sistem agar tabel rekap ikut terupdate
+        await fetchAllMarketData();
+
+    } catch (error) {
+        showStatus('error', `❌ Gagal import: ${error.message}`);
+    } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = 'Simpan & Update';
+    }
+}
+  
 async function submitData() {
     const market = document.getElementById('marketSelectAdmin').value;
     const tanggal = document.getElementById('inputTanggalAdmin').value.trim();

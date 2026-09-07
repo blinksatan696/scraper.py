@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistem Rekapitulasi & Kalkulator Final (Data GitHub)</title>
+<title>Sistem Rekapitulasi & Kalkulator Final</title>
 <style>
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; }
 .container { background-color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 1350px; box-sizing: border-box; }
 .tab-nav { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #ddd; padding-bottom: 8px; flex-wrap: wrap; }
-.tab-btn { background-color: #e0e0e0; border: none; padding: 8px 18px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; color: #555; width: auto !important; flex: 1; min-width: 140px; text-decoration: none; text-align: center; display: inline-block; box-sizing: border-box; line-height: normal; }
+.tab-btn { background-color: #e0e0e0; border: none; padding: 8px 18px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; color: #555; width: auto !important; flex: 1; min-width: 140px; }
 .tab-btn.active { background-color: #1a73e8; color: white; }
 .tab-content { display: none; } .tab-content.active { display: block; }
 h2 { text-align: center; margin: 0 0 12px 0; color: #1a73e8; font-size: 18px; }
 .slot-tabs-wrapper { display: flex; overflow-x: auto; gap: 8px; padding: 10px; margin-bottom: 15px; background-color: #e8f0fe; border-radius: 8px; border: 1px solid #cce0ff; }
-.slot-sub-tab { background-color: white; border: 1px solid #a4c2f4; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; color: #1a73e8; white-space: nowrap; }
+.slot-sub-tab { background-color: white; border: 1px solid #a4c2f4; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; color: #1a73e8; }
 .slot-sub-tab.active { background-color: #1a73e8; color: white; }
 .method-tab-nav { display: flex; gap: 6px; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
 .method-tab-btn { background-color: #f1f3f4; border: 1px solid #dcdcdc; padding: 6px 14px; font-size: 12px; font-weight: bold; border-radius: 4px; cursor: pointer; color: #555; }
@@ -22,8 +22,7 @@ h2 { text-align: center; margin: 0 0 12px 0; color: #1a73e8; font-size: 18px; }
 .date-picker-container { display: flex; align-items: center; justify-content: center; gap: 10px; background-color: #fff3cd; padding: 12px; border-radius: 8px; border: 1px solid #ffe69c; margin-bottom: 15px; }
 .input-group { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 15px; transition: 0.3s; }
 .input-box label { display: block; font-size: 10px; color: #555; margin-bottom: 3px; text-align: center; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-input[type="text"], input[type="number"], input[type="password"] { width: 100%; padding: 8px 6px; font-size: 13px; text-align: center; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-select { width: 100%; padding: 8px 6px; font-size: 13px; text-align: center; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+input[type="text"] { width: 100%; padding: 8px 6px; font-size: 13px; text-align: center; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
 button { background-color: #1a73e8; color: white; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; }
 table { width: 100%; border-collapse: collapse; }
 th, td { border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 12px; }
@@ -32,12 +31,27 @@ th { background-color: #f8f9fa; color: #555; }
 .table-scroll-container { width: 100%; max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 6px; background: white; }
 .table-rekap input { font-size: 12px; padding: 3px; border: none !important; background: transparent !important; text-align: center; width: 100%; outline: none !important; }
 .col-slot { white-space: nowrap; text-align: left; padding-left: 8px; }
+.custom-file-btn { display: inline-block; background-color: #1a73e8; color: white; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+.custom-file-btn:hover { background-color: #1557b0; }
+.custom-file-btn.uploaded { background-color: #28a745 !important; }
+.multi-upload-btn { background-color: #fbbc05; color: #333; padding: 10px 16px; font-size: 13px; margin-bottom: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; display: inline-block; border: 1px solid #e0a800; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s; }
+.multi-upload-btn:hover { background-color: #e0a800; }
+#mainUploadTable { table-layout: fixed; width: 100%; }
+.file-name-cell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; font-weight: bold; color: #333; }
+.clickable-row { cursor: pointer; }
+.clickable-row:hover { background-color: #f1f5f9; }
+.active-row { background-color: #e8f0fe !important; }
 .top-rank-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
 .top-rank-card { background: #fdfdfd; border: 2px solid #28a745; border-radius: 8px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 .top-rank-title { font-weight: bold; color: #28a745; font-size: 13px; text-align: center; margin-bottom: 6px; background: #e6f4ea; padding: 4px; border-radius: 4px; }
 .backtest-banner { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: white; padding: 12px 18px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 3px 10px rgba(26,115,232,0.2); }
 .backtest-banner div { font-size: 14px; font-weight: bold; }
 .backtest-banner span { background: #ffeb3b; color: #333; padding: 3px 8px; border-radius: 4px; font-size: 13px; }
+  
+/* Tabel Rekomendasi & BBFS */
+#rekomendasi-card .top-rank-title { background: #4285f4; color: white; }
+#rekomendasi-card .top-rank-title::after { content: " (Berdasarkan analisis 7 hari terakhir)"; display: block; font-size: 10px; opacity: 0.8; margin-top: 4px; }
+#bbfs-card .top-rank-title { background: #fbbc05; color: #333; border-color: #fbbc05; }
 
 /* Styles untuk Admin Panel GitHub */
 .config-box { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin-bottom: 2rem; }

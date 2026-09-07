@@ -260,22 +260,22 @@ Error generating stack: `+a.message+`
   
 <!-- TAB ADMIN PANEL -->
 <div id="tabAdmin" class="tab-content" style="display:none;">
-    <!-- GitHub Token Pendek -->
-    <div style="max-width: 450px; margin-bottom: 1.5rem;">
-        <div class="config-box" style="margin-bottom: 0; padding: 0.75rem 1rem;">
-            <div class="form-group" style="margin-bottom: 0;">
-                <label for="githubToken" style="font-size: 12px; margin-bottom: 3px;">GitHub Personal Access Token</label>
-                <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" style="padding: 6px 10px; font-size: 12px;">
-            </div>
+    <h2>Admin Panel - Manajemen Data Market</h2>
+    
+    <!-- Wrapper Utama Admin agar rapi di dalam container -->
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; margin-top: 10px;">
+        
+        <!-- GitHub Token Input -->
+        <div style="margin-bottom: 20px; max-width: 100%;">
+            <label for="githubToken" style="display: block; font-size: 13px; font-weight: bold; color: #495057; margin-bottom: 6px;">GitHub Personal Access Token</label>
+            <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" style="width: 100%; padding: 10px; font-size: 13px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;">
         </div>
-    </div>
 
-    <!-- Pilihan Market, Tanggal, dan Nomor dalam Satu Baris Sejajar -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; align-items: start;">
-        <div class="section" style="margin-bottom: 0;">
-            <div class="section-title" style="margin-bottom: 6px;">Pilih Market</div>
-            <div class="form-group" style="margin-bottom: 6px;">
-                <select id="marketSelectAdmin" onchange="onAdminMarketChange()">
+        <!-- Grid Input Market, Tanggal, dan Nomor -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; align-items: start;">
+            <div>
+                <label style="display: block; font-size: 13px; font-weight: bold; color: #495057; margin-bottom: 6px;">Pilih Market</label>
+                <select id="marketSelectAdmin" onchange="onAdminMarketChange()" style="width: 100%; padding: 10px; font-size: 13px; border: 1px solid #ced4da; border-radius: 6px; background: white;">
                     <option value="">-- Pilih Market --</option>
                     <option value="macau-00">Macau 00</option>
                     <option value="germany-plus5">Germany Plus5</option>
@@ -327,42 +327,39 @@ Error generating stack: `+a.message+`
                     <option value="georgia-midday">Georgia Midday</option>
                     <option value="new-jersey-midday">New Jersey Midday</option>
                 </select>
+                <button type="button" onclick="setToday()" style="margin-top: 8px; background: #e2e8f0; color: #4a5568; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; width: auto;">Isi Tanggal Hari Ini</button>
             </div>
-            <button type="button" class="btn btn-secondary" onclick="setToday()" style="padding: 6px 10px; font-size: 12px; width: auto;">Isi Tanggal Hari Ini</button>
-        </div>
 
-        <div class="section" style="margin-bottom: 0;">
-            <div class="section-title" style="margin-bottom: 6px;">Input Tanggal</div>
-            <div class="form-group" style="margin-bottom: 6px;">
-                <input type="text" id="inputTanggalAdmin" placeholder="DD-MM-YYYY" maxlength="10">
+            <div>
+                <label style="display: block; font-size: 13px; font-weight: bold; color: #495057; margin-bottom: 6px;">Input Tanggal</label>
+                <input type="text" id="inputTanggalAdmin" placeholder="DD-MM-YYYY" maxlength="10" style="width: 100%; padding: 10px; font-size: 13px; border: 1px solid #ced4da; border-radius: 6px; background: white; box-sizing: border-box; text-align: center;">
             </div>
-        </div>
 
-        <div class="section" style="margin-bottom: 0;">
-            <div class="section-title" style="margin-bottom: 6px;">Input Nomor (4 digit)</div>
-            <div class="form-group" style="margin-bottom: 6px;">
-                <input type="text" id="inputNomorAdmin" placeholder="1234" maxlength="4">
+            <div>
+                <label style="display: block; font-size: 13px; font-weight: bold; color: #495057; margin-bottom: 6px;">Input Nomor (4 digit)</label>
+                <input type="text" id="inputNomorAdmin" placeholder="1234" maxlength="4" style="width: 100%; padding: 10px; font-size: 13px; border: 1px solid #ced4da; border-radius: 6px; background: white; box-sizing: border-box; text-align: center;">
             </div>
         </div>
-    </div>
 
-    <div id="statusBox" class="status"></div>
+        <div id="statusBox" class="status"></div>
 
-    <!-- Tombol Simpan & Reset dalam Satu Baris (Tombol Simpan Menyesuaikan Teks) -->
-    <div style="display: flex; gap: 10px; align-items: center; margin-top: 15px;">
-        <button class="btn btn-primary" onclick="submitData()" id="btnSubmit" style="background:#1a73e8; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; width: auto; font-size: 13px; font-weight: bold;">Simpan & Update</button>
-        <button class="btn btn-secondary" onclick="resetForm()" style="background:#edf2f7; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; width: auto; font-size: 13px; font-weight: bold;">Reset</button>
-    </div>
+        <!-- Tombol Aksi -->
+        <div style="display: flex; gap: 10px; align-items: center; margin-top: 15px;">
+            <button class="btn btn-primary" onclick="submitData()" id="btnSubmit" style="background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; width: auto;">Simpan & Update</button>
+            <button class="btn btn-secondary" onclick="resetForm()" style="background: #edf2f7; color: #4a5568; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; width: auto;">Reset</button>
+        </div>
 
-    <div class="table-scroll-container" id="currentDataBox" style="display:none; margin-top:15px;">
-        <h3 id="currentDataTitle" style="padding: 10px; color: #1a73e8; font-size: 15px;">Data Saat Ini</h3>
-        <table class="table-rekap">
-            <thead><tr><th>No</th><th>Tanggal</th><th>Nomor</th></tr></thead>
-            <tbody id="currentDataBody"></tbody>
-        </table>
+        <!-- Tabel Data Saat Ini -->
+        <div class="table-scroll-container" id="currentDataBox" style="display: none; margin-top: 20px; background: white; border-radius: 6px; padding: 10px;">
+            <h3 id="currentDataTitle" style="padding: 5px 0 10px 0; color: #1a73e8; font-size: 14px; text-align: left;">Data Saat Ini</h3>
+            <table class="table-rekap">
+                <thead><tr><th>No</th><th>Tanggal</th><th>Nomor</th></tr></thead>
+                <tbody id="currentDataBody"></tbody>
+            </table>
+        </div>
+
     </div>
 </div>
-
 </div>
 
 <!-- KONFLIK MODAL -->

@@ -1260,13 +1260,27 @@ function muatDariLocalStorage() {
   } catch(e) {}
 }
 
-function bukaTab(evt, namaTab) {
-  document.querySelectorAll('.tab-content').forEach(c => { c.classList.remove('active'); c.style.display = 'none'; });
-  document.querySelectorAll('.tab-btn').forEach(b => { if(!b.getAttribute('href')) b.classList.remove('active'); });
-  document.getElementById(namaTab).classList.add('active');
-  document.getElementById(namaTab).style.display = 'block';
-  evt.currentTarget.classList.add('active');
-  if (namaTab === 'tabRekap') { updateRekapSinkron(); }
+function bukaTab(evt, tabName) {
+    // Logika menyembunyikan/menampilkan tab seperti biasa...
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => {
+        content.style.display = 'none';
+        content.classList.remove('active');
+    });
+
+    const targetTab = document.getElementById(tabName);
+    if (targetTab) {
+        targetTab.style.display = 'block';
+        targetTab.classList.add('active');
+    }
+
+    // -> TAMBAHKAN KONDISI INI <-
+    // Jika tab yang dibuka adalah pick-4, paksa tarik data terbaru
+    if (tabName === 'pick4' || tabName === 'pick-4-analysis') {
+        if (typeof muatDataPick4 === 'function') {
+            muatDataPick4(); // Memuat ulang data terbaru ke komponen Pick-4
+        }
+    }
 }
 
 function bukaMetodeTab(evt, id) {

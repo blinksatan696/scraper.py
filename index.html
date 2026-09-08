@@ -1261,24 +1261,40 @@ function muatDariLocalStorage() {
 }
 
 function bukaTab(evt, tabName) {
-    // Logika menyembunyikan/menampilkan tab seperti biasa...
-    const tabContents = document.querySelectorAll('.tab-content');
+    // 1. Logika standar untuk menyembunyikan semua tab
+    const tabContents = document.querySelectorAll('.tab-content, [id$="-content"], .tab-pane');
     tabContents.forEach(content => {
         content.style.display = 'none';
-        content.classList.remove('active');
+        content.classList.remove('active', 'block');
     });
 
+    // 2. Hilangkan status aktif dari semua tombol
+    const tabButtons = document.querySelectorAll('.tab-btn, .tab-button, [data-tab]');
+    tabButtons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // 3. Tampilkan tab yang dituju
     const targetTab = document.getElementById(tabName);
     if (targetTab) {
         targetTab.style.display = 'block';
-        targetTab.classList.add('active');
+        targetTab.classList.add('active', 'block');
     }
 
-    // -> TAMBAHKAN KONDISI INI <-
-    // Jika tab yang dibuka adalah pick-4, paksa tarik data terbaru
-    if (tabName === 'pick4' || tabName === 'pick-4-analysis') {
+    // 4. Berikan tanda aktif pada tombol yang diklik
+    if (evt && evt.currentTarget) {
+        evt.currentTarget.classList.add('active');
+    }
+
+    // =========================================================================
+    // 5. SISIPKAN KODE INI: 
+    // Otomatis tarik/muat ulang data saat tab Pick-4 atau Admin dibuka
+    // =========================================================================
+    if (tabName === 'pick4' || tabName === 'pick-4-analysis' || tabName === 'admin') {
         if (typeof muatDataPick4 === 'function') {
-            muatDataPick4(); // Memuat ulang data terbaru ke komponen Pick-4
+            muatDataPick4(); // Pastikan nama fungsi ini sesuai dengan fungsi pemuat data Anda
+        } else if (typeof fetchMarketData === 'function') {
+            fetchMarketData();
         }
     }
 }

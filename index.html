@@ -312,7 +312,7 @@ th { background-color: #f8f9fa; color: #555; }
 
 <!-- TAB PICK-4 ANALYSIS -->
 <div id="tabPick4" class="tab-content" style="display:none;">
-    <div id="pick4-app-container"></div>
+    <div id="root"></div>
 </div>
 
 <!-- TAB ADMIN PANEL -->
@@ -894,6 +894,8 @@ async function handleBulkImportAdmin() {
         // Upload ke GitHub
         await uploadToGitHub(market, combinedData, latestSHA, token);
 
+        window.dispatchEvent(new Event('pick4-data-updated'));
+
         showStatus('success', `✅ Berhasil! ${newEntries.length} data berhasil di-import ke market ${market}.`);
         
         // Reset textarea dan refresh data
@@ -955,6 +957,8 @@ async function submitData() {
 
         const newData = await processData(market, tanggal, nomor, latestData);
         await uploadToGitHub(market, newData, latestSHA, token);
+
+        window.dispatchEvent(new Event('pick4-data-updated'));
 
         showStatus('success', `✅ Berhasil! Data ${market} untuk tanggal ${tanggal} telah diupdate.`);
         currentData = newData;
@@ -1039,6 +1043,7 @@ async function forceOverwrite() {
     try {
         const newData = await processData(market, tanggal, nomor, latestData);
         await uploadToGitHub(market, newData, latestSHA, token);
+        window.dispatchEvent(new Event('pick4-data-updated'));
         showStatus('success', `⚠️ OVERWRITE BERHASIL! Data ${market} telah dipaksa diupdate.`);
         currentData = newData;
         currentFileSHA = latestSHA;
@@ -1077,6 +1082,7 @@ async function reloadAndMerge() {
             newSHA = fileData.sha;
         }
         await uploadToGitHub(market, newData, newSHA, token);
+        window.dispatchEvent(new Event('pick4-data-updated'));
         showStatus('success', `✅ BERHASIL! Data digabungkan dengan update terbaru.`);
         currentData = newData;
         currentFileSHA = newSHA;
@@ -1090,79 +1096,6 @@ async function reloadAndMerge() {
         btn.innerHTML = 'Simpan & Update';
         pendingSubmit = null;
     }
-}
-
-// Fungsi untuk Sinkronisasi dari Pick-4 ke GitHub
-
-    // 2. Konversi format data ke format sistem (DD-MM-YYYY, 4 digit)
-    // Data Pick-4 format: { date: 'YYYY-MM-DD', digits: [1,2,3,4] }
-    const formattedData = pick4Data.map(item => {
-        if (!item.date || !item.digits || item.digits.length !== 4) return null;
-        const [y, m, d] = item.date.split('-');
-        return {
-            tanggal: `${d}-${m}-${y}`,
-            nomor: item.digits.join('')
-        };
-    }).filter(item => item !== null);
-
-    if (formattedData.length === 0) {
-        showStatus('error', '❌ Data Pick-4 kosong atau format tidak valid.');
-        return;
-    }
-
-    // 3. Ambil data & SHA terbaru dari GitHub
-    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_PATH}/${marketId}.json?ref=${BRANCH}`;
-    
-    let latestSHA = null;
-    let latestData = [];
-    
-    try {
-        const response = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
-        if (response.status === 200) {
-            const file = await response.json();
-            latestSHA = file.sha;
-            latestData = JSON.parse(atob(file.content));
-        } else if (response.status !== 404) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-    } catch (error) {
-        showStatus('error', `❌ Gagal mengambil data GitHub: ${error.message}`);
-        return;
-    }
-
-    // 4. Gabungkan data (Hindari duplikat tanggal)
-    let combinedData = latestData.map(item => ({
-        tanggal: (item.tanggal || '').trim(),
-        nomor: (item.nomor || '').trim()
-    })).filter(item => item.tanggal && item.nomor);
-
-    for (const entry of formattedData) {
-        // Hapus jika tanggal sudah ada, lalu masukkan yang baru
-        combinedData = combinedData.filter(item => item.tanggal !== entry.tanggal);
-        combinedData.unshift(entry);
-    }
-
-    // 5. Urutkan dari tanggal terbaru & batasi 30 record
-    combinedData.sort((a, b) => {
-        const dateA = new Date(a.tanggal.split('-').reverse().join('-'));
-        const dateB = new Date(b.tanggal.split('-').reverse().join('-'));
-        return dateB - dateA;
-    });
-    if (combinedData.length > MAX_RECORDS) {
-        combinedData = combinedData.slice(0, MAX_RECORDS);
-    }
-
-    // 6. Upload ke GitHub
-    await uploadToGitHub(marketId, combinedData, latestSHA, token);
-
-    // 7. Update UI & Refresh data sistem
-    currentData = combinedData;
-    currentFileSHA = latestSHA;
-    showStatus('success', `✅ Sinkronisasi berhasil! ${combinedData.length} data dari Pick-4 di-upload ke GitHub.`);
-    
-    renderQuickGrid(currentData);
-    displayCurrentData();
-    await fetchAllMarketData();
 }
   
 // --- FUNGSI LOKAL KALKULATOR & REKAP ---
@@ -1186,44 +1119,34 @@ function muatDariLocalStorage() {
     }
   } catch(e) {}
 }
-
+  
 function bukaTab(evt, tabName) {
-    // 1. Logika standar untuk menyembunyikan semua tab
-    const tabContents = document.querySelectorAll('.tab-content, [id$="-content"], .tab-pane');
-    tabContents.forEach(content => {
-        content.style.display = 'none';
-        content.classList.remove('active', 'block');
-    });
+  // Sembunyikan semua tab
+  const tabContents = document.querySelectorAll('.tab-content, [id$="-content"], .tab-pane');
+  tabContents.forEach(content => {
+    content.style.display = 'none';
+    content.classList.remove('active', 'block');
+  });
 
-    // 2. Hilangkan status aktif dari semua tombol
-    const tabButtons = document.querySelectorAll('.tab-btn, .tab-button, [data-tab]');
-    tabButtons.forEach(btn => {
-        btn.classList.remove('active');
-    });
+  const tabButtons = document.querySelectorAll('.tab-btn, .tab-button, [data-tab]');
+  tabButtons.forEach(btn => btn.classList.remove('active'));
 
-    // 3. Tampilkan tab yang dituju
-    const targetTab = document.getElementById(tabName);
-    if (targetTab) {
-        targetTab.style.display = 'block';
-        targetTab.classList.add('active', 'block');
-    }
+  const targetTab = document.getElementById(tabName);
+  if (targetTab) {
+    targetTab.style.display = 'block';
+    targetTab.classList.add('active', 'block');
+  }
 
-    // 4. Berikan tanda aktif pada tombol yang diklik
-    if (evt && evt.currentTarget) {
-        evt.currentTarget.classList.add('active');
-    }
+  if (evt && evt.currentTarget) {
+    evt.currentTarget.classList.add('active');
+  }
 
-    // =========================================================================
-    // 5. SISIPKAN KODE INI: 
-    // Otomatis tarik/muat ulang data saat tab Pick-4 atau Admin dibuka
-    // =========================================================================
-    if (tabName === 'pick4' || tabName === 'pick-4-analysis' || tabName === 'admin') {
-        if (typeof muatDataPick4 === 'function') {
-            muatDataPick4(); // Pastikan nama fungsi ini sesuai dengan fungsi pemuat data Anda
-        } else if (typeof fetchMarketData === 'function') {
-            fetchMarketData();
-        }
-    }
+  // ⭐ Saat buka tab Pick-4, trigger refresh React (auto-sync)
+  if (tabName === 'tabPick4') {
+    setTimeout(() => {
+      window.dispatchEvent(new Event('pick4-data-updated'));
+    }, 100);
+  }
 }
 
 function bukaMetodeTab(evt, id) {
